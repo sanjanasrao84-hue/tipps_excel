@@ -1,0 +1,256 @@
+// Course card (core_course/coursecard): the same card on the home page, the course catalogue and search,
+// My courses, starred and recently accessed courses.
+$coursecard-ink: #1f2933 !default;
+$coursecard-body: #4a5663 !default;
+$coursecard-muted: #6b7785 !default;
+$coursecard-line: #e3e9ef !default;
+$coursecard-accent: darken($primary, 6%) !default;
+$coursecard-tint: mix(white, $primary, 92%) !default;
+$coursecard-lavender: #6f5fb8 !default;
+$coursecard-lavender-tint: #f3f0fc !default;
+$coursecard-radius: 20px !default;
+$coursecard-shadow: 0 1px 2px rgba(31, 41, 51, .04), 0 12px 32px rgba(31, 41, 51, .06) !default;
+
+.psy-course {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
+    border-radius: $coursecard-radius;
+    background: #ffffff;
+    box-shadow: $coursecard-shadow;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    transition: box-shadow .25s ease, transform .25s ease;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 2px 4px rgba(31, 41, 51, .04), 0 22px 44px rgba(31, 41, 51, .1);
+    }
+
+    &:focus-within {
+        box-shadow: 0 0 0 3px rgba($primary, .25), $coursecard-shadow;
+    }
+}
+
+.psy-course__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: mix(white, $primary, 85%);
+
+    img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform .5s ease;
+    }
+}
+
+.psy-course:hover .psy-course__media img {
+    transform: scale(1.04);
+}
+
+.psy-course__badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .95);
+    color: $coursecard-accent;
+    font-size: .78rem;
+    font-weight: 600;
+}
+
+// My courses action menu (star / remove from view), over the image.
+.psy-course__menu {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+
+    &:empty {
+        display: none;
+    }
+
+    .coursemenubtn {
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, .95);
+        color: $coursecard-ink;
+        box-shadow: 0 2px 8px rgba(31, 41, 51, .15);
+
+        &:hover,
+        &:focus-visible {
+            color: $coursecard-accent;
+        }
+    }
+}
+
+.psy-course__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 22px 24px 24px;
+}
+
+.psy-course__category {
+    align-self: flex-start;
+    margin-bottom: 10px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: $coursecard-lavender-tint;
+    color: $coursecard-lavender;
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.psy-course__title {
+    margin: 0 0 10px;
+    font-family: inherit;
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.35;
+
+    a {
+        color: $coursecard-ink;
+        text-decoration: none;
+        overflow-wrap: anywhere;
+
+        &:hover,
+        &:focus {
+            color: $coursecard-accent;
+            text-decoration: none;
+        }
+    }
+
+    [data-region="favourite-icon"] .icon {
+        margin-right: 4px;
+        font-size: .9em;
+    }
+}
+
+.psy-course__hidden {
+    align-self: flex-start;
+    margin-bottom: 10px;
+}
+
+.psy-course__summary {
+    display: -webkit-box;
+    margin: 0 0 18px;
+    overflow: hidden;
+    color: $coursecard-body;
+    font-size: .95rem;
+    line-height: 1.6;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+
+    // Summaries from core course data are HTML: keep them inline so the line clamp works.
+    > * {
+        display: inline;
+        margin: 0;
+    }
+}
+
+.psy-course__progress {
+    margin: 0 0 18px;
+}
+
+.psy-course__progress-label {
+    margin-bottom: 6px;
+    color: $coursecard-muted;
+    font-size: .82rem;
+    font-weight: 500;
+}
+
+.psy-course__progress-track {
+    height: 6px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: $coursecard-tint;
+
+    span {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: $primary;
+    }
+}
+
+.psy-course__footer {
+    margin-top: auto;
+}
+
+.psy-course__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 18px;
+    border: 1.5px solid $coursecard-line;
+    border-radius: 12px;
+    background: #ffffff;
+    color: $coursecard-ink;
+    font-size: .95rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+
+    &:hover,
+    &:focus {
+        border-color: $primary;
+        color: $coursecard-accent;
+        text-decoration: none;
+    }
+
+    &:focus-visible {
+        outline: 3px solid rgba($primary, .4);
+        outline-offset: 2px;
+    }
+
+    &--primary {
+        border-color: $primary;
+        background: $primary;
+        color: #ffffff;
+        box-shadow: 0 10px 24px rgba($primary, .22);
+
+        &:hover,
+        &:focus {
+            border-color: $coursecard-accent;
+            background: $coursecard-accent;
+            color: #ffffff;
+        }
+    }
+}
+
+// Card grids and the recently accessed carousel.
+.card-grid > .col > .psy-course {
+    height: 100%;
+}
+
+.card-carousel > .psy-course {
+    flex: 1;
+    margin: 0 .5rem;
+
+    @include media-breakpoint-up(sm) {
+        flex: 0 1 auto;
+        width: 32%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .psy-course,
+    .psy-course * {
+        transition: none !important; /* stylelint-disable-line declaration-no-important */
+        transform: none !important; /* stylelint-disable-line declaration-no-important */
+    }
+}

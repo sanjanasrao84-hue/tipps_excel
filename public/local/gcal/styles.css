@@ -1,0 +1,292 @@
+/* Calendar page (local_gcal). Colours follow the theme brand colour (--bs-primary). */
+.lgc {
+    --lgc-ink: #1f2933;
+    --lgc-muted: #6b7785;
+    --lgc-line: #e3e9ef;
+    --lgc-surface: #f6f9fb;
+    --lgc-radius: 16px;
+}
+
+.lgc-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.lgc-top > [data-region="status"] {
+    flex: 1 1 520px;
+}
+
+.lgc-create {
+    align-self: center;
+    min-height: 44px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.lgc-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 18px;
+    height: 100%;
+    padding: 16px 20px;
+    border: 1px solid var(--lgc-line);
+    border-radius: var(--lgc-radius);
+    background: #fff;
+}
+
+.lgc-status__icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(var(--bs-primary-rgb), .1);
+    color: var(--bs-primary);
+}
+
+.lgc-status--danger .lgc-status__icon {
+    background: rgba(220, 53, 69, .1);
+    color: #b02a37;
+}
+
+.lgc-status--warning .lgc-status__icon {
+    background: rgba(255, 193, 7, .18);
+    color: #946200;
+}
+
+.lgc-status__text {
+    display: flex;
+    flex: 1 1 260px;
+    flex-direction: column;
+    min-width: 0;
+    color: var(--lgc-muted);
+    font-size: .9rem;
+}
+
+.lgc-status__text strong {
+    color: var(--lgc-ink);
+    font-size: 1rem;
+}
+
+.lgc-status__error {
+    color: #b02a37;
+}
+
+.lgc-status__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.lgc-status__actions .btn {
+    border-radius: 10px;
+}
+
+.lgc-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.lgc-sidebar {
+    position: sticky;
+    top: 80px;
+    padding: 18px;
+    border: 1px solid var(--lgc-line);
+    border-radius: var(--lgc-radius);
+    background: #fff;
+}
+
+.lgc-label {
+    display: block;
+    margin: 0 0 6px;
+    color: var(--lgc-ink);
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.lgc-sidebar .form-select {
+    margin-bottom: 16px;
+}
+
+.lgc-categories {
+    margin: 0 0 12px;
+    padding: 0;
+    border: 0;
+}
+
+.lgc-category {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 4px 0;
+    color: var(--lgc-ink);
+    font-size: .9rem;
+    cursor: pointer;
+}
+
+.lgc-dot {
+    display: inline-block;
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.lgc-personal {
+    margin-top: 8px;
+}
+
+.lgc-hint {
+    margin: 6px 0 0;
+    color: var(--lgc-muted);
+    font-size: .8rem;
+}
+
+.lgc-main {
+    padding: 18px;
+    border: 1px solid var(--lgc-line);
+    border-radius: var(--lgc-radius);
+    background: #fff;
+}
+
+/* FullCalendar in the theme style. */
+.lgc-calendar {
+    --fc-border-color: var(--lgc-line);
+    --fc-today-bg-color: rgba(var(--bs-primary-rgb), .07);
+    --fc-button-bg-color: #fff;
+    --fc-button-border-color: var(--lgc-line);
+    --fc-button-text-color: var(--lgc-ink);
+    --fc-button-hover-bg-color: rgba(var(--bs-primary-rgb), .08);
+    --fc-button-hover-border-color: rgba(var(--bs-primary-rgb), .3);
+    --fc-button-active-bg-color: var(--bs-primary);
+    --fc-button-active-border-color: var(--bs-primary);
+    --fc-now-indicator-color: #c92a2a;
+    --fc-list-event-hover-bg-color: var(--lgc-surface);
+    font-size: .9rem;
+}
+
+.lgc-calendar .fc-toolbar-title {
+    color: var(--lgc-ink);
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.lgc-calendar .fc-button {
+    border-radius: 10px !important;
+    font-weight: 600;
+    text-transform: none;
+    box-shadow: none !important;
+}
+
+.lgc-calendar .fc-button-active {
+    color: #fff !important;
+}
+
+.lgc-calendar .fc-button-group {
+    gap: 4px;
+}
+
+.lgc-calendar .fc-col-header-cell-cushion,
+.lgc-calendar .fc-daygrid-day-number {
+    color: var(--lgc-ink);
+    text-decoration: none;
+}
+
+.lgc-calendar .fc-event {
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.lgc-calendar .lgc-event--google {
+    opacity: .85;
+    border-style: dashed;
+}
+
+.lgc-calendar .fc-daygrid-dot-event .fc-event-title {
+    font-weight: 600;
+}
+
+.lgc-warnings:empty {
+    display: none;
+}
+
+/* Event details (modal). */
+.lgc-pill {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--lgc-pill) 14%, #fff);
+    color: var(--lgc-pill);
+    font-size: .8rem;
+    font-weight: 600;
+}
+
+.lgc-details__list {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 6px 16px;
+    margin: 0 0 12px;
+}
+
+.lgc-details__list dt {
+    color: #6b7785;
+    font-weight: 600;
+}
+
+.lgc-details__list dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.lgc-details__description {
+    white-space: pre-line;
+}
+
+.lgc-details__sync {
+    color: #6b7785;
+    font-size: .85rem;
+}
+
+.lgc-details__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+@media (max-width: 991.98px) {
+    .lgc-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .lgc-sidebar {
+        position: static;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .lgc-main {
+        padding: 10px;
+    }
+
+    .lgc-calendar .fc-toolbar-title {
+        font-size: 1.05rem;
+    }
+
+    .lgc-status__actions,
+    .lgc-status__actions .btn,
+    .lgc-create {
+        width: 100%;
+    }
+}

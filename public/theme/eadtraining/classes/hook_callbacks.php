@@ -1,0 +1,419 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Class core_hook_output
+ *
+ * @package   theme_eadtraining
+ * @copyright 2025 Eduardo Kraus {@link https://eduardokraus.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace theme_eadtraining;
+
+use cache;
+use core\hook\output\before_footer_html_generation;
+use core\hook\output\before_html_attributes;
+use core\hook\output\before_http_headers;
+use Exception;
+use moodle_url;
+
+/**
+ * Class core_hook_output
+ *
+ * @package theme_eadtraining
+ */
+class hook_callbacks {
+    /** @var int */
+    private static $hasicons;
+
+    /**
+     * Function before_html_attributes
+     *
+     * @throws Exception
+     */
+    public static function before_html_attributes(before_html_attributes $hook): void {
+        global $CFG, $COURSE, $PAGE;
+
+        if ($COURSE->id) {
+            self::$hasicons = (int) get_config("theme_eadtraining", "course_sections_icons_{$COURSE->id}");
+            if (self::$hasicons && !$PAGE->user_is_editing()) {
+                $hook->add_attribute("data-hasicons", "yes");
+            }
+        }
+
+        $theme = $CFG->theme;
+        if (isset($_SESSION["SESSION"]->theme)) {
+            $theme = $_SESSION["SESSION"]->theme;
+        }
+        if ($theme != "eadtraining") {
+            return;
+        }
+
+        $hook->add_attribute("data-themename", "eadtraining");
+        $hook->add_attribute("data-background-color", get_config("theme_boost", "brandcolor"));
+    }
+
+    /**
+     * Function before_footer_html_generation
+     *
+     * @throws Exception
+     */
+    public static function before_footer_html_generation(before_footer_html_generation $hook) {
+        global $CFG, $COURSE, $SITE;
+
+        static $processed = false;
+        if ($processed) {
+            return;
+        }
+        $processed = true;
+
+        $theme = $CFG->theme;
+        if (isset($_SESSION["SESSION"]->theme)) {
+            $theme = $_SESSION["SESSION"]->theme;
+        }
+        if ($theme != "eadtraining" && $theme != "eadflix") {
+            return;
+        }
+
+        self::background_profile_image($hook);
+        self::acctoolbar();
+        self::vlibras($hook);
+        self::mod_page_editor_integration($hook);
+
+        if ($COURSE->id == $SITE->id) {
+            return;
+        }
+
+        self::course_personalization();
+    }
+
+    /**
+     * Background profile image
+     *
+     * @return void
+     * @throws Exception
+     */
+    private static function background_profile_image(before_footer_html_generation $hook) {
+        $cache = cache::make("theme_eadtraining", "css_cache");
+        $cachekey = "background_profile_image";
+        if ($cache->has($cachekey)) {
+            $css = $cache->get($cachekey);
+            $hook->add_html("<style>{$css}</style>");
+        } else {
+            $backgroundprofileurl = theme_eadtraining_setting_file_url("background_profile_image");
+            if ($backgroundprofileurl) {
+                $profileimagecss = ":root { --background_profile: url({$backgroundprofileurl}); }";
+
+                $cache->set($cachekey, $profileimagecss);
+                $css = $profileimagecss;
+                $hook->add_html("<style>{$css}</style>");
+            }
+        }
+    }
+
+    /**
+     * ACCtoolbar
+     *
+     * @return void
+     * @throws Exception
+     */
+    private static function acctoolbar() {
+        if (get_config("theme_eadtraining", "enable_accessibility")) {
+            global $PAGE;
+            $PAGE->requires->strings_for_js(["acctoolbar_image_without_alt"], "theme_eadtraining");
+            $PAGE->requires->js_call_amd("theme_eadtraining/acctoolbar", "init");
+        }
+    }
+
+    /**
+     * VLibras only Brasiliam
+     *
+     * @return void
+     * @throws Exception
+     */
+    private static function vlibras(before_footer_html_generation $hook) {
+        global $CFG, $OUTPUT, $PAGE;
+
+        $vlibras = get_config("theme_eadtraining", "enable_vlibras") && $CFG->lang == "pt_br";
+        if ($vlibras) {
+            $PAGE->requires->js_call_amd("theme_eadtraining/acctoolbar", "track_vlibras");
+            $htmlvliras = $OUTPUT->render_from_template("theme_eadtraining/settings/vlibras", [
+                "position" => get_config("theme_eadtraining", "vlibras_position") ?: "R",
+                "avatar" => get_config("theme_eadtraining", "vlibras_avatar") ?: "icaro",
+            ]);
+            $hook->add_html($htmlvliras);
+        }
+    }
+
+    /**
+     * Function course_personalization
+     *
+     * @return void
+     * @throws Exception
+     */
+    private static function course_personalization() {
+        global $COURSE, $DB, $OUTPUT, $PAGE;
+
+        $images = ["blocks" => [], "icons" => [], "colors" => []];
+
+        $cache = cache::make("theme_eadtraining", "css_cache");
+        $cachekey = "theme_eadtraining_customimages_{$COURSE->id}";
+        if ($cache->has($cachekey)) {
+            $images = json_decode($cache->get($cachekey), true);
+        } else {
+            // Backgrounds images modules.
+            $sql = "
+                SELECT itemid, contextid, filename
+                  FROM {files}
+                 WHERE component LIKE 'theme_eadtraining'
+                   AND filearea  LIKE 'theme_eadtraining_customimage'
+                   AND filename  LIKE '__%'";
+            $customimages = $DB->get_records_sql($sql);
+            foreach ($customimages as $customimage) {
+                $imageurl = moodle_url::make_pluginfile_url(
+                    $customimage->contextid,
+                    "theme_eadtraining",
+                    "theme_eadtraining_customimage",
+                    $customimage->itemid,
+                    "/",
+                    $customimage->filename
+                );
+                $images["blocks"][] = ["cmid" => $customimage->itemid, "thumb" => $imageurl->out()];
+            }
+
+            // Icons modules.
+            $sql = "
+                SELECT itemid, contextid, filename
+                  FROM {files}
+                 WHERE component LIKE 'theme_eadtraining'
+                   AND filearea  LIKE 'theme_eadtraining_customicon'
+                   AND filename  LIKE '__%'";
+            $customicons = $DB->get_records_sql($sql);
+            foreach ($customicons as $customicon) {
+                $imageurl = moodle_url::make_pluginfile_url(
+                    $customicon->contextid,
+                    "theme_eadtraining",
+                    "theme_eadtraining_customicon",
+                    $customicon->itemid,
+                    "/",
+                    $customicon->filename
+                );
+
+                $images["icons"][] = ["cmid" => $customicon->itemid, "thumb" => $imageurl->out()];
+            }
+
+            // Icons Color.
+            $sql = "
+                SELECT *
+                  FROM {config_plugins}
+                 WHERE plugin  = 'theme_eadtraining'
+                   AND name LIKE 'theme_eadtraining_customcolor_%'";
+            $customcolors = $DB->get_records_sql($sql);
+            foreach ($customcolors as $customcolor) {
+                $moduleid = str_replace("theme_eadtraining_customcolor_", "", $customcolor->name);
+
+                $images["colors"][] = ["cmid" => $moduleid, "color" => $customcolor->value];
+            }
+
+            $cache->set($cachekey, json_encode($images));
+        }
+
+        if ($COURSE->format == "topics" || $COURSE->format == "weeks") {
+            if (self::$hasicons === null) {
+                self::$hasicons = get_config("theme_eadtraining", "course_sections_icons_{$COURSE->id}");
+            }
+            if (self::$hasicons) {
+                foreach ($images["blocks"] as $block) {
+                    $cmid = $block["cmid"];
+                    $thumb = $block["thumb"];
+                    $PAGE->requires->js_call_amd("theme_eadtraining/blocks", "create", [$cmid, $thumb]);
+                }
+                $PAGE->requires->js_call_amd("theme_eadtraining/blocks", "create_not_themeblock");
+            }
+        }
+        foreach ($images["icons"] as $icons) {
+            $cmid = $icons["cmid"];
+            $thumb = $icons["thumb"];
+            $PAGE->requires->js_call_amd("theme_eadtraining/blocks", "icons", [$cmid, $thumb]);
+        }
+        foreach ($images["colors"] as $color) {
+            $cmid = $color["cmid"];
+            $color = $color["color"];
+            $PAGE->requires->js_call_amd("theme_eadtraining/blocks", "color", [$cmid, $color]);
+        }
+
+        $requesturi = $_SERVER["REQUEST_URI"];
+        $hasuri = strpos($requesturi, "course/view.php") || strpos($requesturi, "course/section.php");
+        if ($hasuri) {
+            $header = (object) [];
+            $header->headeractions_edit = false;
+            $header->hasnavbarcourse = false;
+            $header->hasbannercourse = false;
+            $header->hasnavbar = empty($PAGE->layout_options["nonavbar"]);
+            $header->navbar = $OUTPUT->navbar();
+            $header->headeractions = $PAGE->get_header_actions();
+
+            $showcoursesummary = get_config("theme_eadtraining", "course_summary_banner");
+            $showcoursesummarycourse = get_config("theme_eadtraining", "course_summary_banner_{$COURSE->id}");
+            if ($showcoursesummarycourse !== false) {
+                $showcoursesummary = $showcoursesummarycourse;
+            }
+
+            if ($showcoursesummary) {
+                if ($showcoursesummary == 1) {
+                    $header->hasnavbarcourse = true;
+                    $categoryname = $DB->get_field("course_categories", "name", ["id" => $PAGE->course->category]);
+                    $header->categoryname = format_string($categoryname);
+                    $header->overviewfiles = $OUTPUT->get_course_image();
+
+                    if (has_capability("moodle/category:manage", $PAGE->context)) {
+                        $cache = cache::make("theme_eadtraining", "course_cache");
+                        $cachekey = "header_details_{$PAGE->course->id}";
+                        if ($cache->has($cachekey)) {
+                            $header->details = json_decode($cache->get($cachekey));
+                        } else {
+                            $header->details = $OUTPUT->get_details();
+                            $cache->set($cachekey, json_encode($header->details));
+                        }
+                    }
+                }
+                if ($showcoursesummary == 2) {
+                    $bannerfileurl = $OUTPUT->get_course_image();
+                    if ($bannerfileurl) {
+                        $categoryname = $DB->get_field("course_categories", "name", ["id" => $PAGE->course->category]);
+                        $header->categoryname = format_string($categoryname);
+                        $header->hasbannercourse = true;
+                        $header->banner_course_file_url = $bannerfileurl;
+                    }
+                }
+            }
+
+            $header->hasnosumary = !$header->hasbannercourse && !$header->hasnavbarcourse;
+
+            if ($PAGE->user_is_editing() && has_capability("moodle/site:config", $PAGE->context)) {
+                $url = new moodle_url("/theme/eadtraining/quickstart/course-banner.php", ["courseid" => $COURSE->id]);
+                $header->headeractions_edit = true;
+                $header->headeractions_edit_href = $url;
+                $header->headeractions_banner_courseid = $COURSE->id;
+            }
+
+            if ($header->hasnavbarcourse || $header->hasbannercourse || $header->headeractions_edit) {
+                $header->contextheader = $OUTPUT->context_header();
+                echo $OUTPUT->render_from_template("theme_eadtraining/core/course_full_header", $header);
+            }
+        }
+    }
+
+    /**
+     * Adds the visual-editor suggestion to the Moodle page activity form.
+     *
+     * @param \core\hook\output\before_footer_html_generation $hook
+     * @return void
+     * @throws \coding_exception
+     * @throws \core\exception\moodle_exception
+     * @throws \dml_exception
+     */
+    private static function mod_page_editor_integration(before_footer_html_generation $hook): void {
+        global $PAGE;
+
+        $config = page_editor_manager::get_current_modedit_data();
+        if ($config) {
+            $PAGE->requires->strings_for_js([
+                'pageeditor_title',
+                'pageeditor_suggestion',
+                'pageeditor_use',
+                'pageeditor_selected',
+                'pageeditor_linked',
+                'pageeditor_open',
+                'pageeditor_save_to_open',
+            ], 'theme_eadtraining');
+            $PAGE->requires->js_call_amd('theme_eadtraining/pageeditor', 'init', [$config]);
+        }
+
+        $viewconfig = page_editor_manager::get_current_view_data();
+        if (!$viewconfig) {
+            return;
+        }
+
+        $jseditorurl = json_encode($viewconfig['editorurl']);
+        $label = get_string('pageeditor_open_floating', 'theme_eadtraining');
+        $jslabel = json_encode(get_string('pageeditor_open_floating', 'theme_eadtraining'));
+        $title = get_string('pageeditor_title', 'theme_eadtraining');
+
+        $hook->add_html(
+            <<<HTML
+<style>
+.theme-eadtraining-pageeditor-floating {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 1040;
+    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.22);
+}
+.theme-eadtraining-pageeditor-inline {
+    margin-bottom: 1rem;
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let href = {$jseditorurl};
+    let label = {$jslabel};
+    let button = document.createElement('a');
+    button.className = 'btn btn-primary theme-eadtraining-pageeditor-inline';
+    button.href = href;
+    button.textContent = label;
+    let target = document.querySelector('.activity-header') ||
+        document.querySelector('#page-header .header-actions') ||
+        document.querySelector('#region-main .box.generalbox') ||
+        document.querySelector('#region-main');
+    if (target) {
+        target.insertAdjacentElement(target.matches('#page-header .header-actions') ? 'afterbegin' : 'beforebegin', button);
+    }
+});
+</script>
+<a class="btn btn-primary theme-eadtraining-pageeditor-floating"
+   href="{$viewconfig['editorurl']}" aria-label="{$title}">{$label}</a>
+HTML
+        );
+    }
+
+    /**
+     * Function after_http_headers
+     *
+     * @param \core\hook\output\before_http_headers $hooks
+     * @return void
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
+     * @throws \core\exception\moodle_exception
+     */
+    public static function before_http_headers(before_http_headers $hooks) {
+        global $PAGE, $USER;
+
+        if (!empty($USER->theme_eadtraining_redirect_to_editor)) {
+            $redirecturl = $USER->theme_eadtraining_redirect_to_editor;
+            unset($USER->theme_eadtraining_redirect_to_editor);
+            if (is_numeric($redirecturl)) {
+                redirect(new moodle_url("/theme/eadtraining/_editor/editor.php", ["dataid" => $redirecturl]));
+            }
+            redirect(new moodle_url($redirecturl));
+        }
+
+        $navbarlayout = get_config("theme_eadtraining", "navbarlayout");
+        $PAGE->add_body_class("theme_eadtraining-layout-{$navbarlayout}");
+    }
+}

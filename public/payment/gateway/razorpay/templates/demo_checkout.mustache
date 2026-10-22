@@ -1,0 +1,237 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template paygw_razorpay/demo_checkout
+
+    Simulated checkout of a demo account, with every payment method the account offers.
+
+    Example context (json):
+    {
+        "name": "Full LMS - 12 months",
+        "description": "Enrolment Fees for the Course: Full LMS",
+        "ordertext": "Order order_DEMOABC",
+        "paylabel": "Pay ₹4,999.00",
+        "amount": "₹4,999.00",
+        "qrcode": "",
+        "methods": [{"key": "upi", "label": "UPI", "icon": "fa-solid fa-mobile-screen-button", "first": true}],
+        "hasupi": true,
+        "upiapps": [{"key": "gpay", "name": "Google Pay"}]
+    }
+}}
+<div class="paygw-razorpay-demo">
+    <div class="rzp-demo-header d-flex justify-content-between align-items-start gap-3 mb-2">
+        <div class="min-w-0">
+            <div class="fw-bold text-truncate">{{name}}</div>
+            <div class="small text-muted">{{description}}</div>
+            <div class="small text-muted">{{ordertext}}</div>
+        </div>
+        <div class="rzp-demo-amount fs-4 fw-bold text-nowrap">{{amount}}</div>
+    </div>
+    <div class="alert alert-warning small py-2 mb-3">{{#str}}demo_notice, paygw_razorpay{{/str}}</div>
+
+    <div class="rzp-demo-body">
+        <div class="rzp-demo-methods nav flex-column nav-pills" role="tablist" aria-label="{{#str}}demo_choosemethod, paygw_razorpay{{/str}}">
+            {{#methods}}
+            <button type="button" class="nav-link text-start{{#first}} active{{/first}}" role="tab" data-method="{{key}}"
+                    aria-selected="{{#first}}true{{/first}}{{^first}}false{{/first}}">
+                <i class="{{icon}} fa-fw me-2" aria-hidden="true"></i>{{label}}
+            </button>
+            {{/methods}}
+        </div>
+
+        <div class="rzp-demo-panels">
+            {{#hasupi}}
+            <div class="rzp-demo-panel" data-panel="upi" role="tabpanel">
+                <label class="form-label fw-bold" for="rzp-demo-vpa">{{#str}}demo_upiid, paygw_razorpay{{/str}}</label>
+                <div class="input-group mb-1">
+                    <input type="text" class="form-control" id="rzp-demo-vpa" autocomplete="off" spellcheck="false"
+                           placeholder="{{#str}}demo_upiidplaceholder, paygw_razorpay{{/str}}">
+                    <button type="button" class="btn btn-primary" data-action="pay" data-method="upi" data-check="vpa">
+                        {{#str}}demo_verifypay, paygw_razorpay{{/str}}
+                    </button>
+                </div>
+                <div class="rzp-demo-waiting alert alert-info small mt-2 mb-0" hidden>
+                    <div class="mb-2" data-region="waitingtext"></div>
+                    <button type="button" class="btn btn-sm btn-success" data-action="approve">{{#str}}demo_approve, paygw_razorpay{{/str}}</button>
+                </div>
+                <div class="fw-bold mt-3 mb-2">{{#str}}demo_upiapps, paygw_razorpay{{/str}}</div>
+                <div class="rzp-demo-grid">
+                    {{#upiapps}}
+                    <button type="button" class="btn btn-outline-secondary rzp-demo-tile" data-action="pay" data-method="upi">
+                        <span class="rzp-demo-logo" aria-hidden="true">{{initials}}</span>{{name}}
+                    </button>
+                    {{/upiapps}}
+                </div>
+            </div>
+            {{/hasupi}}
+
+            {{#hasupiqr}}
+            <div class="rzp-demo-panel text-center" data-panel="upiqr" role="tabpanel">
+                <p class="small mb-2">{{#str}}demo_scanqr, paygw_razorpay{{/str}}</p>
+                <div class="rzp-demo-qr mx-auto mb-2">
+                    <img src="{{qrcode}}" alt="{{#str}}label_upiqr, paygw_razorpay{{/str}}">
+                    <div class="rzp-demo-qr-expired" hidden>
+                        <p class="mb-2">{{#str}}demo_qrexpired, paygw_razorpay{{/str}}</p>
+                        <button type="button" class="btn btn-sm btn-primary" data-action="qrrefresh">{{#str}}demo_qrrefresh, paygw_razorpay{{/str}}</button>
+                    </div>
+                </div>
+                <div class="small fw-bold mb-1" data-region="qrtimer"></div>
+                <div class="small text-muted mb-3">{{#str}}demo_qrnote, paygw_razorpay{{/str}}</div>
+                <button type="button" class="btn btn-success" data-action="pay" data-method="upiqr">{{#str}}demo_qrpaid, paygw_razorpay{{/str}}</button>
+            </div>
+            {{/hasupiqr}}
+
+            {{#hascard}}
+            <div class="rzp-demo-panel" data-panel="card" role="tabpanel">
+                <div class="mb-2">
+                    <label class="form-label small mb-1" for="rzp-demo-cardnumber">{{#str}}demo_cardnumber, paygw_razorpay{{/str}}</label>
+                    <div class="position-relative">
+                        <input type="text" class="form-control" id="rzp-demo-cardnumber" inputmode="numeric" autocomplete="off"
+                               maxlength="23" placeholder="4111 1111 1111 1111">
+                        <span class="rzp-demo-brand badge bg-secondary" data-region="cardbrand"></span>
+                    </div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <label class="form-label small mb-1" for="rzp-demo-cardexpiry">{{#str}}demo_cardexpiry, paygw_razorpay{{/str}}</label>
+                        <input type="text" class="form-control" id="rzp-demo-cardexpiry" inputmode="numeric" autocomplete="off"
+                               maxlength="5" placeholder="MM/YY">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small mb-1" for="rzp-demo-cardcvv">{{#str}}demo_cardcvv, paygw_razorpay{{/str}}</label>
+                        <input type="password" class="form-control" id="rzp-demo-cardcvv" inputmode="numeric" autocomplete="off"
+                               maxlength="4" placeholder="•••">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small mb-1" for="rzp-demo-cardname">{{#str}}demo_cardname, paygw_razorpay{{/str}}</label>
+                    <input type="text" class="form-control" id="rzp-demo-cardname" autocomplete="off">
+                </div>
+                <button type="button" class="btn btn-primary w-100" data-action="pay" data-method="card" data-check="card">
+                    {{paylabel}}
+                </button>
+            </div>
+            {{/hascard}}
+
+            {{#hasnetbanking}}
+            <div class="rzp-demo-panel" data-panel="netbanking" role="tabpanel">
+                <div class="fw-bold mb-2">{{#str}}demo_selectbank, paygw_razorpay{{/str}}</div>
+                <div class="rzp-demo-grid mb-2">
+                    {{#popularbanks}}
+                    <label class="rzp-demo-choice">
+                        <input type="radio" class="visually-hidden" name="rzp-demo-netbanking" value="{{code}}">
+                        <span class="rzp-demo-logo" aria-hidden="true">{{initials}}</span><span>{{name}}</span>
+                    </label>
+                    {{/popularbanks}}
+                </div>
+                <select class="form-select mb-3" data-region="otherbank" aria-label="{{#str}}demo_otherbanks, paygw_razorpay{{/str}}">
+                    <option value="">{{#str}}demo_otherbanks, paygw_razorpay{{/str}}</option>
+                    {{#otherbanks}}<option value="{{code}}">{{name}}</option>{{/otherbanks}}
+                </select>
+                <button type="button" class="btn btn-primary w-100" data-action="pay" data-method="netbanking" data-check="choice">
+                    {{paylabel}}
+                </button>
+            </div>
+            {{/hasnetbanking}}
+
+            {{#haswallet}}
+            <div class="rzp-demo-panel" data-panel="wallet" role="tabpanel">
+                <div class="fw-bold mb-2">{{#str}}demo_selectwallet, paygw_razorpay{{/str}}</div>
+                <div class="rzp-demo-list mb-3">
+                    {{#wallets}}
+                    <label class="rzp-demo-choice">
+                        <input type="radio" class="visually-hidden" name="rzp-demo-wallet" value="{{key}}">
+                        <span class="rzp-demo-logo" aria-hidden="true">{{initials}}</span><span>{{name}}</span>
+                    </label>
+                    {{/wallets}}
+                </div>
+                <button type="button" class="btn btn-primary w-100" data-action="pay" data-method="wallet" data-check="choice">
+                    {{paylabel}}
+                </button>
+            </div>
+            {{/haswallet}}
+
+            {{#hasemi}}
+            <div class="rzp-demo-panel" data-panel="emi" role="tabpanel">
+                <label class="form-label fw-bold" for="rzp-demo-emibank">{{#str}}demo_emibank, paygw_razorpay{{/str}}</label>
+                <select class="form-select mb-3" id="rzp-demo-emibank">
+                    {{#emibanks}}<option value="{{code}}">{{name}}</option>{{/emibanks}}
+                </select>
+                <div class="fw-bold mb-2">{{#str}}demo_emitenure, paygw_razorpay{{/str}}</div>
+                <div class="rzp-demo-list mb-3">
+                    {{#emiplans}}
+                    <label class="rzp-demo-choice justify-content-between">
+                        <input type="radio" class="visually-hidden" name="rzp-demo-emi" value="{{months}}">
+                        <span>{{label}}</span>
+                        <span class="small text-muted text-end">
+                            {{#nocost}}<span class="badge bg-success">{{#str}}demo_eminocost, paygw_razorpay{{/str}}</span>{{/nocost}}
+                            {{^nocost}}{{ratelabel}}{{/nocost}}
+                            <br>{{totallabel}}
+                        </span>
+                    </label>
+                    {{/emiplans}}
+                </div>
+                <button type="button" class="btn btn-primary w-100" data-action="pay" data-method="emi" data-check="choice">
+                    {{paylabel}}
+                </button>
+            </div>
+            {{/hasemi}}
+
+            {{#hascardless_emi}}
+            <div class="rzp-demo-panel" data-panel="cardless_emi" role="tabpanel">
+                <div class="fw-bold mb-2">{{#str}}demo_selectprovider, paygw_razorpay{{/str}}</div>
+                <div class="rzp-demo-list mb-3">
+                    {{#cardlessemi}}
+                    <label class="rzp-demo-choice">
+                        <input type="radio" class="visually-hidden" name="rzp-demo-cardless_emi" value="{{key}}">
+                        <span class="rzp-demo-logo" aria-hidden="true">{{initials}}</span><span>{{name}}</span>
+                    </label>
+                    {{/cardlessemi}}
+                </div>
+                <button type="button" class="btn btn-primary w-100" data-action="pay" data-method="cardless_emi" data-check="choice">
+                    {{paylabel}}
+                </button>
+            </div>
+            {{/hascardless_emi}}
+
+            {{#haspaylater}}
+            <div class="rzp-demo-panel" data-panel="paylater" role="tabpanel">
+                <div class="fw-bold mb-2">{{#str}}demo_selectprovider, paygw_razorpay{{/str}}</div>
+                <div class="rzp-demo-list mb-3">
+                    {{#paylater}}
+                    <label class="rzp-demo-choice">
+                        <input type="radio" class="visually-hidden" name="rzp-demo-paylater" value="{{key}}">
+                        <span class="rzp-demo-logo" aria-hidden="true">{{initials}}</span><span>{{name}}</span>
+                    </label>
+                    {{/paylater}}
+                </div>
+                <button type="button" class="btn btn-primary w-100" data-action="pay" data-method="paylater" data-check="choice">
+                    {{paylabel}}
+                </button>
+            </div>
+            {{/haspaylater}}
+
+            <div class="alert alert-danger small py-2 mt-3 mb-0" data-region="error" hidden></div>
+            <div class="rzp-demo-processing text-center py-4" hidden>
+                <span class="spinner-border text-primary" role="status" aria-hidden="true"></span>
+                <div class="mt-2">{{#str}}demo_processing, paygw_razorpay{{/str}}</div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-link btn-sm text-danger w-100 mt-3" data-action="fail">{{#str}}demo_fail, paygw_razorpay{{/str}}</button>
+</div>

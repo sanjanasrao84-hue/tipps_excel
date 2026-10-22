@@ -1,0 +1,27 @@
+.block_themeeditor.all-courses-section {
+  padding: clamp(40px, 6vw, 72px) 20px;
+}
+.block_themeeditor.all-courses-section .all-courses-section__head {
+  margin-bottom: 1.75rem;
+}
+.block_themeeditor.all-courses-section .all-courses-section__head h2 {
+  margin: 0 0 0.5rem;
+  color: color-mix(in srgb, var(--bs-primary) 45%, #000);
+  font-size: clamp(1.75rem, 1.3rem + 1.5vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+.block_themeeditor.all-courses-section .all-courses-section__head p {
+  max-width: 680px;
+  margin: 0;
+  color: #5b6476;
+  font-size: 1.0625rem;
+}
+.block_themeeditor.all-courses-section .all-courses-section__empty {
+  color: #5b6476;
+}
+.block_themeeditor.all-courses-section .paging-morelink,
+.block_themeeditor.all-courses-section .paging {
+  margin-top: 1.5rem;
+  text-align: center;
+}

@@ -1,0 +1,91 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_gcal/calendar
+
+    Calendar page.
+
+    Example context (json):
+    {
+        "status": {"configured": true, "canconnect": true, "connected": false},
+        "courses": [{"id": 2, "name": "Foundations of Clinical Psychiatry", "selected": false}],
+        "organisations": [], "hasorganisations": false,
+        "categories": [{"key": "lesson", "name": "Lessons and classes", "color": "#0f7c80"}],
+        "cancreate": true, "isadmin": false, "issetup": true, "settingsurl": "#"
+    }
+}}
+<div class="lgc" data-region="local-gcal">
+    {{^issetup}}
+        <div class="alert alert-info">
+            {{#isadmin}}{{#str}} notconfiguredadmin, local_gcal, {{settingsurl}} {{/str}}{{/isadmin}}
+            {{^isadmin}}{{#str}} notconfigured, local_gcal {{/str}}{{/isadmin}}
+        </div>
+    {{/issetup}}
+
+    <div class="lgc-top">
+        <div data-region="status">
+            {{#status}}{{> local_gcal/status }}{{/status}}
+        </div>
+        {{#cancreate}}
+            <button type="button" class="btn btn-primary lgc-create" data-action="create">
+                <span aria-hidden="true">+</span> {{#str}} createevent, local_gcal {{/str}}
+            </button>
+        {{/cancreate}}
+    </div>
+
+    <div class="lgc-layout">
+        <aside class="lgc-sidebar" aria-label="{{#str}} filters, local_gcal {{/str}}">
+            {{#hasorganisations}}
+                <label class="lgc-label" for="lgc-organisation">{{#str}} organisation, local_gcal {{/str}}</label>
+                <select class="form-select" id="lgc-organisation" data-filter="organisation">
+                    <option value="0">{{#str}} allorganisations, local_gcal {{/str}}</option>
+                    {{#organisations}}<option value="{{id}}">{{name}}</option>{{/organisations}}
+                </select>
+            {{/hasorganisations}}
+
+            <label class="lgc-label" for="lgc-course">{{#str}} course, local_gcal {{/str}}</label>
+            <select class="form-select" id="lgc-course" data-filter="course">
+                <option value="0">{{#str}} allcourses, local_gcal {{/str}}</option>
+                {{#courses}}<option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/courses}}
+            </select>
+
+            <fieldset class="lgc-categories">
+                <legend class="lgc-label">{{#str}} eventcategories, local_gcal {{/str}}</legend>
+                {{#categories}}
+                    <label class="lgc-category">
+                        <input type="checkbox" checked data-category="{{key}}">
+                        <span class="lgc-dot" style="background: {{color}}"></span>
+                        {{name}}
+                    </label>
+                {{/categories}}
+            </fieldset>
+
+            {{#status.personalavailable}}
+                <div class="form-check form-switch lgc-personal">
+                    <input class="form-check-input" type="checkbox" id="lgc-personal" data-action="personal" {{#status.showpersonal}}checked{{/status.showpersonal}}>
+                    <label class="form-check-label" for="lgc-personal">{{#str}} showmypersonal, local_gcal {{/str}}</label>
+                </div>
+                <p class="lgc-hint">{{#str}} personalprivacy, local_gcal {{/str}}</p>
+            {{/status.personalavailable}}
+        </aside>
+
+        <div class="lgc-main">
+            <div class="lgc-warnings" data-region="warnings"></div>
+            <div class="lgc-calendar" data-region="calendar"></div>
+        </div>
+    </div>
+</div>

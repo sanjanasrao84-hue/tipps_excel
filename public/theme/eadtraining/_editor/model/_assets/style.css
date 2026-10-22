@@ -1,0 +1,88 @@
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;700&family=Raleway:wght@400;700&family=Roboto:wght@400;700&display=swap");
+.sec-title {
+  margin-bottom: 60px;
+  text-align: center;
+}
+.sec-title h2 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #222222;
+  margin-bottom: 15px;
+  position: relative;
+  display: inline-block;
+}
+.sec-title h2::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 4px;
+  background: var(--bs-primary);
+  border-radius: 2px;
+  margin: 10px auto 0;
+}
+.sec-title .subtitle {
+  font-size: 1.1rem;
+  color: #666666;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+
+
+/* Content width of the homepage sections: centred, matching .psy-container. */
+.block_themeeditor .large-container {
+    width: 100%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+@media (max-width: 575.98px) { .block_themeeditor .large-container { padding-left: 16px; padding-right: 16px; } }
+
+/* Psychiatry homepage sections (psy-*): shared palette, layout and buttons. */
+.psy-section {
+    --psy-ink: #1f2933;
+    --psy-body: #4a5663;
+    --psy-muted: #6b7785;
+    --psy-line: #e3e9ef;
+    --psy-surface: #f6f9fb;
+    --psy-sky-50: #eef7fc;
+    --psy-sky-100: #dceff9;
+    --psy-sky-500: #3b9fd6;
+    --psy-teal-50: #e8f6f5;
+    --psy-teal-100: #cdeceb;
+    --psy-teal-600: #0f7c80;
+    --psy-teal-700: #0b6468;
+    --psy-lavender-50: #f3f0fc;
+    --psy-lavender-100: #e6e0f8;
+    --psy-lavender-600: #6f5fb8;
+    --psy-radius: 20px;
+    --psy-shadow: 0 1px 2px rgba(31, 41, 51, .04), 0 12px 32px rgba(31, 41, 51, .06);
+    position: relative;
+    padding: clamp(64px, 8vw, 104px) 0;
+    background: #fff;
+    color: var(--psy-body);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.psy-section--soft { background: var(--psy-surface); }
+.psy-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.psy-section h1, .psy-section h2, .psy-section h3 { color: var(--psy-ink); font-family: inherit; }
+.psy-head { max-width: 680px; margin: 0 auto clamp(36px, 5vw, 56px); text-align: center; }
+.psy-head--left { margin-left: 0; text-align: left; }
+.psy-head h2 { margin: 12px 0 14px; font-size: clamp(1.75rem, 3vw, 2.4rem); font-weight: 700; line-height: 1.2; letter-spacing: -.02em; }
+.psy-head p { margin: 0; font-size: 1.075rem; line-height: 1.7; color: var(--psy-body); }
+.psy-eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: var(--psy-teal-50); color: var(--psy-teal-700); font-size: .8rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.psy-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 12px 24px; border: 1.5px solid transparent; border-radius: 12px; font-size: 1rem; font-weight: 600; line-height: 1.2; text-decoration: none; transition: background-color .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.psy-btn:hover, .psy-btn:focus { text-decoration: none; transform: translateY(-1px); }
+.psy-btn:focus-visible { outline: 3px solid var(--psy-sky-500); outline-offset: 3px; }
+.psy-btn--primary { background: var(--psy-teal-600); color: #fff; box-shadow: 0 10px 24px rgba(15, 124, 128, .22); }
+.psy-btn--primary:hover, .psy-btn--primary:focus { background: var(--psy-teal-700); color: #fff; }
+.psy-btn--secondary { background: #fff; border-color: var(--psy-line); color: var(--psy-ink); }
+.psy-btn--secondary:hover, .psy-btn--secondary:focus { border-color: var(--psy-teal-600); color: var(--psy-teal-700); }
+.psy-btn--ghost { padding-left: 4px; padding-right: 4px; color: var(--psy-teal-700); }
+.psy-btn--ghost:hover, .psy-btn--ghost:focus { color: var(--psy-ink); }
+.psy-btn svg { flex: none; }
+@media (prefers-reduced-motion: reduce) { .psy-section *, .psy-section *::before, .psy-section *::after { transition: none !important; transform: none !important; } }
+@media (max-width: 575.98px) { .psy-container { padding: 0 16px; } }
+/*# sourceMappingURL=style.css.map */

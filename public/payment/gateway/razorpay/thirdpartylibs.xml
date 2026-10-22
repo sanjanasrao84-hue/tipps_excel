@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<libraries>
+    <library>
+        <location>.extlib/razorpay-php</location>
+        <name>Razorpay PHP bindings</name>
+        <version>2.9.1</version>
+        <license>MIT License</license>
+        <licenseversion>1</licenseversion>
+    </library>
+</libraries>

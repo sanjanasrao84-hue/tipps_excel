@@ -1,0 +1,11 @@
+.psy-topics__grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+.psy-topic { padding: 26px 24px; border: 1px solid var(--psy-line); border-radius: var(--psy-radius); background: #fff; transition: border-color .2s ease, box-shadow .2s ease; }
+.psy-topic:hover { border-color: transparent; box-shadow: var(--psy-shadow); }
+.psy-topic__icon { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; margin-bottom: 18px; border-radius: 14px; }
+.psy-topic--sky .psy-topic__icon { background: var(--psy-sky-50); color: #1f7fb6; }
+.psy-topic--teal .psy-topic__icon { background: var(--psy-teal-50); color: var(--psy-teal-700); }
+.psy-topic--lavender .psy-topic__icon { background: var(--psy-lavender-50); color: var(--psy-lavender-600); }
+.psy-topic h3 { margin: 0 0 8px; font-size: 1.05rem; font-weight: 700; line-height: 1.35; }
+.psy-topic p { margin: 0; color: var(--psy-body); font-size: .92rem; line-height: 1.6; }
+@media (max-width: 1199.98px) { .psy-topics__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 575.98px) { .psy-topics__grid { grid-template-columns: 1fr; gap: 14px; } .psy-topic { display: grid; grid-template-columns: 48px 1fr; column-gap: 16px; padding: 20px; } .psy-topic__icon { grid-row: span 2; margin-bottom: 0; } }

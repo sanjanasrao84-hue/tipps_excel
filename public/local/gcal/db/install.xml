@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/gcal/db" VERSION="20261021" COMMENT="Google Calendar integration"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_gcal_connection" COMMENT="A user's connection to their Google Calendar. Tokens are encrypted.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="issuerid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="OAuth 2 service used to connect"/>
+        <FIELD NAME="googleemail" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="calendarid" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Academic calendar created in the user's Google account"/>
+        <FIELD NAME="refreshtoken" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Encrypted"/>
+        <FIELD NAME="accesstoken" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Encrypted"/>
+        <FIELD NAME="tokenexpires" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="scopes" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Scopes granted by the user"/>
+        <FIELD NAME="showpersonal" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="Show the user's own Google events in the LMS calendar"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="active" SEQUENCE="false" COMMENT="active, reconnect (token expired or revoked) or error"/>
+        <FIELD NAME="synctoken" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Google incremental sync token of the academic calendar"/>
+        <FIELD NAME="lastsync" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="lastsyncstatus" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="ok, partial or failed"/>
+        <FIELD NAME="lasterror" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign-unique" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="status_lastsync" UNIQUE="false" FIELDS="status, lastsync"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_gcal_eventmap" COMMENT="Link between a Moodle calendar event and its copy in a user's Google Calendar">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="eventid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Moodle event id"/>
+        <FIELD NAME="googleeventid" TYPE="char" LENGTH="1024" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="htmllink" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Link to the event in Google Calendar"/>
+        <FIELD NAME="contenthash" TYPE="char" LENGTH="40" NOTNULL="true" DEFAULT="" SEQUENCE="false" COMMENT="Hash of the content last sent to Google; empty to force an update"/>
+        <FIELD NAME="googleupdated" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="Google 'updated' value after the last sync"/>
+        <FIELD NAME="timestart" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="timesynced" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="userid_eventid" UNIQUE="true" FIELDS="userid, eventid"/>
+        <INDEX NAME="eventid" UNIQUE="false" FIELDS="eventid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_gcal_eventmeta" COMMENT="Category of academic events created with the LMS calendar (lesson, live class, session...)">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="eventid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="category" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="mode" TYPE="char" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="online or offline"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="eventid" UNIQUE="true" FIELDS="eventid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_gcal_log" COMMENT="Synchronisation log, for failures and audits">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="level" TYPE="char" LENGTH="10" NOTNULL="true" DEFAULT="info" SEQUENCE="false" COMMENT="info, warning or error"/>
+        <FIELD NAME="action" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="eventid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="message" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="userid_time" UNIQUE="false" FIELDS="userid, timecreated"/>
+        <INDEX NAME="level_time" UNIQUE="false" FIELDS="level, timecreated"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

@@ -1,0 +1,286 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_lmssub/plans_page
+
+    The learner's subscription plans page.
+
+    Example context (json):
+    {
+        "intro": "Pick the plan that fits how you learn.",
+        "coursename": "",
+        "showallurl": "",
+        "myurl": "#",
+        "dashboardurl": "#",
+        "checkouturl": "#",
+        "courseid": 0,
+        "hasactive": true,
+        "active": [{"name": "Psychiatry Beginner", "until": "12 November 2026", "ingrace": false}],
+        "showfilters": true,
+        "filters": [{"key": "all", "label": "All plans", "count": 2, "selected": true}],
+        "hasplans": true,
+        "plans": [{
+            "id": 4, "name": "Psychiatry Beginner", "typekey": "course", "typelabel": "Single course",
+            "isallaccess": false, "owned": false, "ingrace": false, "until": "", "expired": false, "expiredon": "",
+            "description": "", "hasdescription": false, "features": ["Includes 1 course(s)"],
+            "openslabel": "Includes 1 course(s)", "courses": [{"name": "Psychiatry Beginner", "image": ""}],
+            "hasmore": false, "more": [], "morelabel": "",
+            "prices": [{"id": 5, "duration": "Monthly", "amount": "₹499.00", "permonth": "₹499.00", "showpermonth": false,
+                "saving": 0, "best": false, "checked": true}],
+            "buttonlabel": "Subscribe now", "buttonlabelaria": "Subscribe to Psychiatry Beginner"
+        }]
+    }
+}}
+<div class="lmssub-plans" data-region="lmssub-plans">
+
+    <section class="lmssub-hero mb-4">
+        <div class="lmssub-hero-text">
+            <span class="lmssub-eyebrow">{{#str}}hero_eyebrow, local_lmssub{{/str}}</span>
+            {{#coursename}}
+                <h2 class="lmssub-hero-title">{{#str}}plansforcourse, local_lmssub, {{coursename}}{{/str}}</h2>
+            {{/coursename}}
+            {{^coursename}}
+                <h2 class="lmssub-hero-title">{{#str}}hero_title, local_lmssub{{/str}}</h2>
+            {{/coursename}}
+            <p class="lmssub-hero-intro mb-0">{{intro}}</p>
+            {{#showallurl}}
+                <a href="{{showallurl}}" class="btn btn-link px-0 mt-2">
+                    <i class="fa fa-arrow-left me-1" aria-hidden="true"></i>{{#str}}showallplans, local_lmssub{{/str}}
+                </a>
+            {{/showallurl}}
+        </div>
+        <ul class="lmssub-trust list-unstyled mb-0">
+            <li><i class="fa fa-bolt" aria-hidden="true"></i><span>{{#str}}trust_instant, local_lmssub{{/str}}</span></li>
+            <li><i class="fa fa-lock" aria-hidden="true"></i><span>{{#str}}trust_secure, local_lmssub{{/str}}</span></li>
+            <li><i class="fa fa-bookmark" aria-hidden="true"></i><span>{{#str}}trust_progress, local_lmssub{{/str}}</span></li>
+        </ul>
+    </section>
+
+    {{#hasactive}}
+    <section class="lmssub-active mb-4" aria-labelledby="lmssub-active-heading">
+        <div class="lmssub-active-icon" aria-hidden="true"><i class="fa fa-check"></i></div>
+        <div class="flex-grow-1 min-w-0">
+            <h3 id="lmssub-active-heading" class="lmssub-active-title">{{#str}}youractiveplans, local_lmssub{{/str}}</h3>
+            <ul class="list-unstyled mb-0 lmssub-active-list">
+                {{#active}}
+                <li>
+                    <strong>{{name}}</strong>
+                    <span class="text-body-secondary">&middot; {{#str}}activeuntil, local_lmssub, {{until}}{{/str}}</span>
+                    {{#ingrace}}<span class="badge bg-warning text-dark ms-1">{{#str}}status_grace, local_lmssub{{/str}}</span>{{/ingrace}}
+                </li>
+                {{/active}}
+            </ul>
+        </div>
+        <a href="{{myurl}}" class="btn btn-outline-primary lmssub-btn text-nowrap">{{#str}}managesubscriptions, local_lmssub{{/str}}</a>
+    </section>
+    {{/hasactive}}
+
+    {{#hasplans}}
+    {{#showfilters}}
+    <div class="lmssub-filters mb-4" role="group" aria-label="{{#str}}filterplans, local_lmssub{{/str}}">
+        {{#filters}}
+        <button type="button" class="btn lmssub-filter {{#selected}}active{{/selected}}"
+                data-filter="{{key}}" aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">
+            {{label}} <span class="lmssub-filter-count">{{count}}</span>
+        </button>
+        {{/filters}}
+    </div>
+    {{/showfilters}}
+
+    <div class="lmssub-plan-grid mb-5">
+        {{#plans}}
+        <div class="lmssub-plan-cell" data-plantype="{{typekey}}">
+            <article class="lmssub-plan {{#owned}}lmssub-plan-owned{{/owned}}" aria-labelledby="lmssub-plan-{{id}}">
+                <div class="lmssub-plan-head">
+                    <div class="lmssub-badges">
+                        <span class="badge lmssub-type lmssub-type-{{typekey}}">{{typelabel}}</span>
+                        {{#isallaccess}}<span class="badge lmssub-type">{{#str}}everythingincluded, local_lmssub{{/str}}</span>{{/isallaccess}}
+                    </div>
+                    {{#owned}}
+                        {{^ingrace}}
+                        <div class="lmssub-status lmssub-status-active">
+                            <i class="fa fa-check-circle" aria-hidden="true"></i>{{#str}}yourplanuntil, local_lmssub, {{until}}{{/str}}
+                        </div>
+                        {{/ingrace}}
+                        {{#ingrace}}
+                        <div class="lmssub-status lmssub-status-grace">
+                            <i class="fa fa-clock-o" aria-hidden="true"></i>{{#str}}graceuntil, local_lmssub, {{until}}{{/str}}
+                        </div>
+                        {{/ingrace}}
+                    {{/owned}}
+                    {{#expired}}
+                    <div class="lmssub-status lmssub-status-expired">
+                        <i class="fa fa-history" aria-hidden="true"></i>{{#str}}expiredon, local_lmssub, {{expiredon}}{{/str}}
+                    </div>
+                    {{/expired}}
+                    <h3 id="lmssub-plan-{{id}}" class="lmssub-plan-name">{{name}}</h3>
+                    {{#hasdescription}}<div class="lmssub-plan-description">{{{description}}}</div>{{/hasdescription}}
+                </div>
+
+                <form method="get" action="{{checkouturl}}" class="lmssub-plan-form" data-region="lmssub-checkout">
+                    {{#courseid}}<input type="hidden" name="courseid" value="{{courseid}}">{{/courseid}}
+
+                    <div class="lmssub-price" aria-live="polite">
+                        <span class="lmssub-price-amount" data-region="amount">{{#prices}}{{#checked}}{{amount}}{{/checked}}{{/prices}}</span>
+                        <span class="lmssub-price-duration" data-region="duration">{{#prices}}{{#checked}}/ {{duration}}{{/checked}}{{/prices}}</span>
+                        <div class="lmssub-price-permonth" data-region="permonth">{{#prices}}{{#checked}}{{#showpermonth}}{{#str}}permonth, local_lmssub, {{permonth}}{{/str}}{{/showpermonth}}{{/checked}}{{/prices}}</div>
+                    </div>
+
+                    <fieldset class="lmssub-section">
+                        <legend class="lmssub-label">{{#str}}chooseduration, local_lmssub{{/str}}</legend>
+                        <div class="lmssub-durations">
+                            {{#prices}}
+                            <div class="lmssub-duration">
+                                <input type="radio" class="btn-check" name="priceid" value="{{id}}"
+                                       id="lmssub-price-{{id}}" autocomplete="off" required {{#checked}}checked{{/checked}}
+                                       data-amount="{{amount}}" data-duration="/ {{duration}}"
+                                       data-permonth="{{#showpermonth}}{{#str}}permonth, local_lmssub, {{permonth}}{{/str}}{{/showpermonth}}">
+                                <label class="lmssub-duration-label" for="lmssub-price-{{id}}">
+                                    {{#best}}<span class="lmssub-best">{{#str}}bestvalue, local_lmssub{{/str}}</span>{{/best}}
+                                    <span class="lmssub-duration-name">{{duration}}</span>
+                                    <span class="lmssub-duration-amount">{{amount}}</span>
+                                    {{#saving}}<span class="lmssub-saving">{{#str}}save, local_lmssub, {{saving}}{{/str}}</span>{{/saving}}
+                                </label>
+                            </div>
+                            {{/prices}}
+                        </div>
+                    </fieldset>
+
+                    <ul class="lmssub-features list-unstyled">
+                        {{#features}}
+                        <li><i class="fa fa-check" aria-hidden="true"></i><span>{{.}}</span></li>
+                        {{/features}}
+                    </ul>
+
+                    <ul class="lmssub-courses list-unstyled">
+                        {{#courses}}
+                        <li>
+                            <span class="lmssub-thumb" style="background-image: url('{{image}}');" aria-hidden="true"></span>
+                            <span class="lmssub-course-name">{{name}}</span>
+                        </li>
+                        {{/courses}}
+                    </ul>
+                    {{#hasmore}}
+                    <details class="lmssub-more">
+                        <summary>{{morelabel}}</summary>
+                        <ul class="mb-0 mt-2">
+                            {{#more}}<li>{{.}}</li>{{/more}}
+                        </ul>
+                    </details>
+                    {{/hasmore}}
+
+                    <div class="lmssub-actions">
+                        <button type="submit" class="btn btn-primary lmssub-btn w-100" aria-label="{{buttonlabelaria}}"
+                                data-loading-text="{{#str}}openingcheckout, local_lmssub{{/str}}">
+                            <span data-region="label">{{buttonlabel}}</span>
+                            <i class="fa fa-arrow-right ms-1" aria-hidden="true" data-region="icon"></i>
+                        </button>
+                        {{#owned}}
+                        <a href="{{myurl}}" class="btn btn-outline-primary lmssub-btn w-100">{{#str}}managesubscription, local_lmssub{{/str}}</a>
+                        {{/owned}}
+                    </div>
+                </form>
+            </article>
+        </div>
+        {{/plans}}
+    </div>
+    {{/hasplans}}
+
+    {{^hasplans}}
+    <div class="lmssub-empty mb-5">
+        <div class="lmssub-empty-icon" aria-hidden="true"><i class="fa fa-calendar-o"></i></div>
+        <p class="mb-3">{{#str}}noplansavailable, local_lmssub{{/str}}</p>
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+            {{#showallurl}}<a href="{{showallurl}}" class="btn btn-primary lmssub-btn">{{#str}}showallplans, local_lmssub{{/str}}</a>{{/showallurl}}
+            {{#hasactive}}<a href="{{myurl}}" class="btn btn-outline-primary lmssub-btn">{{#str}}managesubscriptions, local_lmssub{{/str}}</a>{{/hasactive}}
+            <a href="{{dashboardurl}}" class="btn btn-outline-primary lmssub-btn">{{#str}}myhome{{/str}}</a>
+        </div>
+    </div>
+    {{/hasplans}}
+
+    <section class="lmssub-panel lmssub-steps mb-4" aria-labelledby="lmssub-steps-heading">
+        <h3 id="lmssub-steps-heading" class="lmssub-panel-title">{{#str}}howitworks, local_lmssub{{/str}}</h3>
+        <ol class="lmssub-step-list list-unstyled mb-0">
+            <li class="lmssub-step"><span class="lmssub-step-num">1</span><div><strong>{{#str}}step1_title, local_lmssub{{/str}}</strong><p class="mb-0">{{#str}}step1_text, local_lmssub{{/str}}</p></div></li>
+            <li class="lmssub-step"><span class="lmssub-step-num">2</span><div><strong>{{#str}}step2_title, local_lmssub{{/str}}</strong><p class="mb-0">{{#str}}step2_text, local_lmssub{{/str}}</p></div></li>
+            <li class="lmssub-step"><span class="lmssub-step-num">3</span><div><strong>{{#str}}step3_title, local_lmssub{{/str}}</strong><p class="mb-0">{{#str}}step3_text, local_lmssub{{/str}}</p></div></li>
+        </ol>
+    </section>
+
+    <section class="lmssub-panel lmssub-faq mb-4" aria-labelledby="lmssub-faq-heading">
+        <h3 id="lmssub-faq-heading" class="lmssub-panel-title">{{#str}}faq, local_lmssub{{/str}}</h3>
+        <details><summary>{{#str}}faq1_q, local_lmssub{{/str}}</summary><p>{{#str}}faq1_a, local_lmssub{{/str}}</p></details>
+        <details><summary>{{#str}}faq2_q, local_lmssub{{/str}}</summary><p>{{#str}}faq2_a, local_lmssub{{/str}}</p></details>
+        <details><summary>{{#str}}faq3_q, local_lmssub{{/str}}</summary><p>{{#str}}faq3_a, local_lmssub{{/str}}</p></details>
+        <details><summary>{{#str}}faq4_q, local_lmssub{{/str}}</summary><p>{{#str}}faq4_a, local_lmssub{{/str}}</p></details>
+        <p class="mt-3 mb-0"><a href="{{myurl}}">{{#str}}mysubscriptions, local_lmssub{{/str}} <i class="fa fa-arrow-right" aria-hidden="true"></i></a></p>
+    </section>
+</div>
+{{#js}}
+document.querySelectorAll('[data-region="lmssub-plans"]').forEach(function(root) {
+    // Show the price of the chosen duration in the card's headline.
+    root.addEventListener('change', function(e) {
+        var input = e.target;
+        if (input.name !== 'priceid') {
+            return;
+        }
+        var form = input.closest('form');
+        form.querySelector('[data-region="amount"]').textContent = input.dataset.amount;
+        form.querySelector('[data-region="duration"]').textContent = input.dataset.duration;
+        form.querySelector('[data-region="permonth"]').textContent = input.dataset.permonth;
+    });
+    // Filter the cards by plan type.
+    root.querySelectorAll('.lmssub-filter').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var key = button.dataset.filter;
+            root.querySelectorAll('.lmssub-filter').forEach(function(b) {
+                b.classList.toggle('active', b === button);
+                b.setAttribute('aria-pressed', b === button ? 'true' : 'false');
+            });
+            root.querySelectorAll('[data-plantype]').forEach(function(col) {
+                col.hidden = key !== 'all' && col.dataset.plantype !== key;
+            });
+        });
+    });
+    // While the checkout page opens: show progress and prevent a second submission.
+    root.querySelectorAll('[data-region="lmssub-checkout"]').forEach(function(form) {
+        form.addEventListener('submit', function() {
+            var button = form.querySelector('button[type="submit"]');
+            if (!button || button.disabled) {
+                return;
+            }
+            button.dataset.label = button.querySelector('[data-region="label"]').textContent;
+            button.querySelector('[data-region="label"]').textContent = button.dataset.loadingText;
+            button.querySelector('[data-region="icon"]').className = 'fa fa-spinner fa-spin ms-1';
+            button.setAttribute('aria-busy', 'true');
+            // Disable after the submission has started, so the button value is still sent.
+            setTimeout(function() {
+                button.disabled = true;
+            }, 0);
+        });
+    });
+    // Coming back with the browser's back button: buttons are usable again.
+    window.addEventListener('pageshow', function() {
+        root.querySelectorAll('[data-region="lmssub-checkout"] button[type="submit"][aria-busy="true"]').forEach(function(button) {
+            button.disabled = false;
+            button.removeAttribute('aria-busy');
+            button.querySelector('[data-region="label"]').textContent = button.dataset.label;
+            button.querySelector('[data-region="icon"]').className = 'fa fa-arrow-right ms-1';
+        });
+    });
+});
+{{/js}}

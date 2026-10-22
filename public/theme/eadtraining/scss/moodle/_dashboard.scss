@@ -1,0 +1,473 @@
+/**
+ Dashboard and My courses, and the homepage "All courses" section (same course cards).
+ Every rule is scoped to these two page layouts and that section, so other pages are not affected.
+ */
+$dashboard-radius: 14px;
+$dashboard-border: rgba($primary, .14);
+$dashboard-tint: rgba($primary, .07);
+$dashboard-shadow: 0 6px 24px rgba(16, 24, 40, .06);
+$dashboard-heading-color: darken($primary, 30%);
+$dashboard-muted: #5b6476;
+$dashboard-control-height: 40px;
+
+.pagelayout-mydashboard,
+.pagelayout-mycourses,
+.block-home-all-courses {
+
+    // The blocks are the panels: no extra translucent box around them.
+    #page.drawers div[role="main"] {
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    #page-header {
+        margin-bottom: 1rem;
+
+        h1 {
+            color: $dashboard-heading-color;
+            font-weight: 800;
+            letter-spacing: -.01em;
+        }
+    }
+
+    // Block panels, styled like the course page sections.
+    .block.card,
+    .drawers .block_myoverview.block {
+        margin-bottom: 1.5rem !important; /* stylelint-disable-line declaration-no-important */
+        border: 1px solid $dashboard-border;
+        border-radius: $dashboard-radius;
+        background: #fff;
+        box-shadow: $dashboard-shadow;
+
+        > .card-header {
+            padding: .875rem 1.25rem;
+            border-bottom: 1px solid $dashboard-border;
+            border-radius: $dashboard-radius $dashboard-radius 0 0;
+            background: $dashboard-tint;
+
+            .card-title {
+                margin: 0;
+                color: $dashboard-heading-color;
+                font-size: 1.125rem;
+                font-weight: 700;
+            }
+        }
+
+        > .card-body {
+            padding: 1.25rem !important; /* stylelint-disable-line declaration-no-important */
+        }
+
+        .card-text.content {
+            margin-top: 0 !important; /* stylelint-disable-line declaration-no-important */
+        }
+    }
+
+    // Blocks in the side drawer are narrower: lighter padding.
+    .drawercontent .block.card > .card-body {
+        padding: 1rem !important; /* stylelint-disable-line declaration-no-important */
+    }
+
+    // Toolbars of the course overview and timeline blocks.
+    .eadtraining-overview-toolbar,
+    .block_timeline [data-region="timeline"] > :first-child {
+        .btn-outline-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .25rem;
+            height: $dashboard-control-height;
+            padding: 0 .875rem;
+            border-color: rgba($primary, .22);
+            border-radius: 10px;
+            background: #fff;
+            color: $body-color;
+            font-weight: 500;
+            white-space: nowrap;
+
+            &:hover,
+            &.show,
+            &[aria-expanded="true"] {
+                border-color: $primary;
+                background: #fff;
+                color: $primary;
+            }
+
+            &:focus-visible {
+                border-color: $primary;
+                box-shadow: 0 0 0 .2rem rgba($primary, .2);
+            }
+        }
+
+        input.form-control {
+            height: $dashboard-control-height;
+            border: 1px solid rgba($primary, .22);
+            border-radius: 10px !important; /* stylelint-disable-line declaration-no-important */
+            background-color: #fff;
+
+            &:focus {
+                border-color: $primary;
+                box-shadow: 0 0 0 .2rem rgba($primary, .2);
+            }
+        }
+    }
+
+    .eadtraining-overview-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .75rem;
+        margin-bottom: 1.25rem;
+        padding: .75rem;
+        border: 1px solid $dashboard-border;
+        border-radius: 12px;
+        background: $dashboard-tint;
+
+        .eadtraining-overview-filters {
+            display: flex;
+            flex: 1 1 520px;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: .5rem;
+            min-width: 0;
+
+            > * {
+                margin: 0 !important; /* stylelint-disable-line declaration-no-important */
+            }
+
+            // Search grows to fill the row.
+            > .flex-grow-1 {
+                flex: 1 1 220px;
+                min-width: 180px;
+            }
+        }
+
+        .eadtraining-overview-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .5rem;
+            margin-left: auto;
+
+            form {
+                margin: 0;
+            }
+
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                height: $dashboard-control-height;
+                padding: 0 1rem;
+                border-radius: 10px;
+                font-weight: 600;
+                white-space: nowrap;
+            }
+        }
+
+        @include media-breakpoint-down(md) {
+            .eadtraining-overview-filters {
+                flex-basis: 100%;
+
+                > .flex-grow-1 {
+                    flex-basis: 100%;
+                    order: -1;
+                }
+
+                > .dropdown,
+                > .d-flex {
+                    flex: 1 1 auto;
+                    min-width: 0;
+
+                    .dropdown,
+                    .btn {
+                        width: 100%;
+                    }
+
+                    .btn span {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                }
+            }
+
+            .eadtraining-overview-actions {
+                width: 100%;
+                margin-left: 0;
+
+                form {
+                    flex: 1 1 0;
+                }
+
+                .btn {
+                    justify-content: center;
+                    width: 100%;
+                }
+            }
+        }
+    }
+
+    // My courses: the page title replaces the block header, the toolbar replaces the old filter box.
+    &.page-mycourses .block_myoverview {
+        [data-region="filter"] {
+            width: auto;
+            margin-bottom: 0 !important; /* stylelint-disable-line declaration-no-important */
+            padding: 0;
+            background: transparent;
+        }
+
+        [data-region="paged-content-page"] {
+            margin: 0;
+        }
+    }
+
+    .block_myoverview .content {
+        min-height: 0;
+    }
+
+    // Course grid: same column widths everywhere, adapts to the available width.
+    .card-grid {
+        display: grid !important; /* stylelint-disable-line declaration-no-important */
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin: 0 !important; /* stylelint-disable-line declaration-no-important */
+
+        > .col {
+            display: flex;
+            width: auto;
+            max-width: none;
+            margin: 0 !important; /* stylelint-disable-line declaration-no-important */
+            padding: 0 !important; /* stylelint-disable-line declaration-no-important */
+        }
+
+        @include media-breakpoint-down(sm) {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    }
+
+    // Course cards.
+    .course-card {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        margin: 0 !important; /* stylelint-disable-line declaration-no-important */
+        overflow: hidden;
+        border: 1px solid $dashboard-border;
+        border-radius: $dashboard-radius;
+        background: #fff;
+        box-shadow: 0 2px 10px rgba(16, 24, 40, .05);
+
+        &:hover {
+            transform: translateY(-4px);
+            border-color: rgba($primary, .3);
+            box-shadow: 0 14px 34px rgba(16, 24, 40, .12);
+        }
+
+        &:focus-within {
+            border-color: $primary;
+            box-shadow: 0 0 0 .2rem rgba($primary, .2);
+        }
+
+        .card-img-top {
+            flex: 0 0 auto;
+            padding-top: 56.25%; // 16:9 for every course image.
+            border-radius: 0;
+            background-color: $dashboard-tint;
+
+            .categoryarea {
+                top: 12px;
+                left: 12px;
+                max-width: calc(100% - 24px);
+                padding: 4px 10px;
+                background: rgba(255, 255, 255, .92);
+                backdrop-filter: none;
+                box-shadow: 0 2px 8px rgba(16, 24, 40, .12);
+                color: $dashboard-heading-color;
+                font-size: .75rem;
+                font-weight: 700;
+                letter-spacing: .03em;
+                text-transform: uppercase;
+
+                &:not(:has(.categoryname)) {
+                    display: none;
+                }
+
+                .categoryname {
+                    display: block;
+                    color: inherit;
+                }
+            }
+        }
+
+        .course-info-container {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            padding: 1rem 1.125rem .5rem !important; /* stylelint-disable-line declaration-no-important */
+            border-radius: 0;
+
+            .course-info-text {
+                min-width: 0;
+            }
+
+            .course-shortname {
+                font-size: .8125rem;
+            }
+
+            .coursename {
+                min-height: calc(1.35em * 2);
+                margin: 0 0 .25rem;
+                color: $dashboard-heading-color;
+                font-size: 1.0625rem;
+                font-weight: 700;
+                line-height: 1.35;
+                overflow-wrap: anywhere;
+                white-space: normal;
+
+                &:hover,
+                &:focus {
+                    color: $primary;
+                    text-decoration: none;
+                }
+
+                .multiline {
+                    white-space: normal;
+                }
+            }
+
+            .course-summary {
+                display: -webkit-box;
+                margin: .25rem 0 0;
+                overflow: hidden;
+                color: $dashboard-muted;
+                font-size: .875rem;
+                line-height: 1.5;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+            }
+        }
+
+        .course-card-footer {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin-top: auto;
+            padding: .25rem .5rem .875rem 1.125rem;
+            background: transparent;
+
+            &:not(:has(.progress, .dropdown)) {
+                display: none;
+            }
+
+            .course-card-progress {
+                flex: 1 1 auto;
+                min-width: 0;
+            }
+
+            .progress {
+                height: 6px;
+                border-radius: 999px;
+            }
+
+            .progress-text {
+                margin-top: .375rem;
+                color: $dashboard-muted;
+                font-size: .8125rem;
+            }
+
+            .course-card-menu {
+                margin-left: auto;
+            }
+
+            .coursemenubtn {
+                color: $dashboard-muted;
+                border-radius: 8px;
+
+                &:hover,
+                &:focus-visible {
+                    background: $dashboard-tint;
+                    color: $primary;
+                }
+            }
+        }
+
+        // Enrolment (payment) icons of the "All courses" cards.
+        > .d-flex.align-items-start:last-child {
+            padding: 0 1.125rem .875rem;
+            color: $dashboard-muted;
+        }
+    }
+
+    // List and summary views of the course overview.
+    .block_myoverview .course-listitem {
+        margin-bottom: .75rem;
+        border: 1px solid $dashboard-border;
+        border-radius: 12px;
+
+        .coursename {
+            color: $dashboard-heading-color;
+            font-weight: 700;
+        }
+    }
+
+    // Empty states.
+    [data-region="empty-message"] {
+        padding: 1.5rem 1rem;
+
+        h4 {
+            color: $dashboard-heading-color;
+            font-weight: 700;
+        }
+
+        #action_bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: .5rem;
+            margin-top: 1.5rem !important; /* stylelint-disable-line declaration-no-important */
+
+            .singlebutton {
+                margin: 0;
+            }
+
+            .btn {
+                border-radius: 10px;
+                font-weight: 600;
+            }
+        }
+    }
+
+    // Timeline: same toolbar as the course overview.
+    .block_timeline {
+        [data-region="timeline"] > :first-child {
+            margin-bottom: 1rem;
+            padding: .75rem !important; /* stylelint-disable-line declaration-no-important */
+            border: 1px solid $dashboard-border;
+            border-radius: 12px;
+            background: $dashboard-tint;
+
+            > .d-flex {
+                gap: .5rem !important; /* stylelint-disable-line declaration-no-important */
+            }
+
+            .mb-1 {
+                margin-bottom: 0 !important; /* stylelint-disable-line declaration-no-important */
+            }
+
+            > .border-bottom {
+                display: none;
+            }
+
+            .nav-search {
+                flex: 1 1 220px;
+            }
+        }
+
+        .paged-content-page-container {
+            background-color: transparent;
+        }
+
+        .list-group-item {
+            border-color: $dashboard-border;
+        }
+    }
+}

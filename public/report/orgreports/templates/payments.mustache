@@ -1,0 +1,159 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template report_orgreports/payments
+
+    Payment Reports. The page heading is Moodle's page header; report_orgreports/payments loads the content.
+
+    Example context (json):
+    {
+        "config": "{}",
+        "orgs": [{"id": 2, "name": "School", "selected": true}],
+        "multipleorgs": false,
+        "orgname": "School",
+        "period": "17 September 2026 – 16 October 2026",
+        "ranges": [{"value": "last30", "name": "Last 30 Days", "selected": true}],
+        "from": "2026-09-17",
+        "to": "2026-10-16",
+        "today": "2026-10-16",
+        "canexport": true,
+        "dashboardurl": "#",
+        "search": ""
+    }
+}}
+<div id="report-orgreports-payments" class="orgr orgr-payments" data-config="{{config}}">
+
+    <div class="orgr-header">
+        <div class="orgr-header-main">
+            <div class="orgr-org">
+                {{#multipleorgs}}
+                <label for="orgr-org" class="orgr-label">{{#str}}organisation, report_orgreports{{/str}}</label>
+                <div class="orgr-select-wrap">
+                    <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
+                    <select id="orgr-org" class="orgr-select" data-action="org">
+                        {{#orgs}}<option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/orgs}}
+                    </select>
+                </div>
+                {{/multipleorgs}}
+                {{^multipleorgs}}
+                <span class="orgr-label">{{#str}}organisation, report_orgreports{{/str}}</span>
+                {{/multipleorgs}}
+            </div>
+            <div class="orgr-meta">
+                <div class="orgr-orgname" data-region="orgname">{{orgname}}</div>
+                <div class="orgr-meta-line">
+                    <span><i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                        <span class="visually-hidden">{{#str}}reportingperiod, report_orgreports{{/str}}:</span>
+                        <span data-region="period">{{period}}</span></span>
+                    <span><i class="fa-regular fa-clock" aria-hidden="true"></i>
+                        {{#str}}lastupdated, report_orgreports{{/str}}: <span data-region="updated">…</span></span>
+                </div>
+            </div>
+        </div>
+        <div class="orgr-header-actions">
+            <a class="orgr-btn orgr-btn-ghost" href="{{dashboardurl}}" data-region="dashboardlink">
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i><span>{{#str}}pluginname, report_orgreports{{/str}}</span>
+            </a>
+            <button type="button" class="orgr-btn orgr-btn-ghost" data-action="refresh">
+                <i class="fa-solid fa-rotate" aria-hidden="true"></i><span>{{#str}}refresh{{/str}}</span>
+            </button>
+            {{#canexport}}
+            <div class="orgr-menu" data-region="export">
+                <button type="button" class="orgr-btn orgr-btn-primary" data-action="menu" aria-haspopup="menu"
+                        aria-expanded="false" aria-controls="orgr-exportlist">
+                    <i class="fa-solid fa-download" aria-hidden="true"></i><span>{{#str}}export, report_orgreports{{/str}}</span>
+                    <i class="fa-solid fa-chevron-down orgr-caret" aria-hidden="true"></i>
+                </button>
+                <div class="orgr-menu-list" id="orgr-exportlist" role="menu" data-region="exportlist" hidden></div>
+            </div>
+            {{/canexport}}
+        </div>
+    </div>
+
+    <div class="orgr-toolbar" role="group" aria-label="{{#str}}daterange, report_orgreports{{/str}}">
+        <div class="orgr-presets">
+            {{#ranges}}
+            <button type="button" class="orgr-preset {{#selected}}active{{/selected}}" data-range="{{value}}"
+                    aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">{{name}}</button>
+            {{/ranges}}
+        </div>
+        <div class="orgr-dates">
+            <div class="orgr-daterange">
+                <label for="orgr-from" class="orgr-date-label">{{#str}}from, report_orgreports{{/str}}</label>
+                <input type="date" id="orgr-from" class="orgr-input orgr-date-input" value="{{from}}" max="{{today}}"
+                       data-field="from" aria-describedby="orgr-dateerror">
+                <span class="orgr-date-sep" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+                <label for="orgr-to" class="orgr-date-label">{{#str}}to, report_orgreports{{/str}}</label>
+                <input type="date" id="orgr-to" class="orgr-input orgr-date-input" value="{{to}}" max="{{today}}"
+                       data-field="to" aria-describedby="orgr-dateerror">
+            </div>
+            <button type="button" class="orgr-btn orgr-btn-soft" data-action="applycustom">
+                <i class="fa-solid fa-check" aria-hidden="true"></i><span>{{#str}}js_customapply, report_orgreports{{/str}}</span>
+            </button>
+        </div>
+        <div class="orgr-dateerror d-none" id="orgr-dateerror" data-region="dateerror" role="alert"></div>
+    </div>
+
+    <form class="orgr-filterbar" data-region="filters" role="search" aria-label="{{#str}}filters, report_orgreports{{/str}}">
+        <div class="orgr-filter orgr-filter-search">
+            <label for="orgr-psearch" class="orgr-label">{{#str}}filter_search, report_orgreports{{/str}}</label>
+            <div class="orgr-search">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input type="search" id="orgr-psearch" class="orgr-input" data-pfilter="search" value="{{search}}"
+                       placeholder="{{#str}}filter_search_placeholder, report_orgreports{{/str}}">
+            </div>
+        </div>
+        <div class="orgr-filter" data-region="filter-status">
+            <label for="orgr-pstatus" class="orgr-label">{{#str}}filter_status, report_orgreports{{/str}}</label>
+            <select id="orgr-pstatus" class="orgr-select" data-pfilter="status"></select>
+        </div>
+        <div class="orgr-filter" data-region="filter-method">
+            <label for="orgr-pmethod" class="orgr-label">{{#str}}filter_method, report_orgreports{{/str}}</label>
+            <select id="orgr-pmethod" class="orgr-select" data-pfilter="method"></select>
+        </div>
+        <div class="orgr-filter" data-region="filter-courseid">
+            <label for="orgr-pcourse" class="orgr-label">{{#str}}filter_courseid, report_orgreports{{/str}}</label>
+            <select id="orgr-pcourse" class="orgr-select" data-pfilter="courseid"></select>
+        </div>
+        <div class="orgr-filter" data-region="filter-planid">
+            <label for="orgr-pplan" class="orgr-label">{{#str}}filter_planid, report_orgreports{{/str}}</label>
+            <select id="orgr-pplan" class="orgr-select" data-pfilter="planid"></select>
+        </div>
+        <div class="orgr-filter orgr-filter-actions">
+            <button type="reset" class="orgr-btn orgr-btn-ghost" data-action="resetfilters">
+                <i class="fa-solid fa-xmark" aria-hidden="true"></i><span>{{#str}}js_resetfilters, report_orgreports{{/str}}</span>
+            </button>
+        </div>
+    </form>
+
+    <div class="orgr-progress" aria-hidden="true"><span></span></div>
+    <main class="orgr-body" data-region="body" aria-live="polite" aria-busy="true"></main>
+
+    <div class="orgr-drawer" data-region="drawer" hidden>
+        <div class="orgr-drawer-backdrop" data-action="closedetail"></div>
+        <section class="orgr-drawer-panel" role="dialog" aria-modal="true" aria-labelledby="orgr-drawer-title" tabindex="-1">
+            <header class="orgr-drawer-head">
+                <h3 id="orgr-drawer-title" class="orgr-panel-title">{{#str}}js_detailtitle, report_orgreports{{/str}}</h3>
+                <button type="button" class="orgr-iconbtn" data-action="closedetail"
+                        aria-label="{{#str}}js_close, report_orgreports{{/str}}">
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                </button>
+            </header>
+            <div class="orgr-drawer-body" data-region="drawerbody"></div>
+        </section>
+    </div>
+</div>

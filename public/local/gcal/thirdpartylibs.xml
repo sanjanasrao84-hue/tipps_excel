@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<libraries>
+  <library>
+    <location>thirdparty/fullcalendar</location>
+    <name>FullCalendar Standard Bundle</name>
+    <description>Month, week, day and agenda calendar views.</description>
+    <version>6.1.15</version>
+    <license>MIT</license>
+    <licenseversion></licenseversion>
+    <repository>https://github.com/fullcalendar/fullcalendar</repository>
+    <copyrights>
+      <copyright>2021 Adam Shaw</copyright>
+    </copyrights>
+  </library>
+</libraries>

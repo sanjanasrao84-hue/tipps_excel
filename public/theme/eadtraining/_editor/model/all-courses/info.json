@@ -1,0 +1,14 @@
+{
+  "title": "lang::all_courses",
+  "category": "courses",
+  "type": "html-form",
+  "cachekey": "allcourses_{USER}",
+  "form": {
+    "title": "lang::all_courses",
+    "label": "lang::all_courses_form_label",
+    "info": "lang::form_info",
+    "styles": [
+      "bootstrap"
+    ]
+  }
+}

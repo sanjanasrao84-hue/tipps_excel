@@ -1,0 +1,98 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template theme_eadtraining/core/user_menu
+
+    User menu of the navbar: the avatar opens a compact popup with the user's details and a logout button.
+
+    Context variables required for this template:
+    * unauthenticateduser - (Optional) Items to be displayed if an an unautheticated user is accessing the site
+        * content - The content to be displayed in the header.
+        * url - The login url
+    * metadata - Array of additional metadata to be displayed in the dropdown button.
+    * avatardata - Array of avatars to be displayed. Usually only the current user's avatar. If viewing as another user,
+        includes that user's avatar.
+    * userfullname - The name of the logged in user
+    * profilepopup - Popup data (theme_eadtraining\output\user_profile_popup), see theme_eadtraining/profile_popup.
+
+    Example context (json):
+    {
+        "unauthenticateduser": {
+            "content": "You are not logged in",
+            "url": "https://yourmoodlesite/login/index.php"
+        },
+        "items": [],
+        "metadata": [],
+        "avatardata": [],
+        "userfullname": "Admin User",
+        "profilepopup": null
+    }
+}}
+<div class="usermenu">
+    {{#unauthenticateduser}}
+        {{#url}}
+            <a class="login pl-2 btn btn-primary" href="{{{url}}}">{{#str}} login, core {{/str}}</a>
+        {{/url}}
+    {{/unauthenticateduser}}
+    {{^unauthenticateduser}}
+        <a href="{{#profilepopup}}{{profileurl}}{{/profilepopup}}{{^profilepopup}}#{{/profilepopup}}" id="user-menu-toggle"
+           role="button" aria-haspopup="dialog" aria-label="{{#str}}profile_popup_open, theme_eadtraining, {{userfullname}}{{/str}}">
+            <span class="userbutton">
+                {{> core/user_menu_metadata }}
+            </span>
+        </a>
+        {{#profilepopup}}
+            <template id="eadtraining-profile-popup-body">{{> theme_eadtraining/profile_popup }}</template>
+            <template id="eadtraining-profile-popup-footer">
+                <button type="button" class="btn btn-outline-secondary" data-action="hide">{{#str}}closebuttontitle{{/str}}</button>
+                <a href="{{logouturl}}" class="btn btn-primary" data-region="logout">
+                    <i class="fa fa-sign-out me-1" aria-hidden="true"></i>{{#str}}logout{{/str}}
+                </a>
+            </template>
+        {{/profilepopup}}
+    {{/unauthenticateduser}}
+</div>
+{{#profilepopup}}
+{{#js}}
+    require(["core/modal", "core/modal_events", "core/notification"], function(ModalModule, ModalEvents, Notification) {
+        var Modal = ModalModule && (ModalModule.default || ModalModule);
+        var toggle = document.getElementById("user-menu-toggle");
+        if (!toggle || !Modal || typeof Modal.create !== "function") {
+            // Without the modal the link opens the profile page.
+            return;
+        }
+        toggle.addEventListener("click", function(event) {
+            event.preventDefault();
+            Modal.create({
+                title: {{#quote}}{{#str}}profile_popup_title, theme_eadtraining{{/str}}{{/quote}},
+                body: document.getElementById("eadtraining-profile-popup-body").innerHTML,
+                footer: document.getElementById("eadtraining-profile-popup-footer").innerHTML,
+                show: true,
+                removeOnClose: true,
+            }).then(function(modal) {
+                var root = modal.getRoot();
+                root.addClass("eadtraining-profile-modal");
+                // Back to the avatar when the popup closes.
+                root.on(ModalEvents.hidden, function() {
+                    toggle.focus();
+                });
+                return modal;
+            }).catch(Notification.exception);
+        });
+    });
+{{/js}}
+{{/profilepopup}}

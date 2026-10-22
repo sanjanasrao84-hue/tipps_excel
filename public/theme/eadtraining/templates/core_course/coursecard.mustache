@@ -1,0 +1,91 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template theme_eadtraining/core_course/coursecard
+
+    The course card used everywhere: home page, course catalogue and search, My courses, starred and
+    recently accessed courses. Rendered in PHP (theme_eadtraining\output\course_card::export()) and in
+    JavaScript (core course_summary_exporter data). Only the "menu" block can be overridden.
+
+    Context variables:
+    * id, fullname, viewurl, courseimage, coursecategory, summary, visible, isfavourite - course data
+    * hasprogress, progress - completion progress of the current user
+    * enrolled - show the "Enrolled" badge (PHP only)
+    * action - label, url, primary, arialabel of the card button (PHP only; defaults to "Continue learning")
+
+    Example context (json):
+    {
+        "id": 2,
+        "fullname": "Foundations of Clinical Psychiatry",
+        "viewurl": "https://moodlesite/course/view.php?id=2",
+        "courseimage": "https://moodlesite/pluginfile.php/123/course/overviewfiles/course.jpg",
+        "coursecategory": "Psychiatry",
+        "summary": "An introductory course.",
+        "visible": true,
+        "enrolled": true,
+        "hasprogress": true,
+        "progress": 40
+    }
+}}
+<article class="psy-course" role="listitem" data-region="course-content" data-course-id="{{id}}">
+    <a class="psy-course__media" href="{{{viewurl}}}" tabindex="-1" aria-hidden="true">
+        <img src="{{{courseimage}}}" alt="" loading="lazy" decoding="async" width="720" height="450">
+        {{#enrolled}}
+            <span class="psy-course__badge">{{#str}} coursecard_enrolled, theme_eadtraining {{/str}}</span>
+        {{/enrolled}}
+    </a>
+    <div class="psy-course__menu">{{$menu}}{{/menu}}</div>
+    <div class="psy-course__body">
+        {{#coursecategory}}
+            <span class="psy-course__category">
+                <span class="visually-hidden">{{#str}} aria:coursecategory, core_course {{/str}}</span>
+                {{{coursecategory}}}
+            </span>
+        {{/coursecategory}}
+        <h3 class="psy-course__title">
+            <a href="{{{viewurl}}}">{{> core_course/favouriteicon }}{{{fullname}}}</a>
+        </h3>
+        {{^visible}}
+            <span class="badge bg-info text-white psy-course__hidden">{{#str}} hiddenfromstudents {{/str}}</span>
+        {{/visible}}
+        <div class="psy-course__summary">
+            {{#summary}}{{{summary}}}{{/summary}}
+            {{^summary}}{{#str}} coursecard_nosummary, theme_eadtraining {{/str}}{{/summary}}
+        </div>
+        {{#hasprogress}}
+            <div class="psy-course__progress">
+                <div class="psy-course__progress-label">{{#str}} coursecard_progress, theme_eadtraining, {{progress}} {{/str}}</div>
+                <div class="psy-course__progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+                     aria-valuenow="{{progress}}"
+                     aria-label="{{#str}} coursecard_progress, theme_eadtraining, {{progress}} {{/str}}">
+                    <span style="width: {{progress}}%"></span>
+                </div>
+            </div>
+        {{/hasprogress}}
+        <div class="psy-course__footer">
+            {{#action}}
+                <a class="psy-course__btn {{#primary}}psy-course__btn--primary{{/primary}}" href="{{{url}}}"
+                   aria-label="{{arialabel}}">{{label}}</a>
+            {{/action}}
+            {{^action}}
+                <a class="psy-course__btn psy-course__btn--primary" href="{{{viewurl}}}">
+                    {{#str}} coursecard_continue, theme_eadtraining {{/str}}
+                </a>
+            {{/action}}
+        </div>
+    </div>
+</article>

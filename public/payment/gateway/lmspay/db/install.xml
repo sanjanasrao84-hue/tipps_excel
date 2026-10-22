@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="payment/gateway/lmspay/db" VERSION="20261014" COMMENT="XMLDB file for the Online payment gateway"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="paygw_lmspay_order" COMMENT="Every checkout started, and how it was paid">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="component" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="paymentarea" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="itemid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="amount" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Amount in paise"/>
+        <FIELD NAME="currency" TYPE="char" LENGTH="3" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="reference" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false" COMMENT="Order reference shown to the learner"/>
+        <FIELD NAME="status" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="created" SEQUENCE="false" COMMENT="created, pending (UPI transfer waiting for approval), paid or rejected"/>
+        <FIELD NAME="method" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="upi, qr, card, netbanking, wallet or emi"/>
+        <FIELD NAME="methoddetail" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false" COMMENT="UPI app, bank, wallet or card network and last 4 digits"/>
+        <FIELD NAME="paymentid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="The core payment record once paid"/>
+        <FIELD NAME="provider" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="model" SEQUENCE="false" COMMENT="model or razorpay"/>
+        <FIELD NAME="rp_orderid" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="Razorpay order id"/>
+        <FIELD NAME="rp_paymentid" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="Razorpay payment id once paid"/>
+        <FIELD NAME="rp_qrid" TYPE="char" LENGTH="40" NOTNULL="false" SEQUENCE="false" COMMENT="Razorpay UPI QR code id"/>
+        <FIELD NAME="utr" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false" COMMENT="UPI transaction reference of a payment to the account UPI ID"/>
+        <FIELD NAME="reviewedby" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" COMMENT="Admin who approved or rejected the UPI transfer"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="reference" UNIQUE="true" FIELDS="reference"/>
+        <INDEX NAME="paymentid" UNIQUE="false" FIELDS="paymentid"/>
+        <INDEX NAME="rp_paymentid" UNIQUE="true" FIELDS="rp_paymentid" COMMENT="A Razorpay payment pays one order only"/>
+        <INDEX NAME="utr" UNIQUE="false" FIELDS="utr"/>
+        <INDEX NAME="status" UNIQUE="false" FIELDS="status"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

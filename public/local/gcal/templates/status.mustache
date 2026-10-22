@@ -1,0 +1,68 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_gcal/status
+
+    Google Calendar connection status and actions.
+
+    Example context (json):
+    {
+        "configured": true, "canconnect": true, "connected": true, "active": true, "needsreconnect": false,
+        "email": "learner@example.com", "lastsynctext": "21/10/26, 14:30", "lastsyncstatus": "ok",
+        "statusclass": "success", "connecturl": "#", "disconnecturl": "#", "googlecalendarurl": "#"
+    }
+}}
+<div class="lgc-status lgc-status--{{statusclass}}">
+    <div class="lgc-status__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+    </div>
+    <div class="lgc-status__text">
+        {{#active}}
+            <strong>{{#str}} connectedto, local_gcal {{/str}}</strong>
+            <span>{{email}} · {{#str}} lastsync, local_gcal, {{lastsynctext}} {{/str}}</span>
+            {{#lasterror}}<span class="lgc-status__error">{{lasterror}}</span>{{/lasterror}}
+        {{/active}}
+        {{#needsreconnect}}
+            <strong>{{#str}} reconnectneeded, local_gcal {{/str}}</strong>
+            <span>{{#str}} reconnectneeded_desc, local_gcal, {{email}} {{/str}}</span>
+        {{/needsreconnect}}
+        {{^connected}}
+            {{#canconnect}}
+                <strong>{{#str}} notconnected, local_gcal {{/str}}</strong>
+                <span>{{#str}} connect_desc, local_gcal {{/str}}</span>
+            {{/canconnect}}
+            {{^canconnect}}
+                <strong>{{#str}} calendar, local_gcal {{/str}}</strong>
+                <span>{{#str}} connectunavailable, local_gcal {{/str}}</span>
+            {{/canconnect}}
+        {{/connected}}
+    </div>
+    <div class="lgc-status__actions">
+        {{#active}}
+            <button type="button" class="btn btn-primary" data-action="sync">{{#str}} syncnow, local_gcal {{/str}}</button>
+            <a class="btn btn-outline-secondary" href="{{googlecalendarurl}}" target="_blank" rel="noopener">{{#str}} openingooglecalendar, local_gcal {{/str}}</a>
+            <a class="btn btn-link" href="{{disconnecturl}}">{{#str}} disconnect, local_gcal {{/str}}</a>
+        {{/active}}
+        {{#needsreconnect}}
+            {{#canconnect}}<a class="btn btn-primary" href="{{connecturl}}">{{#str}} reconnect, local_gcal {{/str}}</a>{{/canconnect}}
+            <a class="btn btn-link" href="{{disconnecturl}}">{{#str}} disconnect, local_gcal {{/str}}</a>
+        {{/needsreconnect}}
+        {{^connected}}
+            {{#canconnect}}<a class="btn btn-primary" href="{{connecturl}}">{{#str}} connect, local_gcal {{/str}}</a>{{/canconnect}}
+        {{/connected}}
+    </div>
+</div>

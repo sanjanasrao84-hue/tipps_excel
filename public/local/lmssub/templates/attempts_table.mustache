@@ -1,0 +1,91 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_lmssub/attempts_table
+
+    Table of payment attempts (rows from local_lmssub\attempt_manager::export_rows()).
+
+    Example context (json):
+    {
+        "rows": [{
+            "picture": "", "fullname": "Ana Silva", "email": "ana@example.com", "profileurl": "#",
+            "plan": "Level 2 Psychiatry", "duration": "Monthly", "amount": "INR 1.00", "count": 3, "multiple": true,
+            "first": "12/10/26, 10:00", "last": "19/10/26, 14:00", "status": "Started, not paid", "statusclass": "secondary",
+            "gateway": "Checkout", "reference": "", "subscribed": false, "until": "",
+            "markurl": "#", "reviewurl": ""
+        }]
+    }
+}}
+<div class="table-responsive">
+    <table class="table table-striped align-middle generaltable">
+        <thead>
+            <tr>
+                <th scope="col">{{#str}}student, local_lmssub{{/str}}</th>
+                <th scope="col">{{#str}}plan, local_lmssub{{/str}}</th>
+                <th scope="col">{{#str}}attempts, local_lmssub{{/str}}</th>
+                <th scope="col">{{#str}}status{{/str}}</th>
+                <th scope="col">{{#str}}subscription, local_lmssub{{/str}}</th>
+                <th scope="col">{{#str}}actions{{/str}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#rows}}
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        {{{picture}}}
+                        <div>
+                            <a href="{{profileurl}}">{{fullname}}</a>
+                            <div class="small text-body-secondary">{{email}}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="fw-bold">{{plan}}</div>
+                    <div class="small text-body-secondary">{{duration}} &middot; {{amount}}</div>
+                </td>
+                <td>
+                    <div>{{#multiple}}{{#str}}attempts_count, local_lmssub, {{count}}{{/str}}{{/multiple}}{{^multiple}}{{#str}}attempts_one, local_lmssub{{/str}}{{/multiple}}</div>
+                    <div class="small text-body-secondary">
+                        {{#multiple}}{{#str}}attempts_range, local_lmssub, {"first": {{#quote}}{{first}}{{/quote}}, "last": {{#quote}}{{last}}{{/quote}} }{{/str}}{{/multiple}}
+                        {{^multiple}}{{last}}{{/multiple}}
+                    </div>
+                </td>
+                <td>
+                    <span class="badge bg-{{statusclass}}">{{status}}</span>
+                    <div class="small text-body-secondary">{{gateway}}{{#reference}} &middot; <span class="font-monospace">{{reference}}</span>{{/reference}}</div>
+                </td>
+                <td>
+                    {{#subscribed}}<span class="badge bg-success">{{#str}}subscribeduntil, local_lmssub, {{until}}{{/str}}</span>{{/subscribed}}
+                    {{^subscribed}}<span class="text-body-secondary">{{#str}}notsubscribed, local_lmssub{{/str}}</span>{{/subscribed}}
+                </td>
+                <td>
+                    <div class="d-flex flex-wrap gap-1">
+                        {{#reviewurl}}
+                            <a class="btn btn-sm btn-warning" href="{{reviewurl}}">{{#str}}reviewupi, local_lmssub{{/str}}</a>
+                        {{/reviewurl}}
+                        <a class="btn btn-sm {{#subscribed}}btn-outline-primary{{/subscribed}}{{^subscribed}}btn-primary{{/subscribed}}" href="{{markurl}}">
+                            {{#subscribed}}{{#str}}extendsubscription, local_lmssub{{/str}}{{/subscribed}}
+                            {{^subscribed}}{{#str}}markassubscriber, local_lmssub{{/str}}{{/subscribed}}
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {{/rows}}
+        </tbody>
+    </table>
+</div>

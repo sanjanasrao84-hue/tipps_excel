@@ -1,0 +1,219 @@
+/**
+ Site administration (pages under /admin/).
+ Scoped to body.path-admin: course settings pages also use the "admin" layout and are not changed.
+ */
+$siteadmin-radius: 14px;
+$siteadmin-border: rgba($primary, .14);
+$siteadmin-tint: rgba($primary, .07);
+$siteadmin-heading: darken($primary, 30%);
+$siteadmin-link: darken($primary, 8%);
+$siteadmin-muted: #5b6476;
+
+.path-admin {
+
+    // Links: no permanent underline; colour on hover, clear ring on keyboard focus.
+    #region-main,
+    #page-header .breadcrumb {
+        a:not(.btn):not(.nav-link):not(.dropdown-item) {
+            text-decoration: none;
+
+            &:hover {
+                color: darken($primary, 12%);
+                text-decoration: none;
+            }
+
+            &:focus-visible {
+                border-radius: 4px;
+                outline: 2px solid rgba($primary, .6);
+                outline-offset: 2px;
+                text-decoration: none;
+            }
+        }
+    }
+
+    // Category tabs (General, Users, Courses...): on small screens they wrap instead of widening the page.
+    @include media-breakpoint-down(md) {
+        .secondary-navigation .moremenu .more-nav {
+            flex-wrap: wrap;
+            height: auto;
+            overflow: visible;
+        }
+    }
+
+    // Links inside explanatory text stay recognisable without an underline.
+    #region-main .form-text a,
+    #region-main .form-description a,
+    #region-main .box p a {
+        font-weight: 600;
+    }
+
+    // Administration home (admin/search.php): one card per category.
+    .tab-content > .tab-pane > .container-fluid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+        gap: 1.25rem;
+        padding: 0;
+
+        > hr {
+            display: none;
+        }
+
+        > .row {
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 1.125rem 1.25rem 1rem;
+            border: 1px solid $siteadmin-border;
+            border-radius: $siteadmin-radius;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(16, 24, 40, .04);
+
+            > [class*="col"] {
+                width: 100%;
+                max-width: 100%;
+                flex: 0 0 auto;
+                padding: 0;
+            }
+
+            // The category name, with an icon.
+            h4 {
+                display: flex;
+                align-items: center;
+                gap: .625rem;
+                margin: 0 0 .75rem;
+                padding-bottom: .75rem;
+                border-bottom: 1px solid $siteadmin-border;
+                color: $siteadmin-heading;
+                font-size: 1.0625rem;
+                font-weight: 700;
+
+                &::before {
+                    display: inline-flex;
+                    flex-shrink: 0;
+                    align-items: center;
+                    justify-content: center;
+                    width: 2rem;
+                    height: 2rem;
+                    border-radius: 8px;
+                    background: $siteadmin-tint;
+                    color: $primary;
+                    font: var(--fa-font-solid);
+                    font-size: .875rem;
+                    content: fa-content($fa-var-folder-open);
+                }
+
+                a {
+                    color: inherit;
+
+                    &:hover {
+                        color: $primary;
+                    }
+                }
+            }
+
+            // The first group of a tab has no category name.
+            > .col-sm-3:empty {
+                display: none;
+            }
+
+            // A category with no settings of its own (e.g. "Users", whose pages are all in its subcategories)
+            // would be an empty card.
+            &:not(:has(a)) {
+                display: none;
+            }
+
+            ul {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            li > a {
+                display: block;
+                margin: 0 -.5rem;
+                padding: .3rem .5rem;
+                border-radius: 8px;
+                color: $siteadmin-link;
+                line-height: 1.4;
+
+                &:hover {
+                    background: $siteadmin-tint;
+                    color: darken($primary, 20%);
+                }
+            }
+
+            // Nested groups (for example Users > Accounts).
+            li > ul {
+                margin: .25rem 0 .5rem .25rem;
+                padding-left: .75rem;
+                border-left: 2px solid $siteadmin-border;
+            }
+        }
+    }
+
+    // Category pages (admin/category.php): headings are links to each settings page.
+    #adminsettings fieldset > h3 {
+        margin: 0;
+        border-bottom: 1px solid $siteadmin-border;
+        font-size: 1rem;
+        font-weight: 600;
+
+        > a {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: .75rem .75rem;
+            border-radius: 8px;
+            color: $siteadmin-link;
+
+            &::after {
+                color: rgba($primary, .55);
+                font: var(--fa-font-solid);
+                font-size: .75rem;
+                content: fa-content($fa-var-chevron-right);
+            }
+
+            &:hover {
+                background: $siteadmin-tint;
+                color: $primary;
+            }
+        }
+    }
+
+    // Settings pages: section headings and setting rows.
+    #adminsettings h3.main {
+        margin: 1.75rem 0 1rem;
+        padding: .625rem 1rem;
+        border-left: 4px solid $primary;
+        border-radius: 8px;
+        background: $siteadmin-tint;
+        color: $siteadmin-heading;
+        font-size: 1.0625rem;
+        font-weight: 700;
+    }
+
+    #adminsettings .form-item {
+        margin-right: 0;
+        margin-left: 0;
+        padding: 1rem 0;
+
+        & + .form-item {
+            border-top: 1px solid rgba($primary, .08);
+        }
+
+        .form-label label {
+            color: $siteadmin-heading;
+            font-weight: 600;
+        }
+
+        .form-shortname {
+            color: $siteadmin-muted;
+        }
+
+        .form-description,
+        .form-text {
+            color: $siteadmin-muted;
+        }
+    }
+}

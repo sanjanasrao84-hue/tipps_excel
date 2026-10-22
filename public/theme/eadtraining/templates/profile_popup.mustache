@@ -1,0 +1,80 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template theme_eadtraining/profile_popup
+
+    Body of the profile popup opened from the navbar avatar.
+
+    Example context (json):
+    {
+        "picture": "<img src=\"#\" alt=\"\" class=\"userpicture\">",
+        "fullname": "Ana Silva",
+        "username": "ana",
+        "email": "ana@example.com",
+        "details": [{"label": "Timezone", "value": "Europe/London"}],
+        "hasstatus": false,
+        "status": [],
+        "returnrole": null,
+        "profileurl": "#"
+    }
+}}
+<div class="eadtraining-profile-popup">
+    <div class="eadtraining-profile-popup-head">
+        <div class="eadtraining-profile-popup-avatar">{{{picture}}}</div>
+        <div class="eadtraining-profile-popup-identity">
+            <div class="eadtraining-profile-popup-name">{{fullname}}</div>
+            <div class="eadtraining-profile-popup-email">{{email}}</div>
+        </div>
+    </div>
+
+    {{#hasstatus}}
+        <div class="eadtraining-profile-popup-status alert alert-info">
+            {{#status}}<div>{{{content}}}</div>{{/status}}
+            {{#returnrole}}<a href="{{url}}" class="alert-link">{{title}}</a>{{/returnrole}}
+        </div>
+    {{/hasstatus}}
+    {{^hasstatus}}
+        {{#returnrole}}
+            <div class="eadtraining-profile-popup-status alert alert-info"><a href="{{url}}" class="alert-link">{{title}}</a></div>
+        {{/returnrole}}
+    {{/hasstatus}}
+
+    <dl class="eadtraining-profile-popup-details">
+        {{#username}}
+            <div>
+                <dt>{{#str}}username{{/str}}</dt>
+                <dd>{{username}}</dd>
+            </div>
+        {{/username}}
+        {{#email}}
+            <div>
+                <dt>{{#str}}email{{/str}}</dt>
+                <dd>{{email}}</dd>
+            </div>
+        {{/email}}
+        {{#details}}
+            <div>
+                <dt>{{label}}</dt>
+                <dd>{{{value}}}</dd>
+            </div>
+        {{/details}}
+    </dl>
+
+    <a href="{{profileurl}}" class="eadtraining-profile-popup-profilelink">
+        {{#str}}viewprofile{{/str}} <i class="fa fa-arrow-right" aria-hidden="true"></i>
+    </a>
+</div>

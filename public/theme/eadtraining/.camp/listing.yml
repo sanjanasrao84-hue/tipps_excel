@@ -1,0 +1,23 @@
+# (RFC §4.1). Authors update their listing with an ordinary commit; camp
+# ingests and hash-pins it at each tagged release. Listing for theme_eadtraining.
+
+name: "Ead Training"
+summary: "Clean, accessible academic theme packed with customization options."
+description: |
+  Clean, accessible academic theme packed with customization options.
+
+  At Ead Training, we believe in free education that is accessible to everyone, visually appealing in both content and design.
+
+  Key capabilities:
+  - Integration with VLibras for automatic translation into Brazilian Sign Language (only for Brazilian Portuguese)
+  - Text resizing and contrast options
+  - Adjustable letter and line spacing
+
+  Supported Moodle versions in the supplied plugin list: 4.0 - 5.0.
+
+labels:
+  - fully-free
+category: "themes"
+links:
+  docs: https://github.com/EduardoKrausME/moodle-theme_eadtraining#readme
+  issues: https://github.com/EduardoKrausME/moodle-theme_eadtraining/issues

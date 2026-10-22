@@ -1,0 +1,195 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template theme_eadtraining/banner_manager
+
+    Homepage sections manager page.
+
+    Example context (json):
+    {
+        "homemodeoff": false,
+        "quickstarturl": "#",
+        "homeurl": "#",
+        "createurl": "#",
+        "hassections": true,
+        "sections": [{
+            "title": "Hero", "category": "Banners", "iscustom": false, "hidden": false, "language": "English",
+            "position": 1, "total": 5, "isfirst": true, "islast": false, "editurl": "#", "visualeditorurl": "#",
+            "previewurl": "#", "upurl": "#", "downurl": "#", "topurl": "#", "visibilityurl": "#", "removeurl": "#"
+        }],
+        "hascustombanners": true,
+        "custombanners": [{
+            "name": "Welcome", "title": "Welcome!", "imageurl": false, "onhome": true, "timemodified": "19/10/26",
+            "editurl": "#", "previewurl": "#", "addurl": "#", "deleteurl": "#"
+        }],
+        "library": [{"name": "Banners", "count": 1, "expanded": true,
+            "templates": [{"title": "Banner - No video", "image": "#", "addurl": "#"}]}]
+    }
+}}
+<div class="theme-eadtraining-banner-manager">
+    {{#homemodeoff}}
+        <div class="alert alert-warning">
+            {{#str}}banners_homemodeoff, theme_eadtraining{{/str}}
+            <a href="{{quickstarturl}}">{{#str}}quickstart_title, theme_eadtraining{{/str}}</a>
+        </div>
+    {{/homemodeoff}}
+
+    <p>{{#str}}sections_intro, theme_eadtraining{{/str}}</p>
+
+    <h3 class="mt-4">{{#str}}sections_onhome, theme_eadtraining{{/str}}</h3>
+    <p class="text-muted">{{#str}}sections_onhome_desc, theme_eadtraining{{/str}}</p>
+    {{#hassections}}
+        <div class="table-responsive">
+            <table class="table table-striped align-middle generaltable">
+                <thead>
+                    <tr>
+                        <th scope="col">{{#str}}banners_position, theme_eadtraining{{/str}}</th>
+                        <th scope="col">{{#str}}sections_section, theme_eadtraining{{/str}}</th>
+                        <th scope="col">{{#str}}language{{/str}}</th>
+                        <th scope="col">{{#str}}order{{/str}}</th>
+                        <th scope="col">{{#str}}actions{{/str}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#sections}}
+                        <tr class="{{#hidden}}dimmed_text{{/hidden}}">
+                            <td class="text-nowrap">{{#str}}banners_positionof, theme_eadtraining, {"position": {{position}}, "total": {{total}} }{{/str}}</td>
+                            <td>
+                                <div class="fw-bold">{{{title}}}</div>
+                                <span class="badge bg-secondary">{{category}}</span>
+                                {{#iscustom}}<span class="badge bg-info">{{#str}}banners_type_custom, theme_eadtraining{{/str}}</span>{{/iscustom}}
+                                {{#hidden}}<span class="badge bg-warning text-dark">{{#str}}sections_hiddenbadge, theme_eadtraining{{/str}}</span>{{/hidden}}
+                            </td>
+                            <td>{{language}}</td>
+                            <td class="text-nowrap">
+                                {{^isfirst}}
+                                    <a class="btn btn-sm btn-outline-secondary" href="{{topurl}}">
+                                        {{#str}}banners_movetop, theme_eadtraining{{/str}}
+                                    </a>
+                                    <a class="btn btn-sm btn-outline-secondary" href="{{upurl}}" title="{{#str}}moveup{{/str}}">
+                                        {{#pix}}t/up, core, {{#str}}moveup{{/str}}{{/pix}}
+                                    </a>
+                                {{/isfirst}}
+                                {{^islast}}
+                                    <a class="btn btn-sm btn-outline-secondary" href="{{downurl}}" title="{{#str}}movedown{{/str}}">
+                                        {{#pix}}t/down, core, {{#str}}movedown{{/str}}{{/pix}}
+                                    </a>
+                                {{/islast}}
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <a class="btn btn-sm btn-primary" href="{{editurl}}">{{#str}}edit{{/str}}</a>
+                                    {{#visualeditorurl}}
+                                        <a class="btn btn-sm btn-outline-primary" href="{{visualeditorurl}}">
+                                            {{#str}}banners_visualeditor, theme_eadtraining{{/str}}
+                                        </a>
+                                    {{/visualeditorurl}}
+                                    <a class="btn btn-sm btn-outline-secondary" href="{{previewurl}}">{{#str}}preview{{/str}}</a>
+                                    <a class="btn btn-sm btn-outline-secondary" href="{{visibilityurl}}">
+                                        {{#hidden}}{{#str}}show{{/str}}{{/hidden}}{{^hidden}}{{#str}}hide{{/str}}{{/hidden}}
+                                    </a>
+                                    <a class="btn btn-sm btn-outline-danger" href="{{removeurl}}">
+                                        {{#str}}banners_removefromhome, theme_eadtraining{{/str}}
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {{/sections}}
+                </tbody>
+            </table>
+        </div>
+        <a class="btn btn-outline-secondary mb-2" href="{{homeurl}}">{{#str}}banners_viewhome, theme_eadtraining{{/str}}</a>
+    {{/hassections}}
+    {{^hassections}}
+        <div class="alert alert-info">{{#str}}sections_nosections, theme_eadtraining{{/str}}</div>
+    {{/hassections}}
+
+    <h3 class="mt-5">{{#str}}banners_custom, theme_eadtraining{{/str}}</h3>
+    <p>
+        <a class="btn btn-primary" href="{{createurl}}">{{#str}}banners_create, theme_eadtraining{{/str}}</a>
+    </p>
+    {{#hascustombanners}}
+        <div class="table-responsive">
+            <table class="table table-striped align-middle generaltable">
+                <thead>
+                    <tr>
+                        <th scope="col">{{#str}}banners_name, theme_eadtraining{{/str}}</th>
+                        <th scope="col">{{#str}}banners_title, theme_eadtraining{{/str}}</th>
+                        <th scope="col">{{#str}}banners_onhome_short, theme_eadtraining{{/str}}</th>
+                        <th scope="col">{{#str}}lastmodified{{/str}}</th>
+                        <th scope="col">{{#str}}actions{{/str}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#custombanners}}
+                        <tr>
+                            <td>
+                                {{#imageurl}}
+                                    <img src="{{imageurl}}" alt="" class="rounded me-2" style="width: 64px; height: 36px; object-fit: cover;">
+                                {{/imageurl}}
+                                {{{name}}}
+                            </td>
+                            <td>{{{title}}}</td>
+                            <td>{{#onhome}}{{#str}}yes{{/str}}{{/onhome}}{{^onhome}}{{#str}}no{{/str}}{{/onhome}}</td>
+                            <td>{{timemodified}}</td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <a class="btn btn-sm btn-primary" href="{{editurl}}">{{#str}}edit{{/str}}</a>
+                                    <a class="btn btn-sm btn-outline-secondary" href="{{previewurl}}">{{#str}}preview{{/str}}</a>
+                                    {{^onhome}}
+                                        <a class="btn btn-sm btn-outline-success" href="{{addurl}}">
+                                            {{#str}}banners_addtohome, theme_eadtraining{{/str}}
+                                        </a>
+                                    {{/onhome}}
+                                    <a class="btn btn-sm btn-outline-danger" href="{{deleteurl}}">{{#str}}delete{{/str}}</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {{/custombanners}}
+                </tbody>
+            </table>
+        </div>
+    {{/hascustombanners}}
+    {{^hascustombanners}}
+        <div class="alert alert-info">{{#str}}banners_nocustom, theme_eadtraining{{/str}}</div>
+    {{/hascustombanners}}
+
+    <h3 class="mt-5">{{#str}}sections_library, theme_eadtraining{{/str}}</h3>
+    <p class="text-muted">{{#str}}sections_library_desc, theme_eadtraining{{/str}}</p>
+    {{#library}}
+        <details class="card mb-2" {{#expanded}}open{{/expanded}}>
+            <summary class="card-header fw-bold">{{name}} <span class="badge bg-secondary ms-1">{{count}}</span></summary>
+            <div class="card-body">
+                <div class="row g-3">
+                    {{#templates}}
+                        <div class="col-12 col-sm-6 col-lg-4">
+                            <div class="card h-100">
+                                <img src="{{image}}" class="card-img-top" alt="" loading="lazy">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title h6">{{title}}</h5>
+                                    <a class="btn btn-sm btn-outline-success mt-auto" href="{{addurl}}">
+                                        {{#str}}banners_addtohome, theme_eadtraining{{/str}}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {{/templates}}
+                </div>
+            </div>
+        </details>
+    {{/library}}
+</div>

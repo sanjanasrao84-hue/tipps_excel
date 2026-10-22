@@ -1,0 +1,144 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template report_orgreports/dashboard
+
+    Organisation reports dashboard. The page heading ("Organisation Reports") is Moodle's own page header;
+    report_orgreports/dashboard loads the tab content.
+
+    Example context (json):
+    {
+        "config": "{}",
+        "orgs": [{"id": 2, "name": "School", "selected": true}],
+        "multipleorgs": false,
+        "courses": [{"id": 5, "name": "Algebra", "selected": false}],
+        "hascourses": true,
+        "orgname": "School",
+        "period": "17 September 2026 – 16 October 2026",
+        "previousperiod": "18 August 2026 – 16 September 2026",
+        "ranges": [{"value": "last30", "name": "Last 30 Days", "selected": true}],
+        "from": "2026-09-17",
+        "to": "2026-10-16",
+        "today": "2026-10-16",
+        "sections": [{"key": "overview", "name": "Overview", "active": true, "icon": "fa-gauge-high"}],
+        "section": "overview",
+        "canexport": true,
+        "cansales": true,
+        "paymentsurl": "#",
+        "courselevel": false,
+        "courselevelnotice": ""
+    }
+}}
+<div id="report-orgreports" class="orgr" data-config="{{config}}">
+
+    <div class="orgr-header">
+        <div class="orgr-header-main">
+            <div class="orgr-org">
+                {{#multipleorgs}}
+                <label for="orgr-org" class="orgr-label">{{#str}}organisation, report_orgreports{{/str}}</label>
+                <div class="orgr-select-wrap">
+                    <i class="fa-solid fa-building-columns" aria-hidden="true"></i>
+                    <select id="orgr-org" class="orgr-select" data-action="org">
+                        {{#orgs}}<option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/orgs}}
+                    </select>
+                </div>
+                {{/multipleorgs}}
+                {{^multipleorgs}}
+                <span class="orgr-label">{{#str}}organisation, report_orgreports{{/str}}</span>
+                {{/multipleorgs}}
+            </div>
+            <div class="orgr-org orgr-course {{^hascourses}}d-none{{/hascourses}}" data-region="coursefilter">
+                <label for="orgr-course" class="orgr-label">{{#str}}filter_courseid, report_orgreports{{/str}}</label>
+                <div class="orgr-select-wrap">
+                    <i class="fa-solid fa-book" aria-hidden="true"></i>
+                    <select id="orgr-course" class="orgr-select" data-action="course">
+                        <option value="0">{{#str}}js_allcourses, report_orgreports{{/str}}</option>
+                        {{#courses}}<option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/courses}}
+                    </select>
+                </div>
+            </div>
+            <div class="orgr-meta">
+                <div class="orgr-orgname" data-region="orgname">{{orgname}}</div>
+            </div>
+        </div>
+        <div class="orgr-header-actions">
+            <a class="orgr-btn orgr-btn-ghost {{^cansales}}d-none{{/cansales}}" href="{{paymentsurl}}" data-region="paymentslink">
+                <i class="fa-solid fa-receipt" aria-hidden="true"></i><span>{{#str}}paymentreports, report_orgreports{{/str}}</span>
+            </a>
+            <button type="button" class="orgr-btn orgr-btn-ghost" data-action="refresh">
+                <i class="fa-solid fa-rotate" aria-hidden="true"></i><span>{{#str}}refresh{{/str}}</span>
+            </button>
+            {{#canexport}}
+            <div class="orgr-menu" data-region="export">
+                <button type="button" class="orgr-btn orgr-btn-primary" data-action="menu" aria-haspopup="menu"
+                        aria-expanded="false" aria-controls="orgr-exportlist">
+                    <i class="fa-solid fa-download" aria-hidden="true"></i><span>{{#str}}export, report_orgreports{{/str}}</span>
+                    <i class="fa-solid fa-chevron-down orgr-caret" aria-hidden="true"></i>
+                </button>
+                <div class="orgr-menu-list" id="orgr-exportlist" role="menu" data-region="exportlist" hidden></div>
+            </div>
+            {{/canexport}}
+        </div>
+    </div>
+
+    <div class="orgr-toolbar" role="group" aria-label="{{#str}}daterange, report_orgreports{{/str}}">
+        <div class="orgr-presets">
+            {{#ranges}}
+            <button type="button" class="orgr-preset {{#selected}}active{{/selected}}" data-range="{{value}}"
+                    aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">{{name}}</button>
+            {{/ranges}}
+        </div>
+        <div class="orgr-dates">
+            <div class="orgr-daterange">
+                <label for="orgr-from" class="orgr-date-label">{{#str}}from, report_orgreports{{/str}}</label>
+                <input type="date" id="orgr-from" class="orgr-input orgr-date-input" value="{{from}}" max="{{today}}"
+                       data-field="from" aria-describedby="orgr-dateerror">
+                <span class="orgr-date-sep" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+                <label for="orgr-to" class="orgr-date-label">{{#str}}to, report_orgreports{{/str}}</label>
+                <input type="date" id="orgr-to" class="orgr-input orgr-date-input" value="{{to}}" max="{{today}}"
+                       data-field="to" aria-describedby="orgr-dateerror">
+            </div>
+            <button type="button" class="orgr-btn orgr-btn-soft" data-action="applycustom">
+                <i class="fa-solid fa-check" aria-hidden="true"></i><span>{{#str}}js_customapply, report_orgreports{{/str}}</span>
+            </button>
+        </div>
+        <div class="orgr-dateerror d-none" id="orgr-dateerror" data-region="dateerror" role="alert"></div>
+    </div>
+
+    <nav class="orgr-nav" aria-label="{{#str}}sections, report_orgreports{{/str}}">
+        <div class="orgr-tabs" role="tablist" data-region="sections">
+            {{#sections}}
+            <button type="button" role="tab" id="orgr-tab-{{key}}" class="orgr-tab {{#active}}active{{/active}}"
+                    data-section="{{key}}" aria-controls="orgr-panel"
+                    aria-selected="{{#active}}true{{/active}}{{^active}}false{{/active}}"
+                    tabindex="{{#active}}0{{/active}}{{^active}}-1{{/active}}">
+                <i class="fa-solid {{icon}}" aria-hidden="true"></i><span>{{name}}</span>
+            </button>
+            {{/sections}}
+        </div>
+    </nav>
+
+    {{#courselevel}}
+    <div class="orgr-banner" data-region="courselevel">
+        <i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>{{courselevelnotice}}</span>
+    </div>
+    {{/courselevel}}
+
+    <div class="orgr-progress" aria-hidden="true"><span></span></div>
+    <main class="orgr-body" id="orgr-panel" role="tabpanel" data-region="body" aria-labelledby="orgr-tab-{{section}}"
+          aria-live="polite" aria-busy="true"></main>
+</div>

@@ -1,0 +1,145 @@
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Transaction detail drawer of the Payment Reports page, and the shared status badge.
+ *
+ * @module     report_orgreports/transaction_detail
+ * @copyright  2026
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+define(['report_orgreports/format'], function(F) {
+    'use strict';
+
+    var ICONS = {completed: 'fa-circle-check', pending: 'fa-hourglass-half', failed: 'fa-circle-xmark',
+        initiated: 'fa-cart-arrow-down', refunded: 'fa-rotate-left', partrefunded: 'fa-rotate-left'};
+    var opener = null;
+
+    /**
+     * Status badge with an icon and a text label (colour is never the only cue).
+     *
+     * @param {String} status
+     * @param {String} label
+     * @returns {String}
+     */
+    var badge = function(status, label) {
+        return '<span class="orgr-badge orgr-badge-' + F.esc(status) + '"><i class="fa-solid ' +
+            (ICONS[status] || 'fa-circle') + '" aria-hidden="true"></i>' + F.esc(label) + '</span>';
+    };
+
+    /**
+     * Drawer elements.
+     *
+     * @param {HTMLElement} root
+     * @returns {Object}
+     */
+    var parts = function(root) {
+        var drawer = root.querySelector('[data-region="drawer"]');
+        return {drawer: drawer, panel: drawer.querySelector('.orgr-drawer-panel'),
+            body: drawer.querySelector('[data-region="drawerbody"]')};
+    };
+
+    return {
+        badge: badge,
+
+        /**
+         * Open the drawer in its loading state.
+         *
+         * @param {HTMLElement} root
+         * @param {HTMLElement} trigger element to return focus to
+         */
+        open: function(root, trigger) {
+            var p = parts(root);
+            opener = trigger || null;
+            p.body.innerHTML = '<div class="orgr-skeleton orgr-skeleton-row"></div><div class="orgr-skeleton ' +
+                'orgr-skeleton-row"></div><div class="orgr-skeleton orgr-skeleton-row"></div><div class="visually-hidden">' +
+                F.esc(F.str('loading')) + '</div>';
+            p.drawer.hidden = false;
+            document.body.classList.add('orgr-noscroll');
+            p.panel.focus();
+        },
+
+        /**
+         * Close the drawer and return focus.
+         *
+         * @param {HTMLElement} root
+         */
+        close: function(root) {
+            var p = parts(root);
+            p.drawer.hidden = true;
+            document.body.classList.remove('orgr-noscroll');
+            if (opener && opener.focus) {
+                opener.focus();
+            }
+            opener = null;
+        },
+
+        /**
+         * Whether the drawer is open.
+         *
+         * @param {HTMLElement} root
+         * @returns {Boolean}
+         */
+        isOpen: function(root) {
+            return !parts(root).drawer.hidden;
+        },
+
+        /**
+         * Show a transaction.
+         *
+         * @param {HTMLElement} root
+         * @param {Object} data from report_orgreports_get_payment_detail
+         */
+        render: function(root, data) {
+            if (!data || typeof data !== 'object' || !Array.isArray(data.sections)) {
+                throw new Error('unexpected transaction detail');
+            }
+            var html = '<div class="orgr-detail-summary"><div><div class="orgr-detail-id">' + F.esc(data.txid) + '</div>' +
+                '<div class="orgr-detail-amount">' + F.esc(data.amount) + '</div></div>' +
+                badge(data.status, data.statuslabel) + '</div>';
+            data.sections.forEach(function(section) {
+                if (!section.rows || !section.rows.length) {
+                    return;
+                }
+                html += '<section class="orgr-detail-section"><h4>' + F.esc(section.title) + '</h4><dl>' +
+                    section.rows.map(function(r) {
+                        return '<div><dt>' + F.esc(r.label) + '</dt><dd>' + F.esc(r.value) + '</dd></div>';
+                    }).join('') + '</dl></section>';
+            });
+            if (Array.isArray(data.timeline) && data.timeline.length) {
+                html += '<section class="orgr-detail-section"><h4>' + F.esc(F.str('timeline')) + '</h4><ol class="orgr-timeline">' +
+                    data.timeline.map(function(t) {
+                        return '<li><span class="orgr-timeline-time">' + F.esc(t.time) + '</span><span>' + F.esc(t.text) +
+                            '</span></li>';
+                    }).join('') + '</ol></section>';
+            }
+            parts(root).body.innerHTML = html;
+        },
+
+        /**
+         * Show that the detail could not be loaded.
+         *
+         * @param {HTMLElement} root
+         * @param {String} txid
+         */
+        error: function(root, txid) {
+            parts(root).body.innerHTML = '<div class="orgr-state orgr-state-error" role="alert"><span class="orgr-empty-icon ' +
+                'orgr-empty-icon-error" aria-hidden="true"><i class="fa-solid fa-triangle-exclamation"></i></span><div>' +
+                '<strong>' + F.esc(F.str('detailfailed')) + '</strong><button type="button" class="orgr-btn orgr-btn-soft ' +
+                'orgr-btn-sm" data-action="detail" data-txid="' + F.esc(txid) + '"><i class="fa-solid fa-rotate-right" ' +
+                'aria-hidden="true"></i> ' + F.esc(F.str('retry')) + '</button></div></div>';
+        }
+    };
+});

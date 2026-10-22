@@ -1,0 +1,15 @@
+{
+  "title": "lang::psy_courses",
+  "category": "courses",
+  "type": "html-form",
+  "cachekey": "psycourses_{USER}",
+  "nocache": true,
+  "form": {
+    "title": "lang::psy_courses",
+    "label": "lang::psy_courses_form_label",
+    "info": "lang::form_info",
+    "styles": [
+      "bootstrap"
+    ]
+  }
+}

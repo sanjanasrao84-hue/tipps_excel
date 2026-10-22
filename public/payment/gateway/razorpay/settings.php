@@ -1,0 +1,50 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Settings for the Razorpay payment gateway
+ *
+ * @package    paygw_razorpay
+ * @copyright  2025 Santosh N.
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
+if ($ADMIN->fulltree) {
+
+    $settings->add(new admin_setting_heading('paygw_razorpay_settings', '', get_string('pluginname_desc', 'paygw_razorpay')));
+
+    \core_payment\helper::add_common_gateway_settings($settings, 'paygw_razorpay');
+
+    $settings->add(new admin_setting_heading('paygw_razorpay_expiry',
+        get_string('expirysettings', 'paygw_razorpay'), get_string('expirysettings_desc', 'paygw_razorpay')));
+
+    $settings->add(new admin_setting_configcheckbox('paygw_razorpay/expirynotify',
+        get_string('expirynotify', 'paygw_razorpay'), get_string('expirynotify_desc', 'paygw_razorpay'), 1));
+
+    $settings->add(new admin_setting_configtext('paygw_razorpay/expirywarndays',
+        get_string('expirywarndays', 'paygw_razorpay'), get_string('expirywarndays_desc', 'paygw_razorpay'),
+        '7,3,1', '/^\s*\d+(\s*,\s*\d+)*\s*$/'));
+
+    $settings->add(new admin_setting_configcheckbox('paygw_razorpay/expirybanner',
+        get_string('expirybanner', 'paygw_razorpay'), get_string('expirybanner_desc', 'paygw_razorpay'), 1));
+}
+
+// UPI payments to the account's own UPI ID wait here for an admin to approve them.
+$ADMIN->add('paymentgateways', new admin_externalpage('paygw_razorpay_upipayments',
+    new lang_string('upipayments', 'paygw_razorpay'),
+    new moodle_url('/payment/gateway/razorpay/upi_payments.php'), 'moodle/payment:manageaccounts'));

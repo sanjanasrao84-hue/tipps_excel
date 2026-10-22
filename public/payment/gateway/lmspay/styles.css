@@ -1,0 +1,134 @@
+.core_payment_gateways_modal .lmspay .icon {
+    height: 40px;
+    width: auto;
+}
+.paygw-lmspay .lp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: .5rem;
+    background: linear-gradient(135deg, #0f6cbf, #0a4f8f);
+    color: #fff;
+}
+.paygw-lmspay .lp-brand {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+.paygw-lmspay .lp-amount {
+    font-size: 1.6rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.paygw-lmspay .lp-body {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 1rem;
+}
+.paygw-lmspay .lp-methods .nav-link {
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    margin-bottom: .375rem;
+    white-space: nowrap;
+}
+.paygw-lmspay .lp-panels {
+    min-height: 330px;
+}
+.paygw-lmspay .lp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: .5rem;
+}
+.paygw-lmspay .lp-list {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+.paygw-lmspay .lp-tile,
+.paygw-lmspay .lp-choice {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    text-align: start;
+    font-size: .875rem;
+}
+.paygw-lmspay .lp-choice {
+    padding: .5rem .75rem;
+    margin: 0;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .375rem;
+    cursor: pointer;
+}
+.paygw-lmspay .lp-choice:hover {
+    background-color: var(--bs-tertiary-bg, #f8f9fa);
+}
+.paygw-lmspay .lp-choice.selected,
+.paygw-lmspay .lp-choice:focus-within {
+    border-color: var(--bs-primary, #0f6cbf);
+    box-shadow: 0 0 0 .15rem rgba(15, 108, 191, .25);
+}
+.paygw-lmspay .lp-logo {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: var(--bs-secondary-bg, #e9ecef);
+    font-size: .75rem;
+    font-weight: 700;
+}
+.paygw-lmspay .lp-qr {
+    position: relative;
+    width: 220px;
+    max-width: 100%;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: .5rem;
+}
+.paygw-lmspay .lp-qr img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+.paygw-lmspay .lp-qr-expired {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, .95);
+    color: #1d2125;
+    border-radius: .5rem;
+}
+.paygw-lmspay .lp-qr-expired[hidden] {
+    display: none;
+}
+.paygw-lmspay .lp-network {
+    position: absolute;
+    top: 50%;
+    right: .5rem;
+    transform: translateY(-50%);
+}
+.paygw-lmspay .lp-network:empty {
+    display: none;
+}
+@media (max-width: 575.98px) {
+    .paygw-lmspay .lp-body {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .paygw-lmspay .lp-methods {
+        flex-direction: row !important;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: .375rem;
+    }
+    .paygw-lmspay .lp-methods .nav-link {
+        margin-bottom: 0;
+    }
+}

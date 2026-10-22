@@ -1,0 +1,81 @@
+.block_themeeditor.eadtraining-custom-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  min-height: var(--eadtraining-banner-height, 480px);
+  padding: 56px 20px;
+  color: var(--eadtraining-banner-color, #ffffff);
+  background-color: var(--bs-primary);
+  background-image: linear-gradient(135deg, var(--bs-primary) 0%, var(--bs-secondary, #14213d) 100%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.block_themeeditor.eadtraining-custom-banner.eadtraining-custom-banner--v-top {
+  align-items: flex-start;
+}
+.block_themeeditor.eadtraining-custom-banner.eadtraining-custom-banner--v-bottom {
+  align-items: flex-end;
+}
+.block_themeeditor.eadtraining-custom-banner .eadtraining-custom-banner__overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--eadtraining-banner-overlay, rgba(0, 0, 0, 0.4));
+}
+.block_themeeditor.eadtraining-custom-banner .eadtraining-custom-banner__container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+}
+.block_themeeditor.eadtraining-custom-banner.eadtraining-custom-banner--h-center .eadtraining-custom-banner__container {
+  justify-content: center;
+}
+.block_themeeditor.eadtraining-custom-banner.eadtraining-custom-banner--h-right .eadtraining-custom-banner__container {
+  justify-content: flex-end;
+}
+.block_themeeditor.eadtraining-custom-banner .eadtraining-custom-banner__content {
+  width: 100%;
+  max-width: 720px;
+}
+.block_themeeditor.eadtraining-custom-banner .eadtraining-custom-banner__title {
+  margin: 0 0 16px;
+  color: inherit;
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.1;
+}
+.block_themeeditor.eadtraining-custom-banner .eadtraining-custom-banner__subtitle {
+  margin: 0 0 16px;
+  color: inherit;
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.block_themeeditor.eadtraining-custom-banner .eadtraining-custom-banner__description {
+  color: inherit;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+.block_themeeditor.eadtraining-custom-banner .eadtraining-custom-banner__description p:last-child {
+  margin-bottom: 0;
+}
+.block_themeeditor.eadtraining-custom-banner .eadtraining-custom-banner__description a {
+  color: inherit;
+  text-decoration: underline;
+}
+.block_themeeditor.eadtraining-custom-banner .eadtraining-custom-banner__button {
+  margin-top: 28px;
+  padding: 12px 28px;
+  font-weight: 700;
+}
+@media (max-width: 767px) {
+  .block_themeeditor.eadtraining-custom-banner {
+    min-height: min(var(--eadtraining-banner-height, 480px), 420px);
+    padding: 40px 16px;
+  }
+  .block_themeeditor.eadtraining-custom-banner .eadtraining-custom-banner__content {
+    max-width: 100%;
+  }
+}

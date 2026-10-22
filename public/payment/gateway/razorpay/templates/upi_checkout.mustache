@@ -1,0 +1,112 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template paygw_razorpay/upi_checkout
+
+    Choice between UPI / QR code (paid straight to the site's UPI ID) and card / netbanking (Razorpay),
+    and the UPI payment itself.
+
+    Example context (json):
+    {
+        "amount": "₹2,899.00",
+        "vpa": "institute@okhdfcbank",
+        "payeetext": "Paying Summit Solutions",
+        "link": "upi://pay?pa=institute@okhdfcbank",
+        "qrcode": "",
+        "notehint": "Pay exactly ₹2,899.00. If your app lets you add a note, write LMS7K2Q9XP4.",
+        "pending": false,
+        "pendingtext": ""
+    }
+}}
+<div class="paygw-razorpay-upi">
+    {{#pending}}
+    <div data-region="pending" class="text-center py-3">
+        <i class="fa-solid fa-hourglass-half fa-2x text-warning mb-3" aria-hidden="true"></i>
+        <h5>{{#str}}upipendingtitle, paygw_razorpay{{/str}}</h5>
+        <p class="mb-3">{{pendingtext}}</p>
+        <button type="button" class="btn btn-primary" data-action="close">{{#str}}upidone, paygw_razorpay{{/str}}</button>
+    </div>
+    {{/pending}}
+    {{^pending}}
+    <div data-region="chooser">
+        <h5 class="mb-3">{{#str}}upichoose, paygw_razorpay{{/str}}</h5>
+        <button type="button" class="rzp-upi-option btn btn-outline-primary w-100 text-start mb-2" data-action="upi">
+            <i class="fa-solid fa-qrcode fa-2x fa-fw" aria-hidden="true"></i>
+            <span>
+                <span class="d-block fw-bold">{{#str}}upichoose_upi, paygw_razorpay{{/str}}</span>
+                <span class="d-block small">{{#str}}upichoose_upi_desc, paygw_razorpay{{/str}}</span>
+            </span>
+            <span class="ms-auto fw-bold">{{amount}}</span>
+        </button>
+        <button type="button" class="rzp-upi-option btn btn-outline-secondary w-100 text-start" data-action="razorpay">
+            <i class="fa-regular fa-credit-card fa-2x fa-fw" aria-hidden="true"></i>
+            <span>
+                <span class="d-block fw-bold">{{#str}}upichoose_razorpay, paygw_razorpay{{/str}}</span>
+                <span class="d-block small">{{#str}}upichoose_razorpay_desc, paygw_razorpay{{/str}}</span>
+            </span>
+        </button>
+    </div>
+
+    <div data-region="upi" hidden>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <button type="button" class="btn btn-link btn-sm px-0" data-action="back">
+                <i class="fa-solid fa-arrow-left me-1" aria-hidden="true"></i>{{#str}}upiback, paygw_razorpay{{/str}}
+            </button>
+            <div class="text-end">
+                <div class="small text-muted">{{#str}}upiamounttopay, paygw_razorpay{{/str}}</div>
+                <div class="fs-4 fw-bold">{{amount}}</div>
+            </div>
+        </div>
+
+        <div class="fw-bold mb-2">{{#str}}upistep_pay, paygw_razorpay{{/str}}</div>
+        <div class="text-center">
+            <div class="small mb-2">{{#str}}upiscan, paygw_razorpay{{/str}}</div>
+            <div class="rzp-upi-qr mx-auto mb-2">
+                <img src="{{qrcode}}" alt="{{#str}}upiscan, paygw_razorpay{{/str}}">
+            </div>
+            <div class="small text-muted mb-2">{{payeetext}}</div>
+            <a class="btn btn-success mb-2 d-md-none" href="{{link}}">
+                <i class="fa-solid fa-mobile-screen-button me-1" aria-hidden="true"></i>{{#str}}upiopenapp, paygw_razorpay{{/str}}
+            </a>
+            <div class="small text-muted">{{#str}}upiorpayto, paygw_razorpay{{/str}}</div>
+            <div class="d-inline-flex align-items-center gap-2 mb-2">
+                <code class="fs-6">{{vpa}}</code>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-action="copy" data-copy="{{vpa}}">
+                    {{#str}}upicopy, paygw_razorpay{{/str}}
+                </button>
+            </div>
+            <div class="alert alert-info small py-2">{{notehint}}</div>
+        </div>
+
+        <label class="fw-bold mb-1" for="rzp-upi-utr">{{#str}}upistep_utr, paygw_razorpay{{/str}}</label>
+        <div class="small text-muted mb-2">{{#str}}upiutr_hint, paygw_razorpay{{/str}}</div>
+        <div class="input-group mb-2">
+            <input type="text" class="form-control" id="rzp-upi-utr" autocomplete="off" spellcheck="false" maxlength="40"
+                   inputmode="numeric" placeholder="{{#str}}upiutrplaceholder, paygw_razorpay{{/str}}"
+                   aria-label="{{#str}}upiutr, paygw_razorpay{{/str}}">
+            <button type="button" class="btn btn-primary" data-action="submit">{{#str}}upisubmit, paygw_razorpay{{/str}}</button>
+        </div>
+        <div class="alert alert-danger small py-2 mb-0" data-region="error" hidden></div>
+    </div>
+
+    <div data-region="done" class="text-center py-3" hidden>
+        <i class="fa-solid fa-circle-check fa-2x text-success mb-3" aria-hidden="true"></i>
+        <p class="mb-3" data-region="donetext"></p>
+        <button type="button" class="btn btn-primary" data-action="close">{{#str}}upidone, paygw_razorpay{{/str}}</button>
+    </div>
+    {{/pending}}
+</div>

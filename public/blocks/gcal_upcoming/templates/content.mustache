@@ -1,0 +1,62 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_gcal_upcoming/content
+
+    Upcoming events and Google Calendar status.
+
+    Example context (json):
+    {
+        "events": [{"title": "Essay", "day": "30", "month": "Oct", "time": "10:00", "deadline": true,
+            "category": "Assignment deadlines", "color": "#e8590c", "course": "LP02", "url": "#"}],
+        "hasevents": true, "days": 14, "calendarurl": "#",
+        "status": {"active": true, "email": "learner@example.com", "lastsynctext": "21/10/26, 14:30",
+            "canconnect": true, "connected": true, "connecturl": "#"}
+    }
+}}
+<div class="bgu">
+    {{#hasevents}}
+        <ul class="bgu-list">
+            {{#events}}
+                <li class="bgu-item">
+                    <span class="bgu-date" style="--bgu-color: {{color}}"><strong>{{day}}</strong>{{month}}</span>
+                    <span class="bgu-body">
+                        {{#url}}<a class="bgu-title" href="{{url}}">{{title}}</a>{{/url}}
+                        {{^url}}<span class="bgu-title">{{title}}</span>{{/url}}
+                        <span class="bgu-meta">{{time}}{{#deadline}} · {{#str}} deadline, local_gcal {{/str}}{{/deadline}}{{#course}} · {{course}}{{/course}} · {{category}}</span>
+                    </span>
+                </li>
+            {{/events}}
+        </ul>
+    {{/hasevents}}
+    {{^hasevents}}
+        <p class="bgu-empty">{{#str}} noupcoming, block_gcal_upcoming, {{days}} {{/str}}</p>
+    {{/hasevents}}
+
+    <div class="bgu-footer">
+        {{#status.active}}
+            <span class="bgu-sync"><span class="bgu-ok" aria-hidden="true"></span>{{#str}} connectedto, local_gcal {{/str}} · {{#str}} lastsync, local_gcal, {{status.lastsynctext}} {{/str}}</span>
+        {{/status.active}}
+        {{#status.needsreconnect}}
+            <a class="btn btn-sm btn-outline-danger" href="{{status.connecturl}}">{{#str}} reconnect, local_gcal {{/str}}</a>
+        {{/status.needsreconnect}}
+        {{^status.connected}}{{#status.canconnect}}
+            <a class="btn btn-sm btn-outline-primary" href="{{status.connecturl}}">{{#str}} connect, local_gcal {{/str}}</a>
+        {{/status.canconnect}}{{/status.connected}}
+        <a class="btn btn-sm btn-primary" href="{{calendarurl}}">{{#str}} opencalendar, block_gcal_upcoming {{/str}}</a>
+    </div>
+</div>

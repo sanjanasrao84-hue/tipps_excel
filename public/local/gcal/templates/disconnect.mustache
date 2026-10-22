@@ -1,0 +1,44 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_gcal/disconnect
+
+    Disconnect confirmation.
+
+    Example context (json):
+    {
+        "email": "learner@example.com", "actionurl": "#", "cancelurl": "#", "sesskey": "abc", "cancremove": true
+    }
+}}
+<div class="lgc-disconnect card">
+    <div class="card-body">
+        <h3 class="h5">{{#str}} disconnectconfirm, local_gcal, {{email}} {{/str}}</h3>
+        <p>{{#str}} disconnect_desc, local_gcal {{/str}}</p>
+        <form method="post" action="{{actionurl}}">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <input type="hidden" name="confirm" value="1">
+            {{#cancremove}}
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" name="removecalendar" value="1" id="lgc-removecalendar">
+                    <label class="form-check-label" for="lgc-removecalendar">{{#str}} removecalendar, local_gcal {{/str}}</label>
+                </div>
+            {{/cancremove}}
+            <button type="submit" class="btn btn-danger">{{#str}} disconnect, local_gcal {{/str}}</button>
+            <a class="btn btn-secondary" href="{{cancelurl}}">{{#str}} cancel {{/str}}</a>
+        </form>
+    </div>
+</div>

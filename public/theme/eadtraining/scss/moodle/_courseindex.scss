@@ -1,0 +1,294 @@
+// Course index (left drawer): calm cards on a white panel, tinted from the brand colour.
+$courseindex-ink: #1f2933 !default;
+$courseindex-link-color: #4a5663 !default;
+$courseindex-link-dimmed-color: $gray-600 !default;
+$courseindex-link-hover-color: $courseindex-ink !default;
+$courseindex-line: #e3e9ef !default;
+$courseindex-hover-bg: #f6f9fb !default;
+$courseindex-tint: mix(white, $primary, 92%) !default;
+$courseindex-tint-strong: mix(white, $primary, 84%) !default;
+$courseindex-accent: darken($primary, 6%) !default;
+$courseindex-item-dragging-bg: shift-color($info, -90%) !default;
+$courseindex-item-dragging-border: shift-color($info, -70%) !default;
+$courseindex-item-padding-y: 8px;
+$courseindex-item-padding-x: 10px;
+$courseindex-item-radius: 10px !default;
+$courseindex-item-current: $primary !default;
+
+@mixin courseindex-item-hover() {
+    &:hover,
+    &:focus-within {
+        background-color: $courseindex-hover-bg;
+
+        .courseindex-link,
+        .courseindex-chevron {
+            color: $courseindex-link-hover-color;
+            cursor: pointer;
+        }
+
+        &.dimmed {
+            .courseindex-link,
+            .courseindex-chevron {
+                color: $courseindex-link-hover-color;
+            }
+        }
+
+        &.draggable {
+            cursor: move;
+        }
+    }
+}
+
+@mixin courseindex-item-dragging() {
+    &.dragging {
+        border: $border-width solid $courseindex-item-dragging-border;
+        background-color: $courseindex-item-dragging-bg;
+    }
+}
+
+.courseindex {
+    // General icons size.
+    .icon {
+        font-size: 10px;
+    }
+
+    // Both activity and section items.
+    .courseindex-item {
+        padding: $courseindex-item-padding-y $courseindex-item-padding-x;
+        border: $border-width solid transparent;
+        border-radius: $courseindex-item-radius;
+        transition: background-color .15s ease, color .15s ease;
+
+        // Show full names: they wrap onto several lines instead of being cut with "..." (text-truncate).
+        .courseindex-link,
+        > span[data-for="section_title"] {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: visible;
+            text-overflow: clip;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .courseindex-link,
+        .courseindex-chevron {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: $courseindex-link-color;
+            font-size: .9rem;
+            line-height: 1.35;
+            text-decoration: none;
+
+            &:hover,
+            &:focus {
+                color: $courseindex-link-hover-color;
+                text-decoration: none;
+            }
+
+            .activity-icon {
+                display: flex;
+                flex: none;
+                align-items: center;
+                justify-content: center;
+                width: 30px;
+                height: 30px;
+                border-radius: 9px;
+                background-color: $courseindex-tint;
+
+                img {
+                    width: 16px;
+                    height: 16px;
+                }
+            }
+        }
+
+        // Section heading row.
+        &.courseindex-section-title {
+            align-items: center;
+            padding: 12px 12px 12px 8px;
+            border-radius: 12px;
+            background: transparent;
+
+            .courseindex-link,
+            > span[data-for="section_title"] {
+                color: $courseindex-ink;
+                font-size: .95rem;
+                font-weight: 600;
+                white-space: normal;
+            }
+
+            .courseindex-chevron {
+                gap: 0;
+                color: mix($courseindex-link-color, white, 70%);
+
+                .icon {
+                    font-size: 12px;
+                }
+            }
+        }
+
+        .icons-collapse-expand {
+            padding-right: 6px;
+        }
+
+        @include courseindex-item-hover();
+        @include courseindex-item-dragging();
+
+        &.active {
+            background-color: $courseindex-hover-bg;
+            border-color: $courseindex-line;
+        }
+
+        // Hidden elements.
+        &.dimmed {
+            color: $courseindex-link-dimmed-color;
+
+            .courseindex-link,
+            .courseindex-chevron {
+                color: $courseindex-link-dimmed-color;
+            }
+        }
+
+        // Restrictions icon.
+        .courseindex-locked {
+            display: none;
+            color: $courseindex-link-dimmed-color;
+        }
+
+        &.restrictions {
+            .courseindex-locked {
+                display: block;
+            }
+        }
+
+        // Current page item: a soft "you are here" highlight.
+        &.pageitem {
+            background-color: $courseindex-tint;
+            box-shadow: inset 3px 0 0 $courseindex-accent;
+            scroll-margin: 6rem;
+
+            .courseindex-link,
+            .courseindex-link a {
+                color: $courseindex-accent;
+                font-weight: 600;
+            }
+
+            .activity-icon {
+                background-color: #ffffff;
+            }
+
+            &:hover,
+            &:focus-within {
+                background-color: $courseindex-tint-strong;
+            }
+        }
+
+        // Completion.
+        .completioninfo {
+            min-width: 16px;
+            margin-left: -4px;
+            margin-right: 2px;
+            color: mix($courseindex-link-color, white, 55%);
+
+            .icon {
+                margin-right: 0;
+            }
+
+            &.completion_complete {
+                color: $success;
+            }
+
+            &.completion_fail {
+                color: $danger;
+            }
+        }
+
+        &.indented {
+            margin-left: map-get($spacers, 3);
+        }
+    }
+
+    // The full section collapsable.
+    .courseindex-section {
+        @include courseindex-item-dragging();
+        padding: 4px;
+        border: 1px solid $courseindex-line;
+        border-radius: 14px;
+        background: #ffffff;
+        box-shadow: none;
+
+        &:not(:last-child) {
+            margin-bottom: 12px;
+        }
+
+        .current-badge {
+            display: none;
+            flex: none;
+            align-self: center;
+            line-height: $line-height-base;
+            font-size: .7rem;
+            font-weight: 600;
+        }
+
+        &.current {
+            border-color: $courseindex-tint-strong;
+            box-shadow: inset 3px 0 0 $courseindex-item-current;
+
+            .current-badge {
+                display: inline-block;
+            }
+
+            /* Skip current badges in delegated sections. */
+            .delegated-section .current-badge {
+                display: none;
+            }
+        }
+
+        .courseindex-sectioncontent {
+            padding: 0 2px 4px;
+            background: transparent;
+
+            .courseindex-item {
+                padding: 7px $courseindex-item-padding-x;
+            }
+        }
+
+        &.delegated-section {
+            width: 100%;
+            padding: 0;
+            border: 0;
+        }
+    }
+
+    // Element visible only on editing mode.
+    .d-flex-noedit {
+        display: none;
+    }
+
+    &.editing {
+        .d-flex-noedit {
+            display: flex;
+        }
+    }
+
+    // Placeholders.
+    .placeholders {
+        .rounded-circle {
+            height: 1rem;
+            width: 1rem;
+        }
+
+        .w-100 {
+            height: 1rem;
+            margin: 0.5rem 0;
+        }
+    }
+}
+
+.personal-icon {
+    .courseindex-link {
+        display: flex;
+        align-items: center;
+    }
+}

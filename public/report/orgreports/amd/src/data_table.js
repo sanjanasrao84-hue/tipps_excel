@@ -1,0 +1,211 @@
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Data tables of the organisation reports dashboard: toolbar, rows, sorting, pagination, empty and error states.
+ *
+ * @module     report_orgreports/data_table
+ * @copyright  2026
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+define(['report_orgreports/format'], function(F) {
+    'use strict';
+
+    /**
+     * Placeholder rows while loading.
+     *
+     * @returns {String}
+     */
+    var skeleton = function() {
+        var rows = '';
+        for (var i = 0; i < 4; i++) {
+            rows += '<div class="orgr-skeleton orgr-skeleton-row"></div>';
+        }
+        return '<div class="visually-hidden">' + F.esc(F.str('loading')) + '</div>' + rows;
+    };
+
+    /**
+     * Numbered pager.
+     *
+     * @param {Object} data
+     * @returns {String}
+     */
+    var pager = function(data) {
+        var pages = Math.max(1, Math.ceil(data.total / data.perpage));
+        var page = Math.min(data.page, pages - 1);
+        var first = page * data.perpage + 1;
+        var last = Math.min(data.total, first + data.perpage - 1);
+        var button = function(p, label, extra) {
+            var disabled = p < 0 || p >= pages;
+            return '<button type="button" class="orgr-page' + (p === page && !extra ? ' active' : '') + '" data-page="' + p +
+                '"' + (disabled ? ' disabled' : '') + (p === page && !extra ? ' aria-current="page"' : '') +
+                (extra ? ' aria-label="' + F.esc(extra) + '"' : '') + '>' + label + '</button>';
+        };
+        var html = button(page - 1, '<i class="fa-solid fa-chevron-left" aria-hidden="true"></i>', F.str('previous'));
+        var start = Math.max(0, Math.min(page - 2, pages - 5));
+        for (var p = start; p < Math.min(pages, start + 5); p++) {
+            html += button(p, String(p + 1));
+        }
+        html += button(page + 1, '<i class="fa-solid fa-chevron-right" aria-hidden="true"></i>', F.str('next'));
+        return '<div class="orgr-pager"><span class="orgr-pager-info">' +
+            F.esc(F.str('showing', {first: first, last: last, total: data.total})) + '</span>' +
+            '<nav class="orgr-pages" aria-label="' + F.esc(F.str('pagination')) + '">' + html + '</nav></div>';
+    };
+
+    /**
+     * Check a table page from the server.
+     *
+     * @param {Object} data
+     * @returns {Object}
+     */
+    var validate = function(data) {
+        if (!data || typeof data !== 'object' || !Array.isArray(data.columns) || !Array.isArray(data.rows)) {
+            throw new Error('unexpected table response');
+        }
+        data.total = F.toNumber(data.total);
+        data.page = F.toNumber(data.page);
+        data.perpage = F.toNumber(data.perpage) || 25;
+        data.statuses = Array.isArray(data.statuses) ? data.statuses : [];
+        return data;
+    };
+
+    return {
+        skeleton: skeleton,
+
+        /**
+         * Card with title, toolbar and body of a table.
+         *
+         * @param {Object} table {key, title}
+         * @param {Object} state current filters of the table
+         * @param {Array} courses course filter options
+         * @param {Boolean} canexport
+         * @param {Object} options {simple: true} for a toolbar with page size only (filters live elsewhere)
+         * @returns {String}
+         */
+        shell: function(table, state, courses, canexport, options) {
+            var simple = options && options.simple;
+            var courseoptions = courses.map(function(c) {
+                return '<option value="' + F.esc(c.id) + '"' + (Number(c.id) === state.courseid ? ' selected' : '') + '>' +
+                    F.esc(F.decode(c.name)) + '</option>';
+            }).join('');
+            var perpage = [10, 25, 50, 100].map(function(n) {
+                return '<option value="' + n + '"' + (n === state.perpage ? ' selected' : '') + '>' +
+                    F.esc(F.str('perpageoption', n)) + '</option>';
+            }).join('');
+            var id = 'orgr-search-' + table.key;
+            return '<section class="orgr-panel orgr-tablecard" data-table="' + F.esc(table.key) + '">' +
+                '<div class="orgr-table-head"><h3 class="orgr-panel-title">' + F.esc(table.title) +
+                ' <span class="orgr-count" data-region="count" aria-live="polite"></span></h3>' +
+                (canexport ? '<a class="orgr-btn orgr-btn-ghost orgr-btn-sm" data-action="tablecsv" href="#" ' +
+                    'aria-disabled="true"><i class="fa-solid fa-file-csv" aria-hidden="true"></i> ' +
+                    F.esc(F.str('downloadcsv')) + '</a>' : '') +
+                '</div><div class="orgr-table-tools' + (simple ? ' orgr-table-tools-simple' : '') + '">' + (simple ? '' :
+                '<div class="orgr-search"><label class="visually-hidden" for="' + id +
+                '">' + F.esc(F.str('search')) + '</label><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>' +
+                '<input type="search" id="' + id + '" class="orgr-input" data-filter="search" value="' + F.esc(state.search) +
+                '" placeholder="' + F.esc(F.str('search')) + '"></div>' +
+                '<select class="orgr-select" data-filter="courseid" aria-label="' + F.esc(F.str('allcourses')) +
+                '"><option value="0">' + F.esc(F.str('allcourses')) + '</option>' + courseoptions + '</select>' +
+                '<select class="orgr-select d-none" data-filter="status" aria-label="' + F.esc(F.str('allstatuses')) +
+                '"></select>') + '<select class="orgr-select" data-filter="perpage" aria-label="' + F.esc(F.str('rowsperpage')) +
+                '">' + perpage + '</select></div><div data-region="tablebody" class="orgr-tablebody">' + skeleton() +
+                '</div></section>';
+        },
+
+        /**
+         * Show a table page.
+         *
+         * @param {HTMLElement} wrapper
+         * @param {Object} data
+         * @param {Object} state
+         * @param {String} csvurl
+         * @param {Number} coursecount
+         */
+        render: function(wrapper, data, state, csvurl, coursecount) {
+            data = validate(data);
+            var status = wrapper.querySelector('[data-filter="status"]');
+            if (status && data.statuses.length && !status.dataset.ready) {
+                status.innerHTML = '<option value="">' + F.esc(F.str('allstatuses')) + '</option>' +
+                    data.statuses.map(function(s) {
+                        return '<option value="' + F.esc(s.value) + '"' + (s.value === state.status ? ' selected' : '') + '>' +
+                            F.esc(s.label) + '</option>';
+                    }).join('');
+                status.dataset.ready = '1';
+                status.classList.remove('d-none');
+            }
+            var course = wrapper.querySelector('[data-filter="courseid"]');
+            if (course) {
+                course.classList.toggle('d-none', !data.coursefilter || coursecount < 2);
+            }
+            wrapper.querySelector('[data-region="count"]').textContent = F.numberFormat({}).format(data.total);
+            var csv = wrapper.querySelector('[data-action="tablecsv"]');
+            if (csv) {
+                csv.href = data.total ? csvurl : '#';
+                csv.classList.toggle('disabled', !data.total);
+                csv.setAttribute('aria-disabled', data.total ? 'false' : 'true');
+            }
+            var body = wrapper.querySelector('[data-region="tablebody"]');
+            body.classList.remove('orgr-dim');
+            body.setAttribute('aria-busy', 'false');
+            if (!data.total) {
+                body.innerHTML = '<div class="orgr-empty orgr-empty-table"><span class="orgr-empty-icon" aria-hidden="true">' +
+                    '<i class="fa-regular fa-folder-open"></i></span><strong>' + F.esc(F.str('norows')) + '</strong><span>' +
+                    F.esc(state.search || state.courseid || state.status ? F.str('norowsfiltered') : F.str('norowsperiod')) +
+                    '</span></div>';
+                return;
+            }
+            var head = data.columns.map(function(c) {
+                var cls = c.numeric ? ' class="orgr-num"' : '';
+                if (!c.sortable) {
+                    return '<th scope="col"' + cls + '>' + F.esc(c.label) + '</th>';
+                }
+                var icon = c.sorted === 'asc' ? 'fa-sort-up' : (c.sorted === 'desc' ? 'fa-sort-down' : 'fa-sort');
+                var aria = c.sorted ? (c.sorted === 'asc' ? 'ascending' : 'descending') : 'none';
+                return '<th scope="col"' + cls + ' aria-sort="' + aria + '"><button type="button" class="orgr-sort' +
+                    (c.sorted ? ' sorted' : '') + '" data-sort="' + F.esc(c.key) + '">' + F.esc(c.label) +
+                    '<i class="fa-solid ' + icon + '" aria-hidden="true"></i></button></th>';
+            }).join('');
+            // Cell values are formatted and escaped on the server.
+            var rows = data.rows.map(function(r) {
+                return '<tr>' + (r.cells || []).map(function(cell, i) {
+                    var col = data.columns[i] || {};
+                    var value = cell.badge ? '<span class="orgr-badge orgr-badge-' + F.esc(cell.badge) + '">' + cell.value +
+                        '</span>' : cell.value;
+                    return '<td data-label="' + F.esc(col.label) + '"' + (col.numeric ? ' class="orgr-num"' : '') + '>' +
+                        value + '</td>';
+                }).join('') + '</tr>';
+            }).join('');
+            body.innerHTML = '<div class="orgr-table-scroll"><table class="orgr-table"><thead><tr>' + head +
+                '</tr></thead><tbody>' + rows + '</tbody></table></div>' + pager(data);
+        },
+
+        /**
+         * Show that a table failed, with a retry for that table only.
+         *
+         * @param {HTMLElement} wrapper
+         */
+        error: function(wrapper) {
+            var body = wrapper.querySelector('[data-region="tablebody"]');
+            body.classList.remove('orgr-dim');
+            body.setAttribute('aria-busy', 'false');
+            body.innerHTML = '<div class="orgr-state orgr-state-error" role="alert"><span class="orgr-empty-icon ' +
+                'orgr-empty-icon-error" aria-hidden="true"><i class="fa-solid fa-triangle-exclamation"></i></span><div>' +
+                '<strong>' + F.esc(F.str('tablefailed')) + '</strong><span>' + F.esc(F.str('loadfailedhint')) + '</span>' +
+                '<button type="button" class="orgr-btn orgr-btn-soft orgr-btn-sm" data-action="retrytable">' +
+                '<i class="fa-solid fa-rotate-right" aria-hidden="true"></i> ' + F.esc(F.str('retry')) +
+                '</button></div></div>';
+        }
+    };
+});

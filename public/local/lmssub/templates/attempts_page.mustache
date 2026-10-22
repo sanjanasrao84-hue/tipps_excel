@@ -1,0 +1,70 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_lmssub/attempts_page
+
+    Payment attempts on subscription plans, for admins.
+
+    Example context (json):
+    {
+        "formurl": "#", "courseid": 0, "coursename": "",
+        "courses": [{"id": 0, "name": "All courses", "selected": true}],
+        "showopen": true, "showall": false, "hasrows": true, "subscribersurl": "#",
+        "rows": [{
+            "picture": "", "fullname": "Ana Silva", "email": "ana@example.com", "profileurl": "#",
+            "plan": "Level 2 Psychiatry", "duration": "Monthly", "amount": "INR 1.00", "count": 3, "multiple": true,
+            "first": "12/10/26, 10:00", "last": "19/10/26, 14:00", "status": "Started, not paid", "statusclass": "secondary",
+            "gateway": "Razorpay", "reference": "order_123", "subscribed": false, "until": "",
+            "markurl": "#", "reviewurl": ""
+        }]
+    }
+}}
+<div class="lmssub-attempts">
+    <p>
+        {{#coursename}}{{#str}}paymentattempts_course_desc, local_lmssub, {{coursename}}{{/str}}{{/coursename}}
+        {{^coursename}}{{#str}}paymentattempts_desc, local_lmssub{{/str}}{{/coursename}}
+    </p>
+
+    <form method="get" action="{{formurl}}" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+        <div>
+            <label for="lmssub-attempts-course" class="form-label small mb-1">{{#str}}course{{/str}}</label>
+            <select id="lmssub-attempts-course" name="courseid" class="form-select">
+                {{#courses}}<option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/courses}}
+            </select>
+        </div>
+        <div>
+            <label for="lmssub-attempts-show" class="form-label small mb-1">{{#str}}show{{/str}}</label>
+            <select id="lmssub-attempts-show" name="show" class="form-select">
+                <option value="open" {{#showopen}}selected{{/showopen}}>{{#str}}attempts_show_open, local_lmssub{{/str}}</option>
+                <option value="all" {{#showall}}selected{{/showall}}>{{#str}}attempts_show_all, local_lmssub{{/str}}</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-secondary">{{#str}}filter{{/str}}</button>
+    </form>
+
+    {{#hasrows}}
+        {{> local_lmssub/attempts_table }}
+    {{/hasrows}}
+    {{^hasrows}}
+        <div class="alert alert-info">
+            {{#showopen}}{{#str}}noattempts_open, local_lmssub{{/str}}{{/showopen}}
+            {{#showall}}{{#str}}noattempts, local_lmssub{{/str}}{{/showall}}
+        </div>
+    {{/hasrows}}
+
+    <p class="mt-3"><a href="{{subscribersurl}}">{{#str}}subscribers, local_lmssub{{/str}} <i class="fa fa-arrow-right" aria-hidden="true"></i></a></p>
+</div>
