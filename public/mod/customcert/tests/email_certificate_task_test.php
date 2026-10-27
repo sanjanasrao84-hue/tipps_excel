@@ -19,13 +19,14 @@
  *
  * @package    mod_customcert
  * @category   test
- * @copyright  2017 Mark Nelson <markn@moodle.com>
+ * @copyright  2017 Mark Nelson <mdjnelson@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace mod_customcert;
 
 use completion_info;
+use core\cron;
 use context_course;
 use context_module;
 use stdClass;
@@ -43,7 +44,7 @@ use mod_customcert\task\issue_certificates_task;
  *
  * @package    mod_customcert
  * @category   test
- * @copyright  2017 Mark Nelson <markn@moodle.com>
+ * @copyright  2017 Mark Nelson <mdjnelson@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @coversDefaultClass \mod_customcert\task\email_certificate_task
  */
@@ -231,12 +232,13 @@ final class email_certificate_task_test extends advanced_testcase {
     }
 
     /**
-     * list_email_candidates should not include a user until completion conditions configured on the
-     * certificate itself (core Activity completion, as distinct from Restrict access) are met.
+     * list_email_candidates must not require a user to have already met the completion conditions
+     * configured on the certificate activity itself (e.g. View), since that would create a circular
+     * dependency where the certificate can never be issued automatically (#1020).
      *
      * @covers \mod_customcert\service\certificate_issuer_service::list_email_candidates
      */
-    public function test_list_email_candidates_respects_own_completion_condition_not_met(): void {
+    public function test_list_email_candidates_ignores_own_view_completion_condition(): void {
         global $CFG, $DB;
 
         $CFG->enablecompletion = true;
@@ -246,8 +248,7 @@ final class email_certificate_task_test extends advanced_testcase {
         $student = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($student->id, $course->id);
 
-        // Create a certificate that requires viewing the activity to complete it, with no
-        // Restrict access rule configured (completion tracking is the only gating in place).
+        // Create a certificate that requires viewing the activity to complete it.
         $customcert = $this->getDataGenerator()->create_module('customcert', [
             'course' => $course->id,
             'emailstudents' => 1,
@@ -265,17 +266,17 @@ final class email_certificate_task_test extends advanced_testcase {
         $issuer = certificate_issuer_service::create();
         $candidates = $issuer->list_email_candidates((int)$customcert->id);
 
-        // The student has not viewed the certificate yet, so its completion condition is not met.
-        $this->assertArrayNotHasKey($student->id, $candidates);
+        // The student has not viewed the certificate yet, but should still be eligible.
+        $this->assertArrayHasKey($student->id, $candidates);
     }
 
     /**
-     * list_email_candidates should include a user once completion conditions configured on the
-     * certificate itself have been met.
+     * list_email_candidates must not require a user to have already met a "Mark as done" completion
+     * condition configured on the certificate activity itself (#1020).
      *
      * @covers \mod_customcert\service\certificate_issuer_service::list_email_candidates
      */
-    public function test_list_email_candidates_respects_own_completion_condition_met(): void {
+    public function test_list_email_candidates_ignores_own_manual_completion_condition(): void {
         global $CFG, $DB;
 
         $CFG->enablecompletion = true;
@@ -285,13 +286,11 @@ final class email_certificate_task_test extends advanced_testcase {
         $student = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($student->id, $course->id);
 
-        // Create a certificate that requires viewing the activity to complete it, with no
-        // Restrict access rule configured (completion tracking is the only gating in place).
+        // Create a certificate that requires manual "Mark as done" completion.
         $customcert = $this->getDataGenerator()->create_module('customcert', [
             'course' => $course->id,
             'emailstudents' => 1,
-            'completion' => COMPLETION_TRACKING_AUTOMATIC,
-            'completionview' => 1,
+            'completion' => COMPLETION_TRACKING_MANUAL,
         ]);
 
         // Put the certificate in a valid state by adding a page + element.
@@ -301,16 +300,10 @@ final class email_certificate_task_test extends advanced_testcase {
         $this->assertDebuggingNotCalled();
         $DB->insert_record('customcert_elements', (object)['pageid' => $pageid, 'name' => 'E']);
 
-        // Mark the certificate's own completion condition as met for the student by
-        // simulating a view, since automatic completion recalculates state from the
-        // actual criteria (a bare update_state() call would be recalculated away).
-        $cm = $DB->get_record('course_modules', ['id' => $customcert->cmid]);
-        $completion = new completion_info($course);
-        $completion->set_module_viewed($cm, $student->id);
-
         $issuer = certificate_issuer_service::create();
         $candidates = $issuer->list_email_candidates((int)$customcert->id);
 
+        // The student has not marked the activity as done yet, but should still be eligible.
         $this->assertArrayHasKey($student->id, $candidates);
     }
 
@@ -418,6 +411,101 @@ final class email_certificate_task_test extends advanced_testcase {
         $candidates = $issuer->list_email_candidates((int)$customcert->id);
 
         $this->assertEmpty($candidates);
+    }
+
+    /**
+     * list_email_candidates should skip hidden activities even when "Issue certificates automatically" is
+     * enabled; that setting must never override the activity's hidden status (#1020).
+     *
+     * @covers \mod_customcert\service\certificate_issuer_service::list_email_candidates
+     */
+    public function test_list_email_candidates_skips_hidden_activity_with_issueautomatically_enabled(): void {
+        global $DB;
+
+        // Create a course and enrol a student.
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id);
+
+        // Create a certificate with automatic issuance enabled, then hide the activity.
+        $customcert = $this->getDataGenerator()->create_module('customcert', [
+            'course' => $course->id,
+            'issueautomatically' => 1,
+        ]);
+        set_coursemodule_visible($customcert->cmid, 0);
+
+        // Put the certificate in a valid state by adding a page + element.
+        $template = template::from_record((new template_repository())->get_by_id_or_fail((int)$customcert->templateid));
+        $templateservice = template_service::create();
+        $pageid = $templateservice->add_page($template);
+        $this->assertDebuggingNotCalled();
+        $DB->insert_record('customcert_elements', (object)['pageid' => $pageid, 'name' => 'E']);
+
+        $issuer = certificate_issuer_service::create();
+        $candidates = $issuer->list_email_candidates((int)$customcert->id);
+
+        $this->assertEmpty($candidates);
+    }
+
+    /**
+     * Reproduces the scenario reported in #1020: a restrict access condition requiring a quiz pass,
+     * combined with an unmet "View" completion condition configured on the certificate itself. The
+     * student should be eligible once the restrict access condition is met, regardless of the
+     * certificate's own unmet completion condition.
+     *
+     * @covers \mod_customcert\service\certificate_issuer_service::list_email_candidates
+     */
+    public function test_list_email_candidates_quiz_restriction_with_unmet_own_completion(): void {
+        global $CFG, $DB;
+
+        $CFG->enablecompletion = true;
+
+        // Create a course with completion enabled and enrol a student.
+        $course = $this->getDataGenerator()->create_course(['enablecompletion' => 1]);
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id);
+
+        // Create a quiz and mark it as complete for the student.
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id]);
+        $quizmodule = $DB->get_record('course_modules', ['id' => $quiz->cmid]);
+        $quizmodule->completion = COMPLETION_TRACKING_AUTOMATIC;
+        $quizmodule->completionview = 1;
+        $DB->update_record('course_modules', $quizmodule);
+        $completion = new completion_info($course);
+        $completion->update_state($quizmodule, COMPLETION_COMPLETE, $student->id);
+
+        // Create a certificate restricted to users who have passed the quiz, with its own "View"
+        // completion condition unmet.
+        $customcert = $this->getDataGenerator()->create_module('customcert', [
+            'course' => $course->id,
+            'emailstudents' => 1,
+            'completion' => COMPLETION_TRACKING_AUTOMATIC,
+            'completionview' => 1,
+            'availability' => json_encode([
+                'op' => '&',
+                'c' => [
+                    [
+                        'type' => 'completion',
+                        'cm' => $quiz->cmid,
+                        'e' => COMPLETION_COMPLETE,
+                    ],
+                ],
+                'showc' => [false],
+            ]),
+        ]);
+
+        // Put the certificate in a valid state by adding a page + element.
+        $template = template::from_record((new template_repository())->get_by_id_or_fail((int)$customcert->templateid));
+        $templateservice = template_service::create();
+        $pageid = $templateservice->add_page($template);
+        $this->assertDebuggingNotCalled();
+        $DB->insert_record('customcert_elements', (object)['pageid' => $pageid, 'name' => 'E']);
+
+        $issuer = certificate_issuer_service::create();
+        $candidates = $issuer->list_email_candidates((int)$customcert->id);
+
+        // The student has passed the quiz but never viewed the certificate; it should still be issued.
+        $this->assertArrayHasKey($student->id, $candidates);
     }
 
     /**
@@ -1278,13 +1366,15 @@ final class email_certificate_task_test extends advanced_testcase {
     }
 
     /**
-     * Completion conditions still gate issuance even with "Issue certificates automatically"
-     * enabled: eligibility is required in addition to the setting, not bypassed by it.
+     * Completion conditions configured on the certificate itself must not gate issuance when
+     * "Issue certificates automatically" is enabled, otherwise a "View" completion condition would
+     * create a circular dependency: a student could never view a certificate they are never issued
+     * (#1020).
      *
      * @covers \mod_customcert\task\issue_certificates_task
      * @covers \mod_customcert\task\email_certificate_task
      */
-    public function test_email_certificates_teachers_respects_completion_with_auto_issue_enabled(): void {
+    public function test_email_certificates_teachers_ignores_completion_with_auto_issue_enabled(): void {
         global $CFG, $DB;
 
         $CFG->enablecompletion = true;
@@ -1317,7 +1407,7 @@ final class email_certificate_task_test extends advanced_testcase {
         $this->assertDebuggingNotCalled();
         $DB->insert_record('customcert_elements', (object)['pageid' => $pageid, 'name' => 'E']);
 
-        // Only user1 has viewed it, meeting the completion condition; user2 has not.
+        // Only user1 has viewed it; user2 has not.
         $cm = $DB->get_record('course_modules', ['id' => $customcert->cmid]);
         $completion = new completion_info($course);
         $completion->set_module_viewed($cm, $user1->id);
@@ -1329,16 +1419,18 @@ final class email_certificate_task_test extends advanced_testcase {
         $emails = $sink->get_messages();
         $sink->close();
 
-        // Only user1's certificate should exist; user2 hasn't met the completion condition, even
-        // though automatic issuance is enabled for this certificate.
+        // Both certificates should exist; the unmet "View" completion condition must not block
+        // automatic issuance for user2.
         $issues = $DB->get_records('customcert_issues');
-        $this->assertCount(1, $issues);
-        $issue = reset($issues);
-        $this->assertEquals($user1->id, (int)$issue->userid);
+        $this->assertCount(2, $issues);
+        $issueuserids = array_column($issues, 'userid');
+        $this->assertContains($user1->id, $issueuserids);
+        $this->assertContains($user2->id, $issueuserids);
 
-        // Only one email, to the teacher, about user1's certificate.
-        $this->assertCount(1, $emails);
-        $this->assertEquals($teacher->email, $emails[0]->to);
+        // Both notifications go to the teacher.
+        $this->assertCount(2, $emails);
+        $tos = array_map(fn($email) => $email->to, $emails);
+        $this->assertSame([$teacher->email, $teacher->email], $tos);
     }
 
     /**
@@ -2727,16 +2819,13 @@ final class email_certificate_task_test extends advanced_testcase {
     }
 
     /**
-     * Regression test for manual completion tracking: has_met_own_completion() must still gate
-     * candidacy on the student's manually-ticked completion state. get_core_completion_state()
-     * (used to break the automatic-tracking circularity with completionemailed) only covers
-     * grade/passgrade/view criteria and returns an empty array under manual tracking, which would
-     * otherwise vacuously pass every student regardless of whether they'd ticked the activity
-     * complete.
+     * Regression test for #1020: the certificate's own "Mark as done" completion condition must
+     * not prevent automatic issuance, since that would create a circular dependency (the activity
+     * could require the student to already hold the certificate before it can be issued to them).
      *
      * @covers \mod_customcert\service\certificate_issuer_service
      */
-    public function test_issue_certificates_task_respects_manual_completion(): void {
+    public function test_issue_certificates_task_ignores_manual_completion(): void {
         global $CFG, $DB;
 
         set_config('useadhoc', 0, 'customcert');
@@ -2759,24 +2848,7 @@ final class email_certificate_task_test extends advanced_testcase {
         $this->assertDebuggingNotCalled();
         $DB->insert_record('customcert_elements', (object)['pageid' => $pageid, 'name' => 'ElementX']);
 
-        $cm = $DB->get_record('course_modules', ['id' => $customcert->cmid]);
-        $completioninfo = new completion_info($course);
-
-        // Not manually completed yet: no issue, no email.
-        $sink = $this->redirectEmails();
-        $task = new issue_certificates_task();
-        $task->execute();
-        $emails = $sink->get_messages();
-        $sink->close();
-
-        $this->assertFalse(
-            $DB->record_exists('customcert_issues', ['customcertid' => $customcert->id, 'userid' => $student->id])
-        );
-        $this->assertCount(0, $emails);
-
-        // Now the student manually marks the activity complete.
-        $completioninfo->update_state($cm, COMPLETION_COMPLETE, $student->id);
-
+        // The student has not manually marked the activity complete.
         $sink = $this->redirectEmails();
         $task = new issue_certificates_task();
         $task->execute();
@@ -2941,6 +3013,187 @@ final class email_certificate_task_test extends advanced_testcase {
     }
 
     /**
+     * Issues created by a CLI issuance run are attributed to the cron user, never to a previously emailed student.
+     *
+     * @covers \mod_customcert\service\certificate_issuer_service::process_email_issuance_run
+     * @covers \mod_customcert\service\certificate_email_service::send_issue
+     */
+    public function test_cli_issuance_run_does_not_attribute_issues_to_students(): void {
+        global $DB;
+
+        set_config('useadhoc', 0, 'customcert');
+
+        $course = $this->getDataGenerator()->create_course();
+        $students = [];
+        for ($i = 0; $i < 3; $i++) {
+            $students[$i] = $this->getDataGenerator()->create_user();
+            $this->getDataGenerator()->enrol_user($students[$i]->id, $course->id);
+        }
+        $customcert = $this->getDataGenerator()->create_module('customcert', [
+            'course' => $course->id,
+            'emailstudents' => 1,
+        ]);
+        $template = template::from_record((new template_repository())->get_by_id_or_fail((int)$customcert->templateid));
+        $pageid = template_service::create()->add_page($template);
+        $DB->insert_record('customcert_elements', (object)['pageid' => $pageid, 'name' => 'ElementX']);
+
+        cron::setup_user();
+        $admin = get_admin();
+
+        $emailsink = $this->redirectEmails();
+        $eventsink = $this->redirectEvents();
+        certificate_issuer_service::create()->process_email_issuance_run();
+        $events = array_filter(
+            $eventsink->get_events(),
+            static fn($event) => $event instanceof \mod_customcert\event\issue_created
+        );
+        $eventsink->close();
+        $this->assertCount(3, $emailsink->get_messages());
+        $emailsink->close();
+
+        $this->assertCount(3, $events);
+        foreach ($events as $event) {
+            $this->assertEquals($admin->id, $event->userid);
+        }
+        $this->assertEquals($admin->id, $GLOBALS['USER']->id);
+        $this->assertSame('', $GLOBALS['USER']->lang);
+    }
+
+    /**
+     * Sending an issue restores the previously active user.
+     *
+     * @dataProvider initial_user_provider
+     * @covers \mod_customcert\service\certificate_email_service::send_issue
+     * @param string $usertype
+     */
+    public function test_send_issue_restores_current_user(string $usertype): void {
+        global $USER;
+
+        [$customcert, $issueid] = $this->create_emailable_issue();
+        $initial = $this->set_initial_user($usertype);
+
+        $sink = $this->redirectEmails();
+        certificate_email_service::create()->send_issue((int)$customcert->id, $issueid);
+        $this->assertCount(1, $sink->get_messages());
+        $sink->close();
+
+        $this->assertEquals($initial->id, $USER->id);
+        $this->assertSame($initial->lang, $USER->lang);
+    }
+
+    /**
+     * An exception after switching to the recipient still restores the previously active user.
+     *
+     * @dataProvider initial_user_provider
+     * @covers \mod_customcert\service\certificate_email_service::send_issue
+     * @param string $usertype
+     */
+    public function test_send_issue_restores_current_user_on_exception(string $usertype): void {
+        global $DB, $USER;
+
+        [$customcert, $issueid, $pageid] = $this->create_emailable_issue();
+        // The element is only rendered after the recipient has become the current user.
+        $DB->insert_record('customcert_elements', (object)[
+            'pageid' => $pageid,
+            'name' => 'Category',
+            'element' => 'categoryname',
+        ]);
+        $DB->set_field('course', 'category', 999999, ['id' => $customcert->course]);
+        $initial = $this->set_initial_user($usertype);
+
+        $sink = $this->redirectEmails();
+        try {
+            certificate_email_service::create()->send_issue((int)$customcert->id, $issueid);
+            $this->fail('Expected exception was not thrown');
+        } catch (\dml_missing_record_exception $e) {
+            $this->assertEquals($initial->id, $USER->id);
+            $this->assertSame($initial->lang, $USER->lang);
+        }
+        $this->assertCount(0, $sink->get_messages());
+        $sink->close();
+    }
+
+    /**
+     * Initial user types for the context restoration tests.
+     *
+     * @return array
+     */
+    public static function initial_user_provider(): array {
+        return [
+            'admin' => ['admin'],
+            'regular user' => ['regular'],
+            'cron user' => ['cron'],
+        ];
+    }
+
+    /**
+     * Web issuance keeps attributing the issue event to the logged-in user.
+     *
+     * @covers \mod_customcert\service\certificate_issue_service::issue_certificate
+     */
+    public function test_web_issuance_attributes_event_to_current_user(): void {
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id);
+        $customcert = $this->getDataGenerator()->create_module('customcert', ['course' => $course->id]);
+
+        $this->setUser($student);
+        $sink = $this->redirectEvents();
+        $this->issue_certificate((int)$customcert->id, (int)$student->id);
+        $events = $sink->get_events();
+        $sink->close();
+
+        $this->assertCount(1, $events);
+        $this->assertEquals($student->id, $events[0]->userid);
+        $this->assertEquals($student->id, $events[0]->relateduserid);
+    }
+
+    /**
+     * Create a certificate with an issue for a student, ready to be emailed.
+     *
+     * @return array [customcert record, issue id, page id]
+     */
+    private function create_emailable_issue(): array {
+        global $DB;
+
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id);
+        $customcert = $this->getDataGenerator()->create_module('customcert', [
+            'course' => $course->id,
+            'emailstudents' => 1,
+        ]);
+        $template = template::from_record((new template_repository())->get_by_id_or_fail((int)$customcert->templateid));
+        $pageid = template_service::create()->add_page($template);
+        $DB->insert_record('customcert_elements', (object)['pageid' => $pageid, 'name' => 'ElementX']);
+
+        return [$customcert, $this->issue_certificate((int)$customcert->id, (int)$student->id), $pageid];
+    }
+
+    /**
+     * Make the given type of user the current user, as the caller of a certificate email.
+     *
+     * @param string $usertype admin, regular or cron.
+     * @return stdClass The current user.
+     */
+    private function set_initial_user(string $usertype): stdClass {
+        global $USER;
+
+        switch ($usertype) {
+            case 'admin':
+                $this->setAdminUser();
+                break;
+            case 'cron':
+                cron::setup_user();
+                break;
+            default:
+                $this->setUser($this->getDataGenerator()->create_user(['lang' => 'en']));
+        }
+
+        return $USER;
+    }
+
+    /**
      * Issue a certificate via the service for test setup.
      *
      * @param int $customcertid
@@ -2951,5 +3204,201 @@ final class email_certificate_task_test extends advanced_testcase {
         $service = certificate_issue_service::create();
 
         return $service->issue_certificate($customcertid, $userid);
+    }
+
+    /**
+     * Create a certificate with a date restriction (met or unmet) and notifications enabled.
+     *
+     * @param stdClass $course
+     * @param bool $met Whether the availability restriction is satisfied.
+     * @return stdClass
+     */
+    private function create_restricted_certificate(stdClass $course, bool $met): stdClass {
+        global $DB;
+
+        $customcert = $this->getDataGenerator()->create_module('customcert', [
+            'course' => $course->id,
+            'emailstudents' => 1,
+            'emailteachers' => 1,
+            'emailothers' => 'others@example.com',
+            'availability' => json_encode([
+                'op' => '&',
+                'c' => [
+                    [
+                        'type' => 'date',
+                        'd' => '>=',
+                        't' => $met ? time() - DAYSECS : time() + DAYSECS,
+                    ],
+                ],
+                'showc' => [false],
+            ]),
+        ]);
+
+        $template = template::from_record((new template_repository())->get_by_id_or_fail((int)$customcert->templateid));
+        $pageid = template_service::create()->add_page($template);
+        $DB->insert_record('customcert_elements', (object)['pageid' => $pageid, 'name' => 'E']);
+
+        return $customcert;
+    }
+
+    /**
+     * Run the issuance process and return the emails sent.
+     *
+     * @return array
+     */
+    private function run_issuance(): array {
+        $sink = $this->redirectEmails();
+        certificate_issuer_service::create()->process_email_issuance_run();
+        $emails = $sink->get_messages();
+        $sink->close();
+
+        return $emails;
+    }
+
+    /**
+     * Admins and managers who can ignore availability restrictions must not be issued or emailed
+     * certificates while the restriction is unmet (#1039).
+     *
+     * @covers \mod_customcert\service\certificate_issuer_service::process_email_issuance_run
+     */
+    public function test_process_run_skips_admin_and_manager_with_unmet_restriction(): void {
+        global $DB;
+
+        set_config('useadhoc', 0, 'customcert');
+
+        $course = $this->getDataGenerator()->create_course();
+        $teacher = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($teacher->id, $course->id, 'editingteacher');
+        $manager = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($manager->id, $course->id, 'student');
+        $managerroleid = $DB->get_field('role', 'id', ['shortname' => 'manager']);
+        role_assign($managerroleid, $manager->id, context_course::instance($course->id)->id);
+        $admin = get_admin();
+        $this->getDataGenerator()->enrol_user($admin->id, $course->id, 'student');
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
+
+        $customcert = $this->create_restricted_certificate($course, false);
+        $cmcontext = context_module::instance($customcert->cmid);
+
+        // Both bypass the restriction, which is what made uservisible true.
+        $this->assertTrue(has_capability('mod/customcert:receiveissue', $cmcontext, $admin));
+        $this->assertTrue(has_capability('moodle/course:ignoreavailabilityrestrictions', $cmcontext, $manager));
+        foreach ([$admin, $manager] as $user) {
+            $usercm = get_fast_modinfo($course, $user->id)->get_cm($customcert->cmid);
+            $this->assertTrue($usercm->uservisible);
+            $this->assertFalse($usercm->available);
+        }
+
+        $emails = $this->run_issuance();
+
+        $this->assertEmpty($DB->get_records('customcert_issues'));
+        $this->assertCount(0, $emails);
+    }
+
+    /**
+     * Users who satisfy the restriction are issued once, even when they could ignore it, and only
+     * users who are enrolled, not suspended and hold the capability are eligible.
+     *
+     * @covers \mod_customcert\service\certificate_issuer_service::process_email_issuance_run
+     */
+    public function test_process_run_issues_eligible_users_once_with_met_restriction(): void {
+        global $DB;
+
+        set_config('useadhoc', 0, 'customcert');
+
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
+        $manager = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($manager->id, $course->id, 'student');
+        $managerroleid = $DB->get_field('role', 'id', ['shortname' => 'manager']);
+        role_assign($managerroleid, $manager->id, context_course::instance($course->id)->id);
+        $admin = get_admin();
+        $this->getDataGenerator()->enrol_user($admin->id, $course->id, 'student');
+
+        // Users who must remain ineligible.
+        $suspended = $this->getDataGenerator()->create_user(['suspended' => 1]);
+        $this->getDataGenerator()->enrol_user($suspended->id, $course->id, 'student');
+        $nocapability = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($nocapability->id, $course->id, 'teacher');
+        $unenrolled = $this->getDataGenerator()->create_user();
+
+        $this->create_restricted_certificate($course, true);
+
+        $this->run_issuance();
+        $issuedusers = $DB->get_fieldset_select('customcert_issues', 'userid', '1=1');
+        $this->assertEqualsCanonicalizing([$student->id, $manager->id, $admin->id], $issuedusers);
+        $this->assertNotContains($unenrolled->id, $issuedusers);
+
+        // A second run creates no duplicate issues.
+        $this->run_issuance();
+        $this->assertCount(3, $DB->get_records('customcert_issues'));
+    }
+
+    /**
+     * A normal student is not issued a certificate while the restriction is unmet.
+     *
+     * @covers \mod_customcert\service\certificate_issuer_service::process_email_issuance_run
+     */
+    public function test_process_run_skips_student_with_unmet_restriction(): void {
+        global $DB;
+
+        set_config('useadhoc', 0, 'customcert');
+
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_user();
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
+        $this->create_restricted_certificate($course, false);
+
+        $this->assertCount(0, $this->run_issuance());
+        $this->assertEmpty($DB->get_records('customcert_issues'));
+    }
+
+    /**
+     * Site home certificates are not issued to an admin or student while the restriction is unmet.
+     *
+     * @covers \mod_customcert\service\certificate_issuer_service::process_email_issuance_run
+     */
+    public function test_process_run_site_home_skips_unmet_restriction(): void {
+        global $DB;
+
+        set_config('useadhoc', 0, 'customcert');
+
+        $sitecontext = context_course::instance(SITEID);
+        $studentroleid = $DB->get_field('role', 'id', ['shortname' => 'student']);
+        $student = $this->getDataGenerator()->create_user();
+        role_assign($studentroleid, $student->id, $sitecontext->id);
+        $admin = get_admin();
+        role_assign($studentroleid, $admin->id, $sitecontext->id);
+
+        $this->create_restricted_certificate(get_course(SITEID), false);
+        $this->assertCount(0, $this->run_issuance());
+        $this->assertEmpty($DB->get_records('customcert_issues'));
+    }
+
+    /**
+     * Site home certificates are issued to eligible users, including an admin, when the restriction is met.
+     *
+     * @covers \mod_customcert\service\certificate_issuer_service::process_email_issuance_run
+     */
+    public function test_process_run_site_home_issues_with_met_restriction(): void {
+        global $DB;
+
+        set_config('useadhoc', 0, 'customcert');
+
+        $sitecontext = context_course::instance(SITEID);
+        $studentroleid = $DB->get_field('role', 'id', ['shortname' => 'student']);
+        $student = $this->getDataGenerator()->create_user();
+        role_assign($studentroleid, $student->id, $sitecontext->id);
+        $admin = get_admin();
+        role_assign($studentroleid, $admin->id, $sitecontext->id);
+
+        $this->create_restricted_certificate(get_course(SITEID), true);
+        $this->run_issuance();
+        $this->assertEqualsCanonicalizing(
+            [$student->id, $admin->id],
+            $DB->get_fieldset_select('customcert_issues', 'userid', '1=1')
+        );
     }
 }
