@@ -45,6 +45,15 @@ class block_gcal_upcoming extends block_base {
     }
 
     /**
+     * Show the short title on pages; pluginname must stay unique (it clashes with block_calendar_upcoming otherwise).
+     *
+     * @return void
+     */
+    public function specialization() {
+        $this->title = get_string('blocktitle', 'block_gcal_upcoming');
+    }
+
+    /**
      * Where the block can be added.
      *
      * @return array

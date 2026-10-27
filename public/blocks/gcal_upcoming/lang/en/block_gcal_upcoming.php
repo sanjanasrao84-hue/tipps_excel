@@ -24,9 +24,10 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['blocktitle'] = 'Upcoming events';
 $string['gcal_upcoming:addinstance'] = 'Add an Upcoming events (Google Calendar) block';
 $string['gcal_upcoming:myaddinstance'] = 'Add an Upcoming events (Google Calendar) block to the Dashboard';
 $string['noupcoming'] = 'Nothing scheduled in the next {$a} days.';
 $string['opencalendar'] = 'Open calendar';
-$string['pluginname'] = 'Upcoming events';
+$string['pluginname'] = 'Upcoming events (Google Calendar)';
 $string['privacy:metadata'] = 'The block only displays data stored by the Google Calendar integration.';
