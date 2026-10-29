@@ -42,3 +42,6 @@ Thumbs.db
 *.flv
 *.wmv
 
+
+# Per-machine settings (DB credentials, paths)
+/config-local.php
