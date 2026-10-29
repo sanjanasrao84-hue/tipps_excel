@@ -10,7 +10,7 @@ picked by subdomain:
 
 How it works: `config.php` reads the subdomain (or the `TENANT` environment variable for CLI scripts)
 and points Moodle at that tenant's database and data folder. A tenant exists when its data folder exists;
-any other subdomain gets a 404. The top of `config.php` holds the three settings to change per server:
+any other subdomain gets a 404. `config-local.php` (not in git) holds the settings to change per machine:
 `$basedomain`, `$urlpattern` and `$tenantsroot`.
 
 All commands below run from the project root (`D:\xampp-8.5\htdocs\tipps_excel`). On this machine use
@@ -93,8 +93,10 @@ Each subdomain has its own login cookie, so you can be logged in to several tena
 - DNS: wildcard record `*.yourdomain.com` → server IP.
 - SSL: wildcard certificate (Let's Encrypt needs DNS validation for wildcards).
 - Apache: one VirtualHost with `ServerAlias *.yourdomain.com` and `DocumentRoot` set to `<project>/public`.
-- `config.php`: `$basedomain = 'yourdomain.com'`, `$urlpattern = 'https://%s'`, `$tenantsroot` outside the web root.
+- `config-local.php`: `$basedomain = 'yourdomain.com'`, `$urlpattern = 'https://%s'`, `$tenantsroot` outside the web root.
 - Database: a dedicated user that may create databases, not `root` with an empty password.
 - Cron: `php tenants.php each admin/cli/cron.php --keep-alive=0` every minute. Tenants run one after another;
   with many tenants a pass can take longer than a minute.
 - Backups: each tenant's database (`tipps_<slug>`) plus its data folder.
+
+Full server installation (Apache, PHP, MariaDB, import, SSL, tenants): see [SERVER_SETUP.md](SERVER_SETUP.md).
