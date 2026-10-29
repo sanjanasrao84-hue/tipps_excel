@@ -34,13 +34,12 @@
         data-forceopen="{{$forceopen}}0{{/forceopen}}"
         data-close-on-resize="{{$drawercloseonresize}}0{{/drawercloseonresize}}">
     <div class="drawerheader">
-        <button class="btn drawertoggle icon-no-margin hidden"
+        {{! No "hidden" class: since Moodle 5 theme_boost/drawers no longer un-hides the close button. }}
+        <button class="btn drawertoggle icon-no-margin"
                 data-toggler="drawers"
                 data-action="closedrawer"
                 data-target="{{$id}}{{/id}}"
-                data-toggle="tooltip"
-                data-placement="{{$tooltipplacement}}right{{/tooltipplacement}}"
-                title="{{$closebuttontext}}{{#str}}closedrawer, core{{/str}}{{/closebuttontext}}">
+                aria-label="{{$closebuttontext}}{{#str}}closedrawer, core{{/str}}{{/closebuttontext}}">
             {{#pix}} e/cancel, core {{/pix}}
         </button>
         {{$drawerheading}}{{/drawerheading}}

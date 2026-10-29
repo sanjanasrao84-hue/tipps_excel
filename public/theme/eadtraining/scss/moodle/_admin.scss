@@ -678,3 +678,11 @@
         background-color: $state-success-bg;
     }
 }
+
+// Permissions / role capability tables are wider than a phone and have no scroll wrapper,
+// so they widen the whole page. Scroll them inside their box instead.
+@include media-breakpoint-down(md) {
+    .path-admin .capbox {
+        overflow-x: auto;
+    }
+}

@@ -639,6 +639,24 @@
         }
     }
 
+    // On phones the page itself scrolling sideways widens the whole layout (drawers drift into view),
+    // so scroll the grades table inside its own box instead, with the student column scrolling too
+    // and no avatars.
+    @include media-breakpoint-down(md) {
+        .gradeparent {
+            overflow-x: auto;
+
+            th.header {
+                position: static;
+            }
+
+            .username .userpicture,
+            .username .userinitials {
+                display: none;
+            }
+        }
+    }
+
     &.hasstickyfooter {
         .gradeparent {
             tr.lastrow {

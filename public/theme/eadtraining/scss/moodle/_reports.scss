@@ -56,3 +56,45 @@
     color: lighten($body-color, 1%);
     font-weight: bolder;
 }
+
+// Competency breakdown: the activity/user filter box floats right with a wide select,
+// which pushes it off the left edge on phones. Stack it full width instead.
+@include media-breakpoint-down(md) {
+    .float-end:has(> .user-competency-course-navigation) {
+        float: none !important;
+    }
+
+    .user-competency-course-navigation {
+        select,
+        .form-autocomplete-selection,
+        .form-autocomplete-input,
+        .form-autocomplete-suggestions {
+            max-width: 100%;
+        }
+    }
+}
+
+// Course participation: the filter wrapper is a flex item, so a long activity name in the
+// select widens it (and the page) on phones. Let it shrink so the select fits the screen.
+@include media-breakpoint-down(md) {
+    .participationselectform > div {
+        min-width: 0;
+        max-width: 100%;
+    }
+}
+
+// Activity completion: the indented section selector is sized to its longest section name,
+// which runs past the screen edge on phones. Keep it within the page width.
+@include media-breakpoint-down(md) {
+    .activity-section-selector {
+        max-width: 100%;
+        margin-left: 0 !important;
+
+        .singleselect,
+        form,
+        select {
+            min-width: 0;
+            max-width: 100%;
+        }
+    }
+}

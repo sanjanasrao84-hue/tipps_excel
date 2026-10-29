@@ -530,3 +530,12 @@ textarea[data-auto-rows] {
         }
     }
 }
+
+// core/form_autocomplete_input sets an inline min-width so the whole placeholder shows.
+// A long placeholder then runs past the screen edge on phones, so let the input fit its box.
+@include media-breakpoint-down(md) {
+    .form-autocomplete-input > input.form-control {
+        min-width: 0 !important;
+        max-width: 100%;
+    }
+}

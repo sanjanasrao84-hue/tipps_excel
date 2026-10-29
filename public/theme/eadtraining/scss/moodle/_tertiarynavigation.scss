@@ -73,6 +73,27 @@
         .mform {
             padding-left: initial;
         }
+
+        // core/action_bar (gradebook reports) lays its items out in a non-wrapping row,
+        // which widens the whole page on phones. Let them wrap and drop the dividers.
+        & > .d-flex {
+            flex-wrap: wrap;
+            column-gap: 20px;
+        }
+
+        & > .d-flex > .navitem {
+            margin-right: 0;
+            margin-bottom: 15px;
+        }
+
+        & > .d-flex > .navitem-divider {
+            display: none;
+        }
+
+        // With .ms-0 the left bleed is cancelled but the extra width is kept, overflowing on the right.
+        &.full-width-bottom-border.ms-0 {
+            width: auto;
+        }
     }
 }
 

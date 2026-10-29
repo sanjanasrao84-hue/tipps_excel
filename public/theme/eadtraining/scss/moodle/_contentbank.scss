@@ -173,3 +173,17 @@
 .cb-navigation-container .singleselect .form-select {
     width: 100%;
 }
+
+// The search box and toolbar (unlisted toggle, Add, Upload, view switch) sit in non-wrapping rows,
+// which widens the page on phones. Let both rows wrap.
+@include media-breakpoint-down(md) {
+    .content-bank-container > .d-flex.justify-content-between {
+        flex-wrap: wrap;
+    }
+
+    .content-bank-container .cb-toolbar-container {
+        flex-wrap: wrap;
+        align-items: center;
+        row-gap: .5rem;
+    }
+}

@@ -8,6 +8,12 @@
         opacity: 1;
     }
 
+    // core/moremenu detects overflow by the items wrapping onto a second line, but the bundled
+    // bootstrap sets .nav to nowrap. Without this the tabs never move into "More" and widen the page.
+    .more-nav {
+        flex-wrap: wrap;
+    }
+
     .nav-link {
         height: $moremenu-height;
         display: flex;

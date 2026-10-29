@@ -716,3 +716,12 @@ body.path-question-type .mform fieldset.hidden {
         }
     }
 }
+// Question banks: the "Add" button floats inside the heading and is taller than it, so it hangs
+// over the notice below. Make the heading contain the float, and keep it clear of the title text.
+#page-question-banks #region-main h2:has(> .float-end) {
+    display: flow-root;
+
+    > .float-end {
+        margin-left: .5rem;
+    }
+}

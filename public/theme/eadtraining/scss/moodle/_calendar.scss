@@ -795,7 +795,9 @@ table.calendartable caption {
     }
 }
 
-@media (min-width: 768px) {
+// Compact month calendar for side blocks. Applied at every width (core only does it from 768px):
+// on phones the side blocks sit in the block drawer, which is just as narrow.
+@media all {
     [data-blockregion]:not([data-blockregion="content"]) {
         .block {
             &.block_calendar_month {
@@ -831,9 +833,20 @@ table.calendartable caption {
                                 padding: 0;
                             }
 
+                            // Short day names ("Mon") would otherwise break onto two lines in a narrow block.
+                            th {
+                                font-size: 0.75em;
+                                white-space: nowrap;
+                            }
+
                             td {
                                 height: auto;
                                 font-size: 0.8em;
+
+                                // The full calendar's 60px day height makes the block calendar very tall.
+                                & > div {
+                                    min-height: 0;
+                                }
 
                                 &.hasevent {
                                     [data-region="day-content"] {

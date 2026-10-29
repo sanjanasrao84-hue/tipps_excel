@@ -119,6 +119,21 @@
     padding: 4px;
 }
 
+// On small screens keep each column at its natural width and let the table scroll sideways,
+// instead of squeezing names and headers onto several lines.
+@include media-breakpoint-down(md) {
+    .userlist table#participants th,
+    .userlist table#participants td {
+        white-space: nowrap;
+    }
+
+    // The name stays a link to the profile; the avatar only takes up room here.
+    .userlist table#participants tbody th .userpicture,
+    .userlist table#participants tbody th .userinitials {
+        display: none;
+    }
+}
+
 .userlist {
     table.controls {
         width: 100%;
