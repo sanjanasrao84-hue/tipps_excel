@@ -207,7 +207,8 @@ class event_form extends \core_form\dynamic_form {
                 $fields['repeats'] = (int) $data->repeats;
             }
             $event = calendar_event::create((object) $fields, true);
-            $eventids = $event->repeatid
+            // repeatid only exists on repeated events, and calendar_event::__get throws for unset properties.
+            $eventids = isset($event->repeatid)
                 ? $DB->get_fieldset_select('event', 'id', 'repeatid = ?', [$event->repeatid])
                 : [(int) $event->id];
         }

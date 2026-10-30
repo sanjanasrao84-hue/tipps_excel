@@ -29,6 +29,69 @@ use core_course\management\helper;
  */
 class theme_eadtraining_core_course_management_renderer extends core_course_management_renderer {
     /**
+     * Renders the category bulk actions.
+     *
+     * @param core_course_category|null $category The currently selected category if there is one.
+     * @return string
+     */
+    public function category_bulk_actions(?core_course_category $category = null) {
+        $this->sync_bulk_action_buttons();
+        return parent::category_bulk_actions($category);
+    }
+
+    /**
+     * Renders the course bulk actions.
+     *
+     * @param core_course_category $category The currently selected category.
+     * @return string
+     */
+    public function course_bulk_actions(core_course_category $category) {
+        $this->sync_bulk_action_buttons();
+        return parent::course_bulk_actions($category);
+    }
+
+    /**
+     * Keeps each bulk action button disabled while its select is.
+     *
+     * Core's moodle-course-management JS disables the "move to" and "sort by" selects until something is
+     * selected but leaves the buttons enabled, so clicking one posts without the select and fails with
+     * "A required parameter (movecategoriesto/movecoursesto/resortcategoriesby) was missing". An empty
+     * "move to" choice would post 0 and move to the top level, so that disables the button too.
+     *
+     * @return void
+     */
+    protected function sync_bulk_action_buttons(): void {
+        static $done = false;
+        if ($done) {
+            return;
+        }
+        $done = true;
+        $this->page->requires->js_amd_inline(<<<'JS'
+(function() {
+    var pairs = {
+        bulkmovecategories: 'menumovecategoriesto',
+        bulkmovecourses: 'menumovecoursesto',
+        bulksort: 'menuresortcategoriesby'
+    };
+    Object.keys(pairs).forEach(function(name) {
+        var button = document.querySelector('input[name="' + name + '"]');
+        var select = document.getElementById(pairs[name]);
+        if (!button || !select) {
+            return;
+        }
+        var sync = function() {
+            button.disabled = select.disabled || select.value === '';
+        };
+        new MutationObserver(sync).observe(select, {attributes: true, attributeFilter: ['disabled']});
+        select.addEventListener('change', sync);
+        sync();
+    });
+})();
+JS
+        );
+    }
+
+    /**
      * Renders a category list item.
      *
      * This function gets called recursively to render sub categories.
