@@ -133,6 +133,8 @@
                 <script>
                     (function () {
                         const toggle = document.getElementById("togglePassword");
+                        // The login layout binds the same handler unless it is already bound.
+                        toggle.dataset.bound = "1";
                         toggle.addEventListener("click", function () {
                             const input = document.getElementById("password");
                             const isPassword = input.getAttribute("type") === "password";
