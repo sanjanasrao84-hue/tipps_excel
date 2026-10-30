@@ -45,3 +45,6 @@ Thumbs.db
 
 # Per-machine settings (DB credentials, paths)
 /config-local.php
+
+# Composer libraries (install with: composer install --no-dev)
+/vendor/

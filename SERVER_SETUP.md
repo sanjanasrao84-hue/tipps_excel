@@ -148,7 +148,17 @@ sudo find /var/www/tipps_excel -type d -exec chmod 755 {} \;
 sudo find /var/www/tipps_excel -type f -exec chmod 644 {} \;
 ```
 
-No `composer install` is needed: the required libraries are already in the repository.
+Install the Composer libraries. Most libraries ship inside `public/lib`, but Moodle 5.3 loads some of them
+(for example `league/oauth2-server`, which the REST API in `r.php` needs) only from `vendor/`. Without
+them, actions that call the REST API fail. One example is the Dashboard's course overview filters, which
+show an "undefined" error box:
+
+```bash
+cd /var/www/tipps_excel
+sudo composer install --no-dev --no-interaction
+```
+
+`vendor/` is not in git. Run this command again after any `git pull` that changes `composer.lock`.
 
 ---
 
@@ -472,6 +482,7 @@ Without `TENANT`, scripts run on the main site.
 ```bash
 cd /var/www/tipps_excel
 sudo git pull
+sudo composer install --no-dev --no-interaction
 sudo -u www-data php tenants.php each admin/cli/upgrade.php --non-interactive
 ```
 
@@ -515,4 +526,5 @@ Run this nightly from root's crontab and copy `/backup` off the server.
 | `Can't create database ... database exists` | That slug's database already exists; pick another slug. |
 | Moodle says data folder not writable | `sudo chown -R www-data:www-data /var/www/moodledata /var/www/moodledata-tenants` |
 | Pages without styles / 404 on `/r.php` routes | `DocumentRoot` must point to `.../public` and the vhost needs `FallbackResource /r.php`. |
+| "undefined" error box when changing Dashboard course filters; empty HTTP 500 from `/r.php/api/...` | `vendor/` is missing: run `composer install --no-dev` (step 3). |
 | Errors after `git pull` | Run the upgrade from step 10; check `/var/log/apache2/tipps_error.log`. |
