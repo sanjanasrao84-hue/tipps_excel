@@ -30,19 +30,33 @@
         "courseid": 0,
         "hasactive": true,
         "active": [{"name": "Psychiatry Beginner", "until": "12 November 2026", "ingrace": false}],
-        "showfilters": true,
-        "filters": [{"key": "all", "label": "All plans", "count": 2, "selected": true}],
         "hasplans": true,
-        "plans": [{
-            "id": 4, "name": "Psychiatry Beginner", "typekey": "course", "typelabel": "Single course",
-            "isallaccess": false, "owned": false, "ingrace": false, "until": "", "expired": false, "expiredon": "",
-            "description": "", "hasdescription": false, "features": ["Includes 1 course(s)"],
-            "openslabel": "Includes 1 course(s)", "courses": [{"name": "Psychiatry Beginner", "image": ""}],
-            "hasmore": false, "more": [], "morelabel": "",
-            "prices": [{"id": 5, "duration": "Monthly", "amount": "₹499.00", "permonth": "₹499.00", "showpermonth": false,
-                "saving": 0, "best": false, "checked": true}],
-            "buttonlabel": "Subscribe now", "buttonlabelaria": "Subscribe to Psychiatry Beginner"
-        }]
+        "allaccess": {
+            "id": 18, "name": "All in one subscription", "typelabel": "Full access (all courses)",
+            "owned": false, "ingrace": false, "until": "", "expired": false, "expiredon": "",
+            "description": "", "hasdescription": false, "features": ["Opens all 4 courses, plus new ones"],
+            "courses": [{"name": "Psychiatry Beginner", "image": ""}], "hasmore": false, "more": [], "morelabel": "",
+            "prices": [{"id": 43, "duration": "3 months", "amount": "₹2,199.00", "permonth": "₹733.00", "showpermonth": true,
+                "saving": 0, "best": false, "checked": true, "disabled": false}],
+            "buttonlabel": "Subscribe now", "buttonlabelaria": "Subscribe to All in one subscription"
+        },
+        "bundle": {
+            "url": "#", "sesskey": "abc", "discount": 10, "hasdiscount": true, "moneysample": "₹12,34,567.89",
+            "courses": [
+                {"courseid": 2, "name": "Psychiatry Beginner", "image": "", "from": "From ₹1,299.00", "checked": true,
+                    "pricesjson": "{\"90\":129900}"},
+                {"courseid": 3, "name": "Level 2 Psychiatry", "image": "", "from": "From ₹899.00", "checked": false,
+                    "pricesjson": "{\"90\":89900}"}
+            ],
+            "durations": [{"days": 90, "duration": "3 months"}]
+        },
+        "single": {
+            "headline": {"amount": "₹1,299.00", "duration": "3 months", "permonth": "₹433.00", "showpermonth": true},
+            "courses": [{"courseid": 2, "planid": 4, "name": "Psychiatry Beginner", "image": "", "from": "From ₹1,299.00",
+                "selected": true, "owned": false, "until": "",
+                "prices": [{"id": 6, "duration": "3 months", "amount": "₹1,299.00", "permonth": "₹433.00",
+                    "showpermonth": true, "saving": 0, "best": false, "checked": true, "disabled": false}]}]
+        }
     }
 }}
 <div class="lmssub-plans" data-region="lmssub-plans">
@@ -90,43 +104,16 @@
     {{/hasactive}}
 
     {{#hasplans}}
-    {{#showfilters}}
-    <div class="lmssub-filters mb-4" role="group" aria-label="{{#str}}filterplans, local_lmssub{{/str}}">
-        {{#filters}}
-        <button type="button" class="btn lmssub-filter {{#selected}}active{{/selected}}"
-                data-filter="{{key}}" aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">
-            {{label}} <span class="lmssub-filter-count">{{count}}</span>
-        </button>
-        {{/filters}}
-    </div>
-    {{/showfilters}}
-
     <div class="lmssub-plan-grid mb-5">
-        {{#plans}}
-        <div class="lmssub-plan-cell" data-plantype="{{typekey}}">
+        {{#allaccess}}
+        <div class="lmssub-plan-cell" data-plantype="allaccess">
             <article class="lmssub-plan {{#owned}}lmssub-plan-owned{{/owned}}" aria-labelledby="lmssub-plan-{{id}}">
                 <div class="lmssub-plan-head">
                     <div class="lmssub-badges">
-                        <span class="badge lmssub-type lmssub-type-{{typekey}}">{{typelabel}}</span>
-                        {{#isallaccess}}<span class="badge lmssub-type">{{#str}}everythingincluded, local_lmssub{{/str}}</span>{{/isallaccess}}
+                        <span class="badge lmssub-type lmssub-type-allaccess">{{typelabel}}</span>
+                        <span class="badge lmssub-type">{{#str}}everythingincluded, local_lmssub{{/str}}</span>
                     </div>
-                    {{#owned}}
-                        {{^ingrace}}
-                        <div class="lmssub-status lmssub-status-active">
-                            <i class="fa fa-check-circle" aria-hidden="true"></i>{{#str}}yourplanuntil, local_lmssub, {{until}}{{/str}}
-                        </div>
-                        {{/ingrace}}
-                        {{#ingrace}}
-                        <div class="lmssub-status lmssub-status-grace">
-                            <i class="fa fa-clock-o" aria-hidden="true"></i>{{#str}}graceuntil, local_lmssub, {{until}}{{/str}}
-                        </div>
-                        {{/ingrace}}
-                    {{/owned}}
-                    {{#expired}}
-                    <div class="lmssub-status lmssub-status-expired">
-                        <i class="fa fa-history" aria-hidden="true"></i>{{#str}}expiredon, local_lmssub, {{expiredon}}{{/str}}
-                    </div>
-                    {{/expired}}
+                    {{> local_lmssub/plan_status }}
                     <h3 id="lmssub-plan-{{id}}" class="lmssub-plan-name">{{name}}</h3>
                     {{#hasdescription}}<div class="lmssub-plan-description">{{{description}}}</div>{{/hasdescription}}
                 </div>
@@ -143,20 +130,7 @@
                     <fieldset class="lmssub-section">
                         <legend class="lmssub-label">{{#str}}chooseduration, local_lmssub{{/str}}</legend>
                         <div class="lmssub-durations">
-                            {{#prices}}
-                            <div class="lmssub-duration">
-                                <input type="radio" class="btn-check" name="priceid" value="{{id}}"
-                                       id="lmssub-price-{{id}}" autocomplete="off" required {{#checked}}checked{{/checked}}
-                                       data-amount="{{amount}}" data-duration="/ {{duration}}"
-                                       data-permonth="{{#showpermonth}}{{#str}}permonth, local_lmssub, {{permonth}}{{/str}}{{/showpermonth}}">
-                                <label class="lmssub-duration-label" for="lmssub-price-{{id}}">
-                                    {{#best}}<span class="lmssub-best">{{#str}}bestvalue, local_lmssub{{/str}}</span>{{/best}}
-                                    <span class="lmssub-duration-name">{{duration}}</span>
-                                    <span class="lmssub-duration-amount">{{amount}}</span>
-                                    {{#saving}}<span class="lmssub-saving">{{#str}}save, local_lmssub, {{saving}}{{/str}}</span>{{/saving}}
-                                </label>
-                            </div>
-                            {{/prices}}
+                            {{#prices}}{{> local_lmssub/plan_duration }}{{/prices}}
                         </div>
                     </fieldset>
 
@@ -196,7 +170,140 @@
                 </form>
             </article>
         </div>
-        {{/plans}}
+        {{/allaccess}}
+
+        {{#bundle}}
+        <div class="lmssub-plan-cell" data-plantype="bundle">
+            <article class="lmssub-plan" aria-labelledby="lmssub-plan-bundle">
+                <div class="lmssub-plan-head">
+                    <div class="lmssub-badges">
+                        <span class="badge lmssub-type lmssub-type-bundle">{{#str}}type_bundle, local_lmssub{{/str}}</span>
+                        {{#hasdiscount}}<span class="badge lmssub-type">{{#str}}bundle_discountbadge, local_lmssub, {{discount}}{{/str}}</span>{{/hasdiscount}}
+                    </div>
+                    <h3 id="lmssub-plan-bundle" class="lmssub-plan-name">{{#str}}bundle_title, local_lmssub{{/str}}</h3>
+                    <div class="lmssub-plan-description">{{#str}}bundle_intro, local_lmssub{{/str}}</div>
+                </div>
+
+                <form method="post" action="{{url}}" class="lmssub-plan-form" data-region="lmssub-checkout" data-lmssub-bundle
+                      data-min="2" data-discount="{{discount}}" data-money-sample="{{moneysample}}"
+                      data-hint-min="{{#str}}bundle_hintmin, local_lmssub, 2{{/str}}"
+                      data-hint-count="{{#str}}bundle_hintcount, local_lmssub, COUNT{{/str}}"
+                      data-saving="{{#str}}bundle_saving, local_lmssub, AMOUNT{{/str}}">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    {{#courseid}}<input type="hidden" name="courseid" value="{{courseid}}">{{/courseid}}
+
+                    <div class="lmssub-price" aria-live="polite">
+                        <span class="lmssub-price-amount" data-region="amount">&ndash;</span>
+                        <span class="lmssub-price-duration" data-region="duration"></span>
+                        <div class="lmssub-price-permonth" data-region="permonth"></div>
+                    </div>
+
+                    <fieldset class="lmssub-section">
+                        <legend class="lmssub-label">{{#str}}bundle_choosecourses, local_lmssub{{/str}}</legend>
+                        <ul class="lmssub-pick list-unstyled">
+                            {{#courses}}
+                            <li>
+                                <input class="form-check-input" type="checkbox" name="courses[]" value="{{courseid}}"
+                                       id="lmssub-bundle-course-{{courseid}}" data-prices="{{pricesjson}}" {{#checked}}checked{{/checked}}>
+                                <label class="lmssub-pick-label" for="lmssub-bundle-course-{{courseid}}">
+                                    <span class="lmssub-thumb" style="background-image: url('{{image}}');" aria-hidden="true"></span>
+                                    <span class="lmssub-course-name">{{name}}</span>
+                                    <span class="lmssub-pick-from">{{from}}</span>
+                                </label>
+                            </li>
+                            {{/courses}}
+                        </ul>
+                        <div class="lmssub-pick-hint" data-region="hint" aria-live="polite">{{#str}}bundle_hintmin, local_lmssub, 2{{/str}}</div>
+                    </fieldset>
+
+                    <fieldset class="lmssub-section">
+                        <legend class="lmssub-label">{{#str}}chooseduration, local_lmssub{{/str}}</legend>
+                        <div class="lmssub-durations">
+                            {{#durations}}
+                            <div class="lmssub-duration">
+                                <input type="radio" class="btn-check" name="days" value="{{days}}" id="lmssub-bundle-days-{{days}}"
+                                       autocomplete="off" required disabled data-duration="/ {{duration}}">
+                                <label class="lmssub-duration-label" for="lmssub-bundle-days-{{days}}">
+                                    <span class="lmssub-duration-name">{{duration}}</span>
+                                    <span class="lmssub-duration-amount" data-region="days-amount">&ndash;</span>
+                                </label>
+                            </div>
+                            {{/durations}}
+                        </div>
+                    </fieldset>
+
+                    <div class="lmssub-actions">
+                        <button type="submit" class="btn btn-primary lmssub-btn w-100" disabled
+                                data-loading-text="{{#str}}openingcheckout, local_lmssub{{/str}}">
+                            <span data-region="label">{{#str}}subscribenow, local_lmssub{{/str}}</span>
+                            <i class="fa fa-arrow-right ms-1" aria-hidden="true" data-region="icon"></i>
+                        </button>
+                    </div>
+                </form>
+            </article>
+        </div>
+        {{/bundle}}
+
+        {{#single}}
+        <div class="lmssub-plan-cell" data-plantype="course">
+            <article class="lmssub-plan" aria-labelledby="lmssub-plan-single">
+                <div class="lmssub-plan-head">
+                    <div class="lmssub-badges">
+                        <span class="badge lmssub-type lmssub-type-course">{{#str}}type_course, local_lmssub{{/str}}</span>
+                    </div>
+                    <h3 id="lmssub-plan-single" class="lmssub-plan-name">{{#str}}single_title, local_lmssub{{/str}}</h3>
+                    <div class="lmssub-plan-description">{{#str}}single_intro, local_lmssub{{/str}}</div>
+                </div>
+
+                <form method="get" action="{{checkouturl}}" class="lmssub-plan-form" data-region="lmssub-checkout" data-lmssub-single>
+                    {{#courseid}}<input type="hidden" name="courseid" value="{{courseid}}">{{/courseid}}
+
+                    <div class="lmssub-price" aria-live="polite">
+                        {{#headline}}
+                        <span class="lmssub-price-amount" data-region="amount">{{amount}}</span>
+                        <span class="lmssub-price-duration" data-region="duration">/ {{duration}}</span>
+                        <div class="lmssub-price-permonth" data-region="permonth">{{#showpermonth}}{{#str}}permonth, local_lmssub, {{permonth}}{{/str}}{{/showpermonth}}</div>
+                        {{/headline}}
+                    </div>
+
+                    <fieldset class="lmssub-section">
+                        <legend class="lmssub-label">{{#str}}single_choosecourse, local_lmssub{{/str}}</legend>
+                        <ul class="lmssub-pick list-unstyled">
+                            {{#courses}}
+                            <li>
+                                <input class="form-check-input" type="radio" name="singlecourse" value="{{courseid}}"
+                                       id="lmssub-single-course-{{courseid}}" required {{#selected}}checked{{/selected}}>
+                                <label class="lmssub-pick-label" for="lmssub-single-course-{{courseid}}">
+                                    <span class="lmssub-thumb" style="background-image: url('{{image}}');" aria-hidden="true"></span>
+                                    <span class="lmssub-course-name">{{name}}</span>
+                                    <span class="lmssub-pick-from">{{from}}</span>
+                                    {{#owned}}<span class="lmssub-pick-owned">{{#str}}yourplanuntil, local_lmssub, {{until}}{{/str}}</span>{{/owned}}
+                                </label>
+                            </li>
+                            {{/courses}}
+                        </ul>
+                    </fieldset>
+
+                    <fieldset class="lmssub-section">
+                        <legend class="lmssub-label">{{#str}}chooseduration, local_lmssub{{/str}}</legend>
+                        {{#courses}}
+                        <div class="lmssub-durations" data-course="{{courseid}}" {{^selected}}hidden{{/selected}}>
+                            {{#prices}}{{> local_lmssub/plan_duration }}{{/prices}}
+                        </div>
+                        {{/courses}}
+                    </fieldset>
+
+                    <div class="lmssub-actions">
+                        <button type="submit" class="btn btn-primary lmssub-btn w-100"
+                                data-loading-text="{{#str}}openingcheckout, local_lmssub{{/str}}">
+                            <span data-region="label">{{#str}}subscribenow, local_lmssub{{/str}}</span>
+                            <i class="fa fa-arrow-right ms-1" aria-hidden="true" data-region="icon"></i>
+                        </button>
+                    </div>
+                </form>
+            </article>
+        </div>
+        {{/single}}
     </div>
     {{/hasplans}}
 
@@ -232,35 +339,136 @@
 </div>
 {{#js}}
 document.querySelectorAll('[data-region="lmssub-plans"]').forEach(function(root) {
+    var showPrice = function(form, amount, duration, permonth) {
+        form.querySelector('[data-region="amount"]').textContent = amount;
+        form.querySelector('[data-region="duration"]').textContent = duration;
+        form.querySelector('[data-region="permonth"]').textContent = permonth;
+    };
+
     // Show the price of the chosen duration in the card's headline.
     root.addEventListener('change', function(e) {
         var input = e.target;
         if (input.name !== 'priceid') {
             return;
         }
-        var form = input.closest('form');
-        form.querySelector('[data-region="amount"]').textContent = input.dataset.amount;
-        form.querySelector('[data-region="duration"]').textContent = input.dataset.duration;
-        form.querySelector('[data-region="permonth"]').textContent = input.dataset.permonth;
+        showPrice(input.closest('form'), input.dataset.amount, input.dataset.duration, input.dataset.permonth);
     });
-    // Filter the cards by plan type.
-    root.querySelectorAll('.lmssub-filter').forEach(function(button) {
-        button.addEventListener('click', function() {
-            var key = button.dataset.filter;
-            root.querySelectorAll('.lmssub-filter').forEach(function(b) {
-                b.classList.toggle('active', b === button);
-                b.setAttribute('aria-pressed', b === button ? 'true' : 'false');
+
+    // Single course: one course at a time. Only the chosen course's durations are shown and sent.
+    root.querySelectorAll('[data-lmssub-single]').forEach(function(form) {
+        var refresh = function() {
+            var chosen = form.querySelector('input[name="singlecourse"]:checked');
+            form.querySelectorAll('[data-course]').forEach(function(group) {
+                var active = chosen && group.dataset.course === chosen.value;
+                group.hidden = !active;
+                group.querySelectorAll('input[name="priceid"]').forEach(function(input) {
+                    input.disabled = !active;
+                });
+                if (active) {
+                    var price = group.querySelector('input[name="priceid"]:checked') || group.querySelector('input[name="priceid"]');
+                    price.checked = true;
+                    showPrice(form, price.dataset.amount, price.dataset.duration, price.dataset.permonth);
+                }
             });
-            root.querySelectorAll('[data-plantype]').forEach(function(col) {
-                col.hidden = key !== 'all' && col.dataset.plantype !== key;
-            });
+        };
+        form.addEventListener('change', function(e) {
+            if (e.target.name === 'singlecourse') {
+                refresh();
+            }
         });
+        refresh();
     });
+
+    // Bundle: at least two courses. The total is the courses' own prices less the bundle discount;
+    // the server works it out again before checkout.
+    root.querySelectorAll('[data-lmssub-bundle]').forEach(function(form) {
+        var min = parseInt(form.dataset.min, 10);
+        var discount = parseInt(form.dataset.discount, 10) || 0;
+        // Format amounts like the server does, by following its formatted sample of 1234567.89.
+        var sample = form.dataset.moneySample;
+        var first = sample.search(/\d/);
+        var last = sample.length - sample.split('').reverse().join('').search(/\d/);
+        var number = sample.slice(first, last);
+        var decimal = number.charAt(number.length - 3);
+        var groups = number.slice(0, -3).split(/\D/);
+        var separator = groups.length > 1 ? number.slice(0, -3).replace(/\d/g, '').charAt(0) : '';
+        var primary = groups.length > 1 ? groups[groups.length - 1].length : 0;
+        var secondary = groups.length > 2 ? groups[groups.length - 2].length : primary;
+        var money = function(paise) {
+            var whole = String(Math.floor(paise / 100));
+            var parts = [];
+            if (primary && whole.length > primary) {
+                parts.unshift(whole.slice(-primary));
+                whole = whole.slice(0, -primary);
+                while (whole.length > secondary) {
+                    parts.unshift(whole.slice(-secondary));
+                    whole = whole.slice(0, -secondary);
+                }
+            }
+            parts.unshift(whole);
+            return sample.slice(0, first) + parts.join(separator) + decimal + String(paise % 100).padStart(2, '0') +
+                sample.slice(last);
+        };
+        var button = form.querySelector('button[type="submit"]');
+        var hint = form.querySelector('[data-region="hint"]');
+
+        var refresh = function() {
+            var picked = Array.prototype.slice.call(form.querySelectorAll('input[name="courses[]"]:checked'));
+            var enough = picked.length >= min;
+            hint.textContent = enough ? form.dataset.hintCount.replace('COUNT', picked.length) : form.dataset.hintMin;
+            hint.classList.toggle('lmssub-pick-hint-ok', enough);
+
+            // Durations every picked course is sold for, with their totals.
+            var totals = {};
+            var fulls = {};
+            form.querySelectorAll('input[name="days"]').forEach(function(input) {
+                var days = input.value;
+                var sum = 0;
+                var common = picked.length > 0 && picked.every(function(course) {
+                    var prices = JSON.parse(course.dataset.prices);
+                    if (!(days in prices)) {
+                        return false;
+                    }
+                    sum += prices[days];
+                    return true;
+                });
+                if (common) {
+                    fulls[days] = sum;
+                    totals[days] = Math.round(sum * (100 - discount) / 100);
+                }
+                input.disabled = !enough || !common;
+                if (input.disabled) {
+                    input.checked = false;
+                }
+                input.nextElementSibling.querySelector('[data-region="days-amount"]').textContent =
+                    common && enough ? money(totals[days]) : '–';
+            });
+
+            var chosen = form.querySelector('input[name="days"]:checked') || form.querySelector('input[name="days"]:not(:disabled)');
+            if (chosen) {
+                chosen.checked = true;
+                var saving = fulls[chosen.value] - totals[chosen.value];
+                showPrice(form, money(totals[chosen.value]), chosen.dataset.duration,
+                    saving > 0 ? form.dataset.saving.replace('AMOUNT', money(saving)) : '');
+            } else {
+                showPrice(form, '–', '', '');
+            }
+            button.disabled = !enough || !chosen;
+        };
+        form.addEventListener('change', function(e) {
+            if (e.target.name === 'courses[]' || e.target.name === 'days') {
+                refresh();
+            }
+        });
+        refresh();
+    });
+
     // While the checkout page opens: show progress and prevent a second submission.
     root.querySelectorAll('[data-region="lmssub-checkout"]').forEach(function(form) {
-        form.addEventListener('submit', function() {
+        form.addEventListener('submit', function(e) {
             var button = form.querySelector('button[type="submit"]');
             if (!button || button.disabled) {
+                e.preventDefault();
                 return;
             }
             button.dataset.label = button.querySelector('[data-region="label"]').textContent;

@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026102100;
+$plugin->version   = 2026110200;
 $plugin->requires  = 2025041400;
 $plugin->component = 'local_lmssub';
 $plugin->maturity  = MATURITY_ALPHA;

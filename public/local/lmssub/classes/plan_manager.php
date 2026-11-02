@@ -475,10 +475,14 @@ class plan_manager {
      *
      * Full-LMS plans come first, as the plan that opens everything.
      *
+     * Bundles the learners built themselves are left out unless asked for: they are bought by picking their
+     * courses again, not listed as plans of their own.
+     *
      * @param int $courseid 0 for all
+     * @param bool $includelearnerbundles whether to include bundles built by learners
      * @return array of plan records, each with ->prices and ->courseids
      */
-    public static function get_purchasable_plans(int $courseid = 0): array {
+    public static function get_purchasable_plans(int $courseid = 0, bool $includelearnerbundles = false): array {
         global $DB;
 
         $types = self::get_enabled_types();
@@ -486,7 +490,8 @@ class plan_manager {
             return [];
         }
         [$typein, $params] = $DB->get_in_or_equal(array_keys($types), SQL_PARAMS_NAMED);
-        $plans = $DB->get_records_select('local_lmssub_plan', "active = 1 AND type $typein", $params, 'sortorder, id');
+        $where = "active = 1 AND type $typein" . ($includelearnerbundles ? '' : ' AND bundlekey IS NULL');
+        $plans = $DB->get_records_select('local_lmssub_plan', $where, $params, 'sortorder, id');
 
         $result = [];
         foreach ($plans as $plan) {
@@ -499,6 +504,159 @@ class plan_manager {
         }
         uasort($result, fn($a, $b) => ($b->type === self::TYPE_ALLACCESS) <=> ($a->type === self::TYPE_ALLACCESS));
         return $result;
+    }
+
+    /**
+     * Courses a learner can buy on their own, each with the single course plan that sells it.
+     *
+     * These are the courses offered in the single course and bundle pickers. When a course is sold by more
+     * than one single course plan, the first plan in the admin's order is used.
+     *
+     * @return array courseid => single course plan (with ->prices and ->courseids), in course order
+     */
+    public static function get_course_options(): array {
+        global $DB;
+
+        $options = [];
+        foreach (self::get_purchasable_plans() as $plan) {
+            if ($plan->type !== self::TYPE_COURSE || count($plan->courseids) !== 1) {
+                continue;
+            }
+            $courseid = (int) reset($plan->courseids);
+            $options[$courseid] = $options[$courseid] ?? $plan;
+        }
+        if (!$options) {
+            return [];
+        }
+        [$insql, $params] = $DB->get_in_or_equal(array_keys($options));
+        $result = [];
+        foreach ($DB->get_fieldset_select('course', 'id', "id $insql ORDER BY sortorder", $params) as $courseid) {
+            $result[(int) $courseid] = $options[(int) $courseid];
+        }
+        return $result;
+    }
+
+    /**
+     * Price of each duration of a plan, cheapest option per duration.
+     *
+     * @param array $prices active price records
+     * @return array days => price record
+     */
+    public static function prices_by_duration(array $prices): array {
+        $result = [];
+        foreach ($prices as $price) {
+            $days = (int) $price->durationdays;
+            if (!isset($result[$days]) || $price->amount < $result[$days]->amount) {
+                $result[$days] = $price;
+            }
+        }
+        ksort($result);
+        return $result;
+    }
+
+    /**
+     * Discount, in percent, on learner-built bundles.
+     *
+     * @return int 0 to 90
+     */
+    public static function bundle_discount(): int {
+        return min(90, max(0, (int) get_config('local_lmssub', 'bundlediscount')));
+    }
+
+    /**
+     * Prices of a bundle of courses the learner picked: the sum of the courses' own prices, less the bundle discount.
+     *
+     * Only durations every picked course is sold for are offered.
+     *
+     * @param int[] $courseids at least two courses from {@see get_course_options()}
+     * @return array days => amount in paise
+     * @throws \moodle_exception when fewer than two valid courses were picked, or they share no duration
+     */
+    public static function bundle_quote(array $courseids): array {
+        $options = self::get_course_options();
+        $courseids = array_values(array_unique(array_map('intval', $courseids)));
+        if (count($courseids) < 2) {
+            throw new \moodle_exception('error_bundlemin', 'local_lmssub');
+        }
+        $totals = null;
+        foreach ($courseids as $courseid) {
+            if (!isset($options[$courseid])) {
+                throw new \moodle_exception('plannotavailable', 'local_lmssub');
+            }
+            $prices = array_map(fn($p) => (int) $p->amount, self::prices_by_duration($options[$courseid]->prices));
+            if ($totals === null) {
+                $totals = $prices;
+                continue;
+            }
+            $common = [];
+            foreach (array_intersect_key($totals, $prices) as $days => $amount) {
+                $common[$days] = $amount + $prices[$days];
+            }
+            $totals = $common;
+        }
+        if (!$totals) {
+            throw new \moodle_exception('error_bundlenoduration', 'local_lmssub');
+        }
+        $discount = self::bundle_discount();
+        return array_map(fn($amount) => (int) round($amount * (100 - $discount) / 100), $totals);
+    }
+
+    /**
+     * Returns the plan for a bundle of courses the learner picked, creating it the first time, with current prices.
+     *
+     * The same courses always map to the same plan, so buying them again renews the learner's subscription.
+     *
+     * @param int[] $courseids
+     * @return int plan id
+     * @throws \moodle_exception when the courses cannot be bought as a bundle
+     */
+    public static function get_learner_bundle(array $courseids): int {
+        global $DB;
+
+        $quote = self::bundle_quote($courseids);
+        $courseids = array_values(array_unique(array_map('intval', $courseids)));
+        sort($courseids);
+        $key = implode(',', $courseids);
+
+        $options = self::get_course_options();
+        [$insql, $params] = $DB->get_in_or_equal($courseids);
+        $names = array_map(fn($c) => trim($c->fullname),
+            $DB->get_records_select('course', "id $insql", $params, 'sortorder', 'id, fullname'));
+        $prices = [];
+        foreach ($quote as $days => $paise) {
+            $prices[] = ['durationdays' => $days, 'amount' => $paise / 100];
+        }
+        $existing = $DB->get_records('local_lmssub_plan', ['bundlekey' => $key], 'id', 'id, active', 0, 1);
+        $existing = reset($existing);
+
+        $data = (object) [
+            'id' => $existing ? $existing->id : 0,
+            'name' => \core_text::substr(get_string('learnerbundlename', 'local_lmssub', implode(' + ', $names)), 0, 255),
+            'description' => '',
+            'type' => self::TYPE_BUNDLE,
+            'active' => 1,
+            // The bundle is as generous as the most generous of its courses.
+            'devicelimit' => max(array_map(fn($id) => (int) $options[$id]->devicelimit, $courseids)),
+            'gracedays' => max(array_map(fn($id) => (int) $options[$id]->gracedays, $courseids)),
+            'autorenew' => 0,
+            'prices' => $prices,
+            'courses' => $courseids,
+        ];
+
+        // Only write when something changed, so viewing the same bundle again does not queue syncs.
+        if ($existing && $existing->active) {
+            $current = [];
+            foreach (self::get_prices((int) $existing->id) as $price) {
+                $current[(int) $price->durationdays] = (int) $price->amount;
+            }
+            ksort($current);
+            if ($current === $quote) {
+                return (int) $existing->id;
+            }
+        }
+        $planid = self::save_plan($data);
+        $DB->set_field('local_lmssub_plan', 'bundlekey', $key, ['id' => $planid]);
+        return $planid;
     }
 
     /**

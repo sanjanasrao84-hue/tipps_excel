@@ -60,7 +60,8 @@ if (!$subs) {
     echo $OUTPUT->footer();
     die;
 }
-$purchasable = plan_manager::get_purchasable_plans();
+// Bundles the learner built are renewed by picking the same courses again.
+$purchasable = plan_manager::get_purchasable_plans(0, true);
 
 $fmt = get_string('strftimedate');
 foreach ($subs as $sub) {
@@ -100,7 +101,8 @@ foreach ($subs as $sub) {
         html_writer::alist($lines, ['class' => 'list-unstyled']) . $courses;
     // Renew: back to the plans page to choose a duration, then pay. Revoked subscriptions start over as a new purchase.
     if (isset($purchasable[$plan->id]) && $sub->status !== subs::STATUS_REVOKED) {
-        $body .= html_writer::link(new moodle_url('/local/lmssub/index.php'), get_string('renew', 'local_lmssub'),
+        $body .= html_writer::link(new moodle_url('/local/lmssub/index.php', $plan->bundlekey ? ['bundle' => $plan->id] : []),
+            get_string('renew', 'local_lmssub'),
             ['class' => 'btn btn-outline-primary']);
     }
     echo html_writer::div(html_writer::div($body, 'card-body'), 'card mb-3');

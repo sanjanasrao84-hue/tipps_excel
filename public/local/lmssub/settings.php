@@ -36,6 +36,10 @@ if ($ADMIN->fulltree) {
         new lang_string('enablefullsubs', 'local_lmssub'),
         new lang_string('enablefullsubs_desc', 'local_lmssub'), 1));
 
+    $settings->add(new admin_setting_configtext('local_lmssub/bundlediscount',
+        new lang_string('bundlediscount', 'local_lmssub'),
+        new lang_string('bundlediscount_desc', 'local_lmssub'), 0, '/^([0-9]|[1-8][0-9]|90)$/', 4));
+
     $accounts = [0 => new lang_string('paymentaccount_auto', 'local_lmssub')];
     foreach ($DB->get_records('payment_accounts', ['archived' => 0], 'name', 'id, name') as $account) {
         $accounts[$account->id] = format_string($account->name);

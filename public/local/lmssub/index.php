@@ -29,6 +29,8 @@ use local_lmssub\plan_manager;
 use local_lmssub\subscription_manager as subs;
 
 $courseid = optional_param('courseid', 0, PARAM_INT);
+// A bundle the learner bought before, to tick its courses again when they renew it.
+$renewbundle = optional_param('bundle', 0, PARAM_INT);
 
 require_login(null, false);
 if (isguestuser()) {
@@ -65,33 +67,21 @@ foreach ($livesubs as $sub) {
     }
 }
 
-$cards = [];
-$typecounts = [];
-foreach ($plans as $plan) {
-    // The learner's current subscription to this plan, if any.
-    $current = subs::find_current((int) $USER->id, (int) $plan->id);
-    $until = $current ? access_engine::effective_end($current, $plan) : 0;
-    $owned = $until > time();
-    $expired = $current && !$owned;
-    $isall = $plan->type === plan_manager::TYPE_ALLACCESS;
-    $typecounts[$plan->type] = ($typecounts[$plan->type] ?? 0) + 1;
-
-    // Durations, with the saving against the shortest duration's daily rate.
-    $prices = array_values($plan->prices);
-    usort($prices, fn($a, $b) => $a->durationdays <=> $b->durationdays);
+// Duration choices of a plan, with the saving against the shortest duration's daily rate.
+$priceitems = function(array $prices): array {
+    $prices = array_values(plan_manager::prices_by_duration($prices));
     $baserate = $prices[0]->amount / max(1, $prices[0]->durationdays);
-    $priceitems = [];
+    $items = [];
     $bestsaving = 0;
     foreach ($prices as $i => $price) {
         $days = max(1, (int) $price->durationdays);
         $saving = $i ? (int) floor((1 - ($price->amount / $days) / $baserate) * 100) : 0;
         $saving = $saving >= 5 ? $saving : 0;
         $bestsaving = max($bestsaving, $saving);
-        $priceitems[] = [
+        $items[] = [
             'id' => $price->id,
-            'duration' => $days % 30 === 0 || $days === 365
-                ? get_string($days === 30 ? 'duration_onemonth' : 'duration_months', 'local_lmssub', $days === 365 ? 12 : $days / 30)
-                : plan_manager::duration_label($days),
+            'days' => $days,
+            'duration' => local_lmssub_duration_name($days),
             'amount' => plan_manager::format_amount((int) $price->amount, $price->currency),
             'permonth' => plan_manager::format_amount((int) round($price->amount * 30 / $days), $price->currency),
             // The monthly rate only adds information for durations longer than a month.
@@ -101,42 +91,31 @@ foreach ($plans as $plan) {
             'checked' => $i === 0,
         ];
     }
-    foreach ($priceitems as &$item) {
+    foreach ($items as &$item) {
         $item['best'] = $bestsaving && $item['saving'] === $bestsaving;
     }
-    unset($item);
+    return $items;
+};
 
-    // What it opens: a few courses with their images, the rest by name.
-    $courseids = array_values($plan->courseids);
-    $shown = $isall ? 3 : 4;
-    [$insql, $params] = $DB->get_in_or_equal(array_slice($courseids, 0, $shown + 30));
-    $records = array_values($DB->get_records_select('course', "id $insql", $params, 'sortorder', 'id, fullname'));
-    $courses = [];
-    foreach (array_slice($records, 0, $shown) as $c) {
-        $image = \core_course\external\course_summary_exporter::get_course_image($c);
-        $courses[] = [
-            'name' => format_string($c->fullname),
-            'image' => $image ?: $OUTPUT->get_generated_image_for_id($c->id),
-        ];
-    }
-    $more = array_map(fn($c) => format_string($c->fullname), array_slice($records, $shown));
-    $extra = count($courseids) - $shown;
+/**
+ * Name of a duration as shown on the plan cards.
+ *
+ * @param int $days
+ * @return string
+ */
+function local_lmssub_duration_name(int $days): string {
+    return $days % 30 === 0 || $days === 365
+        ? get_string($days === 30 ? 'duration_onemonth' : 'duration_months', 'local_lmssub', $days === 365 ? 12 : $days / 30)
+        : plan_manager::duration_label($days);
+}
 
-    // What the plan gives, from the settings the platform applies.
-    $features = [get_string($isall ? 'opens_all_count' : 'opens_count', 'local_lmssub', count($courseids))];
-    if ((int) $plan->gracedays > 0) {
-        $features[] = get_string('feature_grace', 'local_lmssub', (int) $plan->gracedays);
-    }
-    if (count($priceitems) > 1) {
-        $features[] = get_string('feature_durations', 'local_lmssub', count($priceitems));
-    }
-
-    $cards[] = [
-        'id' => $plan->id,
-        'name' => format_string($plan->name),
-        'typekey' => $plan->type,
-        'typelabel' => $types[$plan->type],
-        'isallaccess' => $isall,
+// The learner's subscription to a plan, for the status lines of the cards.
+$planstatus = function(\stdClass $plan) use ($USER, $dateformat): array {
+    $current = subs::find_current((int) $USER->id, (int) $plan->id);
+    $until = $current ? access_engine::effective_end($current, $plan) : 0;
+    $owned = $until > time();
+    $expired = $current && !$owned;
+    return [
         'owned' => $owned,
         'ingrace' => $owned && $current->status === subs::STATUS_GRACE,
         'until' => $owned ? userdate($until, $dateformat) : '',
@@ -145,26 +124,120 @@ foreach ($plans as $plan) {
         // its end date, or the moment it was ended early.
         'expiredon' => $expired ? userdate(min(max((int) $current->timeend, (int) $current->graceend),
             (int) $current->timemodified), $dateformat) : '',
+    ];
+};
+
+// Card 1, all in one: the first full access plan (covering the course, when the learner came from one).
+$allaccess = null;
+foreach ($plans as $plan) {
+    if ($plan->type !== plan_manager::TYPE_ALLACCESS) {
+        continue;
+    }
+    $courseids = array_values($plan->courseids);
+    [$insql, $params] = $DB->get_in_or_equal(array_slice($courseids, 0, 33));
+    $records = array_values($DB->get_records_select('course', "id $insql", $params, 'sortorder', 'id, fullname'));
+    $courses = [];
+    foreach (array_slice($records, 0, 3) as $c) {
+        $image = \core_course\external\course_summary_exporter::get_course_image($c);
+        $courses[] = ['name' => format_string($c->fullname), 'image' => $image ?: $OUTPUT->get_generated_image_for_id($c->id)];
+    }
+    $extra = count($courseids) - 3;
+    $items = $priceitems($plan->prices);
+    $features = [get_string('opens_all_count', 'local_lmssub', count($courseids))];
+    if ((int) $plan->gracedays > 0) {
+        $features[] = get_string('feature_grace', 'local_lmssub', (int) $plan->gracedays);
+    }
+    if (count($items) > 1) {
+        $features[] = get_string('feature_durations', 'local_lmssub', count($items));
+    }
+    $status = $planstatus($plan);
+    $allaccess = $status + [
+        'id' => $plan->id,
+        'name' => format_string($plan->name),
+        'typelabel' => $types[$plan->type],
         'features' => $features,
         'hasdescription' => trim((string) $plan->description) !== '',
         'description' => format_text($plan->description, FORMAT_PLAIN),
-        'openslabel' => get_string($isall ? 'opens_all_count' : 'opens_count', 'local_lmssub', count($courseids)),
         'courses' => $courses,
         'hasmore' => $extra > 0,
-        'more' => $more,
+        'more' => array_map(fn($c) => format_string($c->fullname), array_slice($records, 3)),
         'morelabel' => get_string('showmorecourses', 'local_lmssub', $extra),
-        'prices' => $priceitems,
-        'buttonlabel' => get_string($owned ? 'renewplan' : 'subscribenow', 'local_lmssub'),
-        'buttonlabelaria' => get_string($owned ? 'renewplan_aria' : 'subscribenow_aria', 'local_lmssub', format_string($plan->name)),
+        'prices' => $items,
+        'buttonlabel' => get_string($status['owned'] ? 'renewplan' : 'subscribenow', 'local_lmssub'),
+        'buttonlabelaria' => get_string($status['owned'] ? 'renewplan_aria' : 'subscribenow_aria', 'local_lmssub',
+            format_string($plan->name)),
     ];
+    break;
 }
 
-// Filter pills, only when there is more than one kind of plan.
-$filters = [['key' => 'all', 'label' => get_string('allplans', 'local_lmssub'), 'count' => count($cards), 'selected' => true]];
-foreach ($typecounts as $type => $count) {
-    $filters[] = ['key' => $type, 'label' => get_string('filter_' . $type, 'local_lmssub'), 'count' => $count,
-        'selected' => false];
+// Cards 2 and 3: the courses sold on their own, picked for a bundle (check boxes) or alone (radio buttons).
+$options = plan_manager::get_course_options();
+// Courses ticked in the bundle card: the course the learner came from, or the bundle they are renewing.
+$prechecked = $course && isset($options[$course->id]) ? [(int) $course->id] : [];
+if ($renewbundle) {
+    $renew = $DB->get_record('local_lmssub_plan', ['id' => $renewbundle], 'id, bundlekey');
+    if ($renew && $renew->bundlekey) {
+        $prechecked = array_map('intval', explode(',', $renew->bundlekey));
+    }
 }
+$singleselected = $course && isset($options[$course->id]) ? (int) $course->id : (int) array_key_first($options);
+$records = [];
+if ($options) {
+    [$insql, $params] = $DB->get_in_or_equal(array_keys($options));
+    $records = $DB->get_records_select('course', "id $insql", $params, '', 'id, fullname');
+}
+$bundlecourses = [];
+$singlecourses = [];
+$singleheadline = null;
+$bundledays = [];
+$bundlecurrency = 'INR';
+foreach ($options as $optioncourseid => $plan) {
+    $c = $records[$optioncourseid];
+    $image = \core_course\external\course_summary_exporter::get_course_image($c);
+    $image = $image ?: $OUTPUT->get_generated_image_for_id($c->id);
+    $bydays = plan_manager::prices_by_duration($plan->prices);
+    $cheapest = reset($bydays);
+    foreach ($bydays as $price) {
+        $cheapest = $price->amount < $cheapest->amount ? $price : $cheapest;
+    }
+    $from = get_string('fromprice', 'local_lmssub', plan_manager::format_amount((int) $cheapest->amount, $cheapest->currency));
+    $bundledays += array_fill_keys(array_keys($bydays), true);
+    $bundlecurrency = $cheapest->currency;
+
+    $bundlecourses[] = [
+        'courseid' => $optioncourseid,
+        'name' => format_string($c->fullname),
+        'image' => $image,
+        'from' => $from,
+        'checked' => in_array($optioncourseid, $prechecked, true),
+        'pricesjson' => json_encode(array_map(fn($p) => (int) $p->amount, $bydays)),
+    ];
+
+    $selected = $optioncourseid === $singleselected;
+    $items = $priceitems($plan->prices);
+    if ($selected) {
+        $singleheadline = $items[0];
+    } else {
+        // Only the chosen course's durations are sent with the form.
+        foreach ($items as &$item) {
+            $item['checked'] = false;
+            $item['disabled'] = true;
+        }
+        unset($item);
+    }
+    $singlecourses[] = $planstatus($plan) + [
+        'courseid' => $optioncourseid,
+        'planid' => $plan->id,
+        'name' => format_string($c->fullname),
+        'image' => $image,
+        'from' => $from,
+        'selected' => $selected,
+        'prices' => $items,
+    ];
+}
+ksort($bundledays);
+$bundleenabled = isset(plan_manager::get_enabled_types()[plan_manager::TYPE_BUNDLE]) && count($options) >= 2;
+$discount = plan_manager::bundle_discount();
 
 $context = [
     'intro' => get_string('plans_intro', 'local_lmssub'),
@@ -177,10 +250,20 @@ $context = [
     'courseid' => $course ? $course->id : 0,
     'hasactive' => (bool) $active,
     'active' => $active,
-    'showfilters' => count($typecounts) > 1,
-    'filters' => $filters,
-    'hasplans' => (bool) $cards,
-    'plans' => $cards,
+    'hasplans' => $allaccess || $bundleenabled || $singlecourses,
+    'allaccess' => $allaccess,
+    'bundle' => $bundleenabled ? [
+        'url' => (new moodle_url('/local/lmssub/bundle.php'))->out(false),
+        'sesskey' => sesskey(),
+        'courses' => $bundlecourses,
+        'durations' => array_map(fn($days) => ['days' => $days, 'duration' => local_lmssub_duration_name($days)],
+            array_keys($bundledays)),
+        'hasdiscount' => $discount > 0,
+        'discount' => $discount,
+        // A formatted sample amount: the page shows bundle totals in exactly the format the server uses.
+        'moneysample' => plan_manager::format_amount(123456789, $bundlecurrency),
+    ] : null,
+    'single' => $singlecourses ? ['courses' => $singlecourses, 'headline' => $singleheadline] : null,
 ];
 
 echo $OUTPUT->header();

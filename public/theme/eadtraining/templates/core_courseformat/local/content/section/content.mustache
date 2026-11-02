@@ -114,21 +114,28 @@
             {{> core_courseformat/local/content/section/badges }}
         {{/ core_courseformat/local/content/section/badges }}
     </div>
-    {{#collapsemenu}}
-        {{^displayonesection}}
-            <div id="contract-everything-{{{id}}}" class="flex-fill d-flex justify-content-end align-self-start">
-                <a id="collapsesections"
-                   class="section-collapsemenu"
-                   href="#"
-                   aria-expanded="true"
-                   role="button"
-                   data-toggle="toggleall">
-                    <span class="collapseall text-nowrap">{{#str}}collapseall{{/str}}</span>
-                    <span class="expandall text-nowrap">{{#str}}expandall{{/str}}</span>
-                </a>
-            </div>
-        {{/displayonesection}}
-    {{/collapsemenu}}
+    {{!
+        The collapse/expand all sections toggle is rendered by core_courseformat/local/content above the
+        section list since Moodle 5.3, and that template suppresses this block. Keeping the toggle inside
+        the block prevents a second [data-toggle="toggleall"] control from being added to the page.
+    }}
+    {{$ core_courseformat/local/content/section/collapsemenu }}
+        {{#collapsemenu}}
+            {{^displayonesection}}
+                <div class="flex-fill d-flex justify-content-end align-self-start">
+                    <a id="collapsesections"
+                       class="section-collapsemenu"
+                       href="#"
+                       aria-expanded="true"
+                       role="button"
+                       data-toggle="toggleall">
+                        <span class="collapseall text-nowrap">{{#str}}collapseall{{/str}}</span>
+                        <span class="expandall text-nowrap">{{#str}}expandall{{/str}}</span>
+                    </a>
+                </div>
+            {{/displayonesection}}
+        {{/collapsemenu}}
+    {{/ core_courseformat/local/content/section/collapsemenu }}
     {{#controlmenu}}
         {{^displayonesection}}
             {{$ core_courseformat/local/content/section/controlmenu }}
@@ -160,7 +167,7 @@
         {{/headerdisplaymultipage}}
     {{/header}}
 </div>
-<div id="coursecontentcollapseid{{{num}}}"
+<div id="coursecontentcollapseid{{id}}"
      class="content {{^iscoursedisplaymultipage}}{{^sitehome}}{{^displayonesection}}course-content-item-content collapse {{^contentcollapsed}}show{{/contentcollapsed}}{{/displayonesection}}{{/sitehome}}{{/iscoursedisplaymultipage}}">
     <div class="{{#hasavailability}}description{{/hasavailability}} my-3" data-for="sectioninfo">
         {{#isstealth}}
@@ -192,8 +199,3 @@
     {{{cmcontrols}}}
 </div>
 
-{{#js}}
-    require(["jquery"], function($) {
-        $("#contract-everything-{{{id}}}").insertBefore("#course-section-header-{{{id}}} h3.sectionname");
-    });
-{{/js}}

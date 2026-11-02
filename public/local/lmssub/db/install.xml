@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/lmssub/db" VERSION="20261013" COMMENT="LMS subscriptions: plans, subscriptions, payments, access rules and devices"
+<XMLDB PATH="local/lmssub/db" VERSION="20261102" COMMENT="LMS subscriptions: plans, subscriptions, payments, access rules and devices"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -18,12 +18,14 @@
         <FIELD NAME="usermodified" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="bundlekey" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Sorted course ids of a bundle the learner built themselves; empty for plans made by admins"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
       </KEYS>
       <INDEXES>
         <INDEX NAME="type_active" UNIQUE="false" FIELDS="type, active"/>
+        <INDEX NAME="bundlekey" UNIQUE="false" FIELDS="bundlekey"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_lmssub_price" COMMENT="One row per duration option of a plan">

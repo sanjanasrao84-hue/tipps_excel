@@ -358,3 +358,21 @@ $string['notify_revoked_subject'] = 'Your subscription "{$a->plan}" has ended';
 $string['notify_revoked_body'] = 'Your subscription "{$a->plan}" on {$a->site} has been ended by the site administrator, and your access to its courses has been removed.
 
 If you think this is a mistake, please contact the site administrator.';
+
+// Plans page: all in one, a bundle the learner builds, or a single course.
+$string['bundle_choosecourses'] = 'Choose your courses (at least 2)';
+$string['bundle_discountbadge'] = 'Save {$a}%';
+$string['bundle_hintcount'] = '{$a} courses selected';
+$string['bundle_hintmin'] = 'Select at least {$a} courses';
+$string['bundle_intro'] = 'Pick the courses you want and get them together in one subscription.';
+$string['bundle_saving'] = 'You save {$a}';
+$string['bundle_title'] = 'Build your bundle';
+$string['bundlediscount'] = 'Bundle discount (%)';
+$string['bundlediscount_desc'] = 'When learners pick two or more courses for a bundle, they pay the sum of the courses\' single course prices less this percentage (0 to 90).';
+$string['error_bundlemin'] = 'Select at least two courses for a bundle.';
+$string['error_bundlenoduration'] = 'The selected courses are not sold for a common duration. Pick other courses or another duration.';
+$string['fromprice'] = 'From {$a}';
+$string['learnerbundlename'] = 'Bundle: {$a}';
+$string['single_choosecourse'] = 'Choose one course';
+$string['single_intro'] = 'Subscribe to the one course you need.';
+$string['single_title'] = 'Single course';
