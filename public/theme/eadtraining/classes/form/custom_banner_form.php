@@ -21,6 +21,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once("{$CFG->libdir}/formslib.php");
 
+use theme_eadtraining\link_map;
 use theme_eadtraining\section_manager;
 
 /**
@@ -71,9 +72,15 @@ class custom_banner_form extends \moodleform {
         $mform->setType('buttontext', PARAM_TEXT);
         $mform->addRule('buttontext', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
-        $mform->addElement('text', 'buttonurl', get_string('banners_buttonurl', 'theme_eadtraining'), ['size' => 50]);
-        $mform->setType('buttonurl', PARAM_URL);
+        $mform->addElement('select', 'buttonroute', get_string('banners_buttonroute', 'theme_eadtraining'),
+            link_map::get_options());
+        $mform->addHelpButton('buttonroute', 'banners_buttonroute', 'theme_eadtraining');
+
+        $mform->addElement('text', 'buttonurl', get_string('banners_buttonurl', 'theme_eadtraining'),
+            ['size' => 50, 'placeholder' => 'https://']);
+        $mform->setType('buttonurl', PARAM_RAW_TRIMMED);
         $mform->addHelpButton('buttonurl', 'banners_buttonurl', 'theme_eadtraining');
+        $mform->hideIf('buttonurl', 'buttonroute', 'neq', link_map::CUSTOM);
 
         // Appearance.
         $mform->addElement('header', 'appearanceheader', get_string('banners_appearance', 'theme_eadtraining'));
@@ -152,8 +159,12 @@ class custom_banner_form extends \moodleform {
         if ($data['height'] < 200 || $data['height'] > 1200) {
             $errors['height'] = get_string('banners_invalidheight', 'theme_eadtraining');
         }
-        if (trim($data['buttontext']) !== '' && trim($data['buttonurl']) === '') {
-            $errors['buttonurl'] = get_string('banners_buttonurl_required', 'theme_eadtraining');
+        if (trim($data['buttontext']) !== '') {
+            $route = (string) ($data['buttonroute'] ?? '');
+            $error = link_map::validate($route, (string) ($data['buttonurl'] ?? ''));
+            if ($error) {
+                $errors[$route === link_map::CUSTOM ? 'buttonurl' : 'buttonroute'] = get_string($error, 'theme_eadtraining');
+            }
         }
 
         return $errors;

@@ -25,7 +25,8 @@
         "subtitle": "Courses for the whole team",
         "description": "<p>Start today.</p>",
         "buttontext": "See courses",
-        "buttonurl": "https://example.com/course/",
+        "buttonurl": "https://example.com/course/index.php",
+        "buttonexternal": false,
         "hasbutton": true,
         "textposition": "left",
         "verticalposition": "middle",
@@ -49,7 +50,7 @@
                 <div class="eadtraining-custom-banner__description">{{{description}}}</div>
             {{/description}}
             {{#hasbutton}}
-                <a class="btn btn-primary btn-lg eadtraining-custom-banner__button" href="{{buttonurl}}">{{{buttontext}}}</a>
+                <a class="btn btn-primary btn-lg eadtraining-custom-banner__button" href="{{buttonurl}}"{{#buttonexternal}} target="_blank" rel="noopener noreferrer"{{/buttonexternal}}>{{{buttontext}}}</a>
             {{/hasbutton}}
         </div>
     </div>

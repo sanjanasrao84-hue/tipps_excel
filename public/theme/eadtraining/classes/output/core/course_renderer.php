@@ -38,6 +38,7 @@ use core_course_category;
 use coursecat_helper;
 use stdClass;
 use core_course_list_element;
+use theme_eadtraining\link_map;
 use theme_eadtraining\output\course_card;
 use theme_eadtraining\section_manager;
 
@@ -84,6 +85,10 @@ class course_renderer extends \core_course_renderer {
                 });
             }
             $compiledpages = theme_eadtraining_compile_pages($pages, $lang, $editing);
+            foreach ($compiledpages->pages as $compiledpage) {
+                // No dead buttons: empty, "#" or broken links open the page of their label, or home.
+                $compiledpage->html = link_map::fix_html($compiledpage->html);
+            }
 
             $csslink = "";
             foreach ($compiledpages->css as $cssfile) {

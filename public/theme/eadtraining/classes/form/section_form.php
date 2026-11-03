@@ -21,6 +21,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once("{$CFG->libdir}/formslib.php");
 
+use theme_eadtraining\link_map;
 use theme_eadtraining\section_manager;
 
 /**
@@ -71,9 +72,13 @@ class section_form extends \moodleform {
         // Links.
         if ($fields['links']) {
             $this->add_header('linksheader', get_string('sections_links', 'theme_eadtraining'));
+            $options = link_map::get_options();
             foreach ($fields['links'] as $field) {
-                $mform->addElement('text', $field['name'], $field['label'], ['size' => 60, 'placeholder' => $field['default']]);
+                $mform->addElement('select', "{$field['name']}_route", $field['label'], $options);
+                $mform->addElement('text', $field['name'], get_string('link_customurl', 'theme_eadtraining'),
+                    ['size' => 60, 'placeholder' => 'https://']);
                 $mform->setType($field['name'], PARAM_RAW_TRIMMED);
+                $mform->hideIf($field['name'], "{$field['name']}_route", 'neq', link_map::CUSTOM);
             }
             $mform->addElement('static', 'linkshelp', '', get_string('sections_links_help', 'theme_eadtraining'));
         }
@@ -205,9 +210,11 @@ class section_form extends \moodleform {
         }
 
         foreach ($fields['links'] as $field) {
-            $value = trim($data[$field['name']] ?? '');
-            if ($value !== '' && $value[0] !== '#' && clean_param($value, PARAM_URL) === '') {
-                $errors[$field['name']] = get_string('sections_invalidurl', 'theme_eadtraining');
+            $route = (string) ($data["{$field['name']}_route"] ?? '');
+            $error = link_map::validate($route, (string) ($data[$field['name']] ?? ''));
+            if ($error) {
+                $element = $route === link_map::CUSTOM ? $field['name'] : "{$field['name']}_route";
+                $errors[$element] = get_string($error, 'theme_eadtraining');
             }
         }
 

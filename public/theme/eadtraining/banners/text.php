@@ -23,6 +23,7 @@
  */
 
 use theme_eadtraining\form\section_form;
+use theme_eadtraining\link_map;
 use theme_eadtraining\section_manager;
 
 require_once("../../../config.php");
@@ -66,10 +67,14 @@ if ($fields["rowdefs"] && !$fields["rows"] && !$addrows) {
 $rowcount = count($fields["rows"]) + $addrows;
 
 $data = ["pageid" => $page->id, "returnurl" => $returnurl];
-foreach (["texts", "links", "block"] as $group) {
+foreach (["texts", "block"] as $group) {
     foreach ($fields[$group] as $field) {
         $data[$field["name"]] = $field["value"];
     }
+}
+foreach ($fields["links"] as $field) {
+    // Links without a destination yet ("#") get the page suggested by their text.
+    [$data["{$field["name"]}_route"], $data[$field["name"]]] = link_map::to_form((string) $field["value"], $field["text"]);
 }
 foreach ($fields["rows"] as $index => $row) {
     foreach ($row as $key => $value) {

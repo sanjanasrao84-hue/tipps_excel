@@ -173,5 +173,12 @@ function xmldb_theme_eadtraining_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026101900, 'theme', 'eadtraining');
     }
 
+    if ($oldversion < 2026110300) {
+        // Homepage buttons: store site paths and map buttons without a link by their label (or home).
+        \theme_eadtraining\link_map::migrate();
+
+        upgrade_plugin_savepoint(true, 2026110300, 'theme', 'eadtraining');
+    }
+
     return true;
 }

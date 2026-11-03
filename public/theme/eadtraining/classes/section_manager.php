@@ -451,7 +451,7 @@ class section_manager {
         }
         $banner->description = (string) $banner->description;
         $banner->descriptionformat = (int) $banner->descriptionformat;
-        $banner->buttonurl = trim(clean_param((string) $banner->buttonurl, PARAM_URL));
+        $banner->buttonurl = link_map::normalise((string) $banner->buttonurl);
         if (!in_array($banner->textposition, self::POSITIONS)) {
             $banner->textposition = $defaults->textposition;
         }
@@ -661,13 +661,17 @@ class section_manager {
             $description = format_text($banner->description, $banner->descriptionformat, ['context' => $context]);
         }
 
+        // A button without a working destination opens the page suggested by its text, or home: never a dead button.
+        [$buttonurl, $external] = link_map::resolve($banner->buttonurl, $banner->buttontext);
+
         return [
             'title' => format_string($banner->title, true, ['context' => $context]),
             'subtitle' => format_string($banner->subtitle, true, ['context' => $context]),
             'description' => $description,
             'buttontext' => format_string($banner->buttontext, true, ['context' => $context]),
-            'buttonurl' => $banner->buttonurl,
-            'hasbutton' => $banner->buttontext !== '' && $banner->buttonurl !== '',
+            'buttonurl' => $buttonurl,
+            'buttonexternal' => $external,
+            'hasbutton' => $banner->buttontext !== '',
             'textposition' => $banner->textposition,
             'verticalposition' => $banner->verticalposition,
             'alignclass' => $alignclasses[$banner->textalign],
@@ -753,7 +757,8 @@ class section_manager {
             }
         }
         foreach ($compiled->pages as $compiledpage) {
-            $html .= "<div class=\"block block-home-{$compiledpage->template}\">{$compiledpage->html}</div>";
+            $html .= "<div class=\"block block-home-{$compiledpage->template}\">" . link_map::fix_html($compiledpage->html) .
+                "</div>";
         }
 
         return $html;
@@ -812,6 +817,7 @@ class section_manager {
                 'label' => get_string('sections_link', 'theme_eadtraining', (object) [
                     'number' => $index + 1, 'text' => self::link_text($template, $tag['offset']),
                 ]),
+                'text' => self::link_text($template, $tag['offset']),
                 'default' => $default,
                 'value' => array_key_exists($index, $savedlinks) ? $savedlinks[$index] : $default,
             ];
@@ -1060,7 +1066,9 @@ class section_manager {
     private static function link_text(string $html, int $offset): string {
         $end = stripos($html, '</a>', $offset);
         $inner = $end === false ? '' : substr($html, $offset, $end - $offset);
-        $text = trim(preg_replace('/\s+/', ' ', strip_tags(preg_replace('/^<a\b[^>]*>/i', '', $inner))));
+        // Tags are separated first so the texts of nested elements (and their lang:: tokens) do not run together.
+        $inner = str_replace('><', '> <', preg_replace('/^<a\b[^>]*>/i', '', $inner));
+        $text = trim(preg_replace('/\s+/', ' ', strip_tags($inner)));
 
         return shorten_text(self::resolve_tokens($text), 50);
     }
@@ -1186,8 +1194,12 @@ class section_manager {
         // Links and images, by position.
         $newlinks = [];
         foreach ($fields['links'] as $field) {
-            if (array_key_exists($field['name'], $values)) {
-                $value = trim(clean_param((string) $values[$field['name']], PARAM_URL));
+            if (array_key_exists("{$field['name']}_route", $values)) {
+                // Destination chosen in the form: a route of link_map or a custom URL.
+                $value = link_map::from_form((string) $values["{$field['name']}_route"], (string) ($values[$field['name']] ?? ''));
+                $newlinks[$field['index']] = $value === '' ? $field['default'] : $value;
+            } else if (array_key_exists($field['name'], $values)) {
+                $value = link_map::normalise((string) $values[$field['name']]);
                 $newlinks[$field['index']] = $value === '' ? $field['default'] : $value;
             }
         }
@@ -1221,7 +1233,9 @@ class section_manager {
                 if (!$rebuild && $value === $field['value']) {
                     continue;
                 }
-                if (self::replace_tag_attribute($page->html, $pattern, count($fields[$type]), $index, $attribute, $value)) {
+                // Links are stored as site paths (see link_map) and written to the HTML as full addresses.
+                $htmlvalue = $type == 'links' ? link_map::resolve($value, $field['text'])[0] : $value;
+                if (self::replace_tag_attribute($page->html, $pattern, count($fields[$type]), $index, $attribute, $htmlvalue)) {
                     if ($type == 'links') {
                         $links[$index] = $value;
                     } else {

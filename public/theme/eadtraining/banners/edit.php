@@ -22,6 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use theme_eadtraining\link_map;
 use theme_eadtraining\section_manager;
 use theme_eadtraining\form\custom_banner_form;
 
@@ -52,6 +53,7 @@ $PAGE->navbar->add($title);
 $data = clone($banner);
 $data->returnurl = $returnurl;
 $data->description_editor = ["text" => $banner->description, "format" => $banner->descriptionformat];
+[$data->buttonroute, $data->buttonurl] = link_map::to_form((string) $banner->buttonurl, (string) $banner->buttontext);
 $data->showonhome = $id ? (int) (bool) section_manager::get_banner_pages($id) : 1;
 
 $draftitemid = file_get_submitted_draft_itemid("backgroundimage");
@@ -72,12 +74,14 @@ if ($form->no_submit_button_pressed()) {
     if ($submitted) {
         $submitted->description = $submitted->description_editor["text"] ?? "";
         $submitted->descriptionformat = $submitted->description_editor["format"] ?? FORMAT_HTML;
+        $submitted->buttonurl = link_map::from_form((string) ($submitted->buttonroute ?? ""), (string) ($submitted->buttonurl ?? ""));
         $preview = section_manager::render_banner($submitted, section_manager::get_draft_image_url((int) $submitted->backgroundimage));
     }
 } else if ($formdata = $form->get_data()) {
     $formdata->id = $id;
     $formdata->description = $formdata->description_editor["text"];
     $formdata->descriptionformat = $formdata->description_editor["format"];
+    $formdata->buttonurl = link_map::from_form($formdata->buttonroute, $formdata->buttonurl);
     $id = section_manager::save_banner($formdata);
 
     file_save_draft_area_files($formdata->backgroundimage, $context->id, "theme_eadtraining", section_manager::FILEAREA, $id,
@@ -101,6 +105,7 @@ if ($id && !$preview) {
     $preview = section_manager::render_banner($banner, section_manager::get_image_url($id));
 }
 
+$PAGE->requires->js_call_amd("theme_eadtraining/link_picker", "init", ["id_buttontext", "id_buttonroute", link_map::get_keywords()]);
 $PAGE->requires->js_call_amd("theme_eadtraining/settings", "minicolors", ["id_textcolor"]);
 $PAGE->requires->js_call_amd("theme_eadtraining/settings", "minicolors", ["id_overlaycolor"]);
 
