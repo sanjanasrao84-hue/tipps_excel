@@ -149,4 +149,34 @@ final class link_map_test extends \advanced_testcase {
         $html = section_manager::render_banner($banner, null);
         $this->assertStringContainsString("href=\"{$CFG->wwwroot}/course/index.php\"", $html);
     }
+
+    /**
+     * Sections built on a development machine (http://localhost/...) and deployed load their links and images from the
+     * deployed site.
+     */
+    public function test_content_from_dev_host(): void {
+        global $CFG;
+        $this->resetAfterTest();
+        $CFG->wwwroot = 'https://lms.example.org';
+        $model = '/theme/eadtraining/_editor/model/_assets/psychiatry/hero-consultation.webp';
+
+        $html = link_map::fix_html('<a href="http://localhost/tipps_excel/course/index.php">Explore</a>'
+            . '<a href="https://www.example.com/x">Out</a>'
+            . "<img src=\"http://localhost/tipps_excel{$model}\" srcset=\"http://localhost/tipps_excel{$model} 2x\">"
+            . "<div style=\"background: url('http://127.0.0.1{$model}')\"></div>"
+            . '<img src="https://cdn.example.com/a.png">');
+
+        $this->assertStringNotContainsString('localhost', $html);
+        $this->assertStringNotContainsString('127.0.0.1', $html);
+        $this->assertStringContainsString('href="https://lms.example.org/course/index.php"', $html);
+        $this->assertStringContainsString('href="https://www.example.com/x" target="_blank"', $html);
+        $this->assertStringContainsString("src=\"https://lms.example.org{$model}\"", $html);
+        $this->assertStringContainsString("srcset=\"https://lms.example.org{$model} 2x\"", $html);
+        $this->assertStringContainsString("url('https://lms.example.org{$model}')", $html);
+        $this->assertStringContainsString('src="https://cdn.example.com/a.png"', $html);
+
+        $this->assertTrue(link_map::is_dev_host('localhost'));
+        $this->assertTrue(link_map::is_dev_host('tipps.test'));
+        $this->assertFalse(link_map::is_dev_host('lms.example.org'));
+    }
 }

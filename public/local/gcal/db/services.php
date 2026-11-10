@@ -32,6 +32,20 @@ $functions = [
         'ajax' => true,
         'loginrequired' => true,
     ],
+    'local_gcal_get_timeline_events' => [
+        'classname' => '\local_gcal\external\get_timeline_events',
+        'description' => 'Dashboard Timeline events: activity deadlines together with the calendar page events.',
+        'type' => 'read',
+        'ajax' => true,
+        'loginrequired' => true,
+    ],
+    'local_gcal_get_timeline_course_events' => [
+        'classname' => '\local_gcal\external\get_timeline_course_events',
+        'description' => 'Dashboard Timeline events by course: activity deadlines together with the calendar page events.',
+        'type' => 'read',
+        'ajax' => true,
+        'loginrequired' => true,
+    ],
     'local_gcal_get_status' => [
         'classname' => '\local_gcal\external\get_status',
         'description' => 'Google Calendar connection status of the current user.',

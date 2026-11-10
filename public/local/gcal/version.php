@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_gcal';
-$plugin->version   = 2026102100;
+$plugin->version   = 2026110301;
 $plugin->requires  = 2025041400;
 $plugin->maturity  = MATURITY_BETA;
 $plugin->release   = '1.0';

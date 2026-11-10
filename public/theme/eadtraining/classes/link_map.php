@@ -285,21 +285,103 @@ class link_map {
             return $relative;
         }
 
-        // Same host, another folder (e.g. the database came from another install): keep the part that is a page here.
+        // Same host, another folder, or a development host (the database came from another install, e.g. content built
+        // on http://localhost/... and deployed): keep the part that is a page here.
         $parts = parse_url($value);
         $host = parse_url($wwwroot, PHP_URL_HOST);
-        if (!empty($parts['host']) && strcasecmp($parts['host'], $host) === 0) {
+        if (!empty($parts['host']) && (strcasecmp($parts['host'], $host) === 0 || self::is_dev_host($parts['host']))) {
             $segments = array_values(array_filter(explode('/', $parts['path'] ?? '')));
             $tail = (isset($parts['query']) ? "?{$parts['query']}" : '') . (isset($parts['fragment']) ? "#{$parts['fragment']}" : '');
-            for ($skip = 1; $skip < count($segments); $skip++) {
+            for ($skip = 0; $skip < count($segments); $skip++) {
                 $candidate = '/' . implode('/', array_slice($segments, $skip));
                 if (is_file($CFG->dirroot . $candidate) || is_file("{$CFG->dirroot}{$candidate}/index.php")) {
                     return $candidate . $tail;
                 }
             }
+            if (self::is_dev_host($parts['host'])) {
+                // A development address is never reachable by visitors.
+                return '/';
+            }
         }
 
         return $value;
+    }
+
+    /**
+     * Whether a host name only exists on a developer's machine (localhost, 127.0.0.1, *.test...).
+     *
+     * @param string $host
+     * @return bool
+     */
+    public static function is_dev_host(string $host): bool {
+        $host = strtolower(trim($host, '[]'));
+        return in_array($host, ['localhost', '127.0.0.1', '::1', '0.0.0.0'], true)
+            || preg_match('/\.(localhost|local|test)$/', $host);
+    }
+
+    /**
+     * URL of a file (image, stylesheet...) on this site: stored HTML holds absolute URLs written for the site where the
+     * section was built (e.g. http://localhost/tipps_excel/theme/...), which do not load once the site is deployed.
+     *
+     * @param string $url
+     * @return string
+     */
+    public static function asset_url(string $url): string {
+        global $CFG;
+
+        if (!preg_match('#^(?:https?:)?//([^/?\#]+)(/[^?\#]*)?(.*)$#i', $url, $parts)) {
+            return $url;
+        }
+        $wwwroot = rtrim($CFG->wwwroot, '/');
+        $host = preg_replace('/:\d+$/', '', $parts[1]);
+        $path = $parts[2] ?? '';
+        $tail = $parts[3];
+
+        // Files of the homepage section models exist on every install of this theme.
+        if (preg_match('#/theme/eadtraining/_editor/model/.*$#', $path, $model)) {
+            return $wwwroot . $model[0] . $tail;
+        }
+        $samehost = strcasecmp($host, (string) parse_url($wwwroot, PHP_URL_HOST)) === 0;
+        if (!$samehost && !self::is_dev_host($host)) {
+            return $url;
+        }
+        // Another folder of this host or a development host: drop leading folders until the path is a file of this site
+        // (a script such as /pluginfile.php/1/... counts by its script).
+        $segments = array_values(array_filter(explode('/', $path), 'strlen'));
+        for ($skip = 0; $skip < count($segments); $skip++) {
+            $candidate = '/' . implode('/', array_slice($segments, $skip));
+            $script = preg_match('#^(/.*?\.php)(/|$)#', $candidate, $match) ? $match[1] : $candidate;
+            if (is_file($CFG->dirroot . $script)) {
+                $local = $wwwroot . $candidate . $tail;
+                return $samehost && $skip === 0 ? $url : $local;
+            }
+        }
+        return $url;
+    }
+
+    /**
+     * Points the images, sources and CSS url() of stored HTML at this site (see asset_url()).
+     *
+     * @param string $html
+     * @return string
+     */
+    public static function fix_assets(string $html): string {
+        $html = preg_replace_callback('/(\s(?:src|poster|data-src)\s*=\s*)(["\'])(.*?)\2/i', function ($match) {
+            return $match[1] . $match[2] . htmlspecialchars(self::asset_url(html_entity_decode($match[3], ENT_QUOTES)),
+                ENT_QUOTES) . $match[2];
+        }, $html);
+        $html = preg_replace_callback('/(\ssrcset\s*=\s*)(["\'])(.*?)\2/i', function ($match) {
+            $items = array_map(function ($item) {
+                $item = trim($item);
+                $space = strpos($item, ' ');
+                $url = $space === false ? $item : substr($item, 0, $space);
+                return self::asset_url($url) . ($space === false ? '' : substr($item, $space));
+            }, explode(',', html_entity_decode($match[3], ENT_QUOTES)));
+            return $match[1] . $match[2] . htmlspecialchars(implode(', ', $items), ENT_QUOTES) . $match[2];
+        }, $html);
+        return preg_replace_callback('/(url\(\s*)(["\']?)([^"\')]+)\2(\s*\))/i', function ($match) {
+            return $match[1] . $match[2] . self::asset_url($match[3]) . $match[2] . $match[4];
+        }, $html);
     }
 
     /**
@@ -368,12 +450,13 @@ class link_map {
 
     /**
      * Fixes the links of a section HTML: each <a> gets a working href (see resolve()) and external links open in a new
-     * tab with rel="noopener noreferrer".
+     * tab with rel="noopener noreferrer". Images and CSS url() written for another install load from this site.
      *
      * @param string $html
      * @return string
      */
     public static function fix_html(string $html): string {
+        $html = self::fix_assets($html);
         return preg_replace_callback('/(<a\b)([^>]*)(>)(.*?)(<\/a>)/is', function ($match) {
             $attributes = $match[2];
             $value = preg_match('/\shref\s*=\s*"([^"]*)"/i', $attributes, $href) ? $href[1] : '';

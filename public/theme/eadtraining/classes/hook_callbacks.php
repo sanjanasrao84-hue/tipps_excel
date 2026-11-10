@@ -28,6 +28,7 @@ use cache;
 use core\hook\output\before_footer_html_generation;
 use core\hook\output\before_html_attributes;
 use core\hook\output\before_http_headers;
+use core\hook\output\before_import_map_config;
 use Exception;
 use moodle_url;
 
@@ -415,5 +416,21 @@ HTML
 
         $navbarlayout = get_config("theme_eadtraining", "navbarlayout");
         $PAGE->add_body_class("theme_eadtraining-layout-{$navbarlayout}");
+    }
+
+    /**
+     * Replaces core/fetch with js/esm/fetch_fallback.js on every page, whatever the current theme: user preferences
+     * (Dashboard course overview filters, drawers...) are saved through the AJAX web services, so they do not depend on
+     * the REST router of the web server (see that module).
+     *
+     * @param before_import_map_config $hook
+     * @return void
+     */
+    public static function before_import_map_config(before_import_map_config $hook): void {
+        $hook->add_import(
+            '@moodle/lms/core/fetch',
+            path: 'public/theme/eadtraining/js/esm/fetch_fallback',
+            themable: false,
+        );
     }
 }
