@@ -29,6 +29,7 @@ use core\hook\output\before_footer_html_generation;
 use core\hook\output\before_html_attributes;
 use core\hook\output\before_http_headers;
 use core\hook\output\before_import_map_config;
+use core\hook\navigation\primary_extend;
 use Exception;
 use moodle_url;
 
@@ -432,5 +433,19 @@ HTML
             path: 'public/theme/eadtraining/js/esm/fetch_fallback',
             themable: false,
         );
+    }
+
+    /**
+     * Highlights the right primary navigation tab on the custom pages of the site (see local\primary_tab).
+     *
+     * @param primary_extend $hook
+     * @return void
+     */
+    public static function primary_extend(primary_extend $hook): void {
+        global $PAGE;
+        if (during_initial_install()) {
+            return;
+        }
+        local\primary_tab::apply($PAGE, $hook->get_primaryview());
     }
 }

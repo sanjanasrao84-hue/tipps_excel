@@ -26,10 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 
 $callbacks = [
     [
-        'hook' => \core\hook\navigation\primary_extend::class,
-        'callback' => [\local_gcal\hook_callbacks::class, 'primary_extend'],
-    ],
-    [
         'hook' => \core\hook\after_config::class,
         'callback' => [\local_gcal\hook_callbacks::class, 'after_config'],
     ],

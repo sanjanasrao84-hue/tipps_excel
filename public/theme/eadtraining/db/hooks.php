@@ -26,6 +26,7 @@ use core\hook\output\before_footer_html_generation;
 use core\hook\output\before_html_attributes;
 use core\hook\output\before_http_headers;
 use core\hook\output\before_import_map_config;
+use core\hook\navigation\primary_extend;
 use theme_eadtraining\hook_callbacks;
 
 defined('MOODLE_INTERNAL') || die;
@@ -46,5 +47,11 @@ $callbacks = [
     [
         "hook" => before_import_map_config::class,
         "callback" => [hook_callbacks::class, "before_import_map_config"],
+    ],
+    [
+        // After the plugins have added their tabs (default priority 100), before core picks the active tab.
+        "hook" => primary_extend::class,
+        "callback" => [hook_callbacks::class, "primary_extend"],
+        "priority" => 0,
     ],
 ];

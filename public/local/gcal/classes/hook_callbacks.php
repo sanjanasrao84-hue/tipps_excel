@@ -17,7 +17,6 @@
 namespace local_gcal;
 
 use core\hook\after_config;
-use core\hook\navigation\primary_extend;
 use moodle_url;
 
 /**
@@ -28,20 +27,6 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class hook_callbacks {
-
-    /**
-     * Adds the calendar to the primary navigation.
-     *
-     * @param primary_extend $hook
-     * @return void
-     */
-    public static function primary_extend(primary_extend $hook): void {
-        if (during_initial_install() || !isloggedin() || isguestuser()) {
-            return;
-        }
-        $hook->get_primaryview()->add(get_string('calendar', 'local_gcal'), new moodle_url('/local/gcal/index.php'),
-            \navigation_node::TYPE_ROOTNODE, null, 'local_gcal_calendar');
-    }
 
     /**
      * Makes this calendar the primary calendar: the core calendar page opens it instead (exports and
