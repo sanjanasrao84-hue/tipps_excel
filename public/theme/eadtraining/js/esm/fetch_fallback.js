@@ -74,6 +74,10 @@ const preferenceValue = (value) => {
   if (value === null || value === undefined) {
     return "";
   }
+  if (typeof value === "boolean") {
+    // As the REST API stores them (e.g. core_contentbank_displayunlisted only accepts 0 and 1).
+    return value ? "1" : "0";
+  }
   return typeof value === "object" ? JSON.stringify(value) : String(value);
 };
 
@@ -97,7 +101,7 @@ const preferenceFallback = (component, action, options) => {
   const method = (options.method || "GET").toUpperCase();
 
   if (method === "GET") {
-    return fetchOne("core_user_get_user_preferences", { name: name || "" }).then((result) => {
+    return fetchOne({ methodname: "core_user_get_user_preferences", args: { name: name || "" } }).then((result) => {
       const values = {};
       (result.preferences || []).forEach((preference) => {
         values[preference.name] = preference.value;
@@ -117,7 +121,7 @@ const preferenceFallback = (component, action, options) => {
       value: preferenceValue(values[key]),
       userid: 0,
     }));
-    return fetchOne("core_user_set_user_preferences", { preferences }).then((result) => {
+    return fetchOne({ methodname: "core_user_set_user_preferences", args: { preferences } }).then((result) => {
       if (result.warnings && result.warnings.length) {
         throw new Error(result.warnings[0].message);
       }
@@ -159,7 +163,7 @@ const questionRequest = (component, action, options) => {
       args[key] = params[key] === true || params[key] === "true" || params[key] === "1" || params[key] === 1;
     }
   });
-  return fetchOne("theme_eadtraining_question_api", args).then((json) => new Response(json, {
+  return fetchOne({ methodname: "theme_eadtraining_question_api", args }).then((json) => new Response(json, {
     status: 200,
     headers: { "Content-Type": "application/json" },
   }));

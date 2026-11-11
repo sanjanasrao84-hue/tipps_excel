@@ -95,6 +95,7 @@ class hook_callbacks {
         self::acctoolbar();
         self::vlibras($hook);
         self::mod_page_editor_integration($hook);
+        self::contentbank_unlisted();
 
         if ($COURSE->id == $SITE->id) {
             return;
@@ -158,6 +159,19 @@ class hook_callbacks {
                 "avatar" => get_config("theme_eadtraining", "vlibras_avatar") ?: "icaro",
             ]);
             $hook->add_html($htmlvliras);
+        }
+    }
+
+    /**
+     * Content bank: "Display unlisted content" refreshes the file list in place instead of reloading the page.
+     *
+     * @return void
+     */
+    private static function contentbank_unlisted(): void {
+        global $PAGE;
+
+        if ($PAGE->pagetype === 'contentbank') { // contentbank/index.php sets this page type.
+            $PAGE->requires->js_call_amd('theme_eadtraining/contentbank_unlisted', 'init');
         }
     }
 

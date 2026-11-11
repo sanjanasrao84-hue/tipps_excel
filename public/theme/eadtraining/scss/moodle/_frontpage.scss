@@ -69,3 +69,29 @@
         }
     }
 }
+
+// Course lists of the course renderer (home page, categories, search): a responsive grid of evenly sized cards,
+// as many columns as fit at a readable width (1 on phones, up to 4 on wide screens).
+.courses.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: $spacer * 1.5;
+    margin: 0;
+
+    > .col {
+        display: flex;
+        width: auto;
+        max-width: none;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    > .paging {
+        grid-column: 1 / -1;
+        text-align: center;
+    }
+
+    .psy-course__media {
+        aspect-ratio: 16 / 9;
+    }
+}

@@ -57,7 +57,7 @@
 
     <div id="page" data-region="mainpage" data-usertour="scroller"
          class="drawers {{#blockdraweropen}}show-drawer-right{{/blockdraweropen}} drag-container">
-        <div id="topofscroll" class="main-inner {{#homemode_status}}homemode_editor{{/homemode_status}}">
+        <div id="topofscroll" class="{{^homemode_status}}container {{/homemode_status}}main-inner {{#homemode_status}}homemode_editor{{/homemode_status}}">
             {{#editing}}
                 <div class="editmode-page-item editmode-block-form" style="display:none">
                     <div class="me-4">{{#str}}frontpage_change_editor, theme_eadtraining{{/str}}</div>

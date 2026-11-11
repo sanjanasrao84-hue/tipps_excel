@@ -1,4 +1,12 @@
 /* core.less */
+
+// One font family on every page (Inter is bundled in fonts.scss; the system fonts are the fallback). The bundled
+// bootstrap is precompiled with the font stack in this CSS variable, so $font-family-sans-serif has no effect.
+:root {
+    --#{$prefix}font-sans-serif: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+        sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
 $bg-inverse-link-color: $white !default;
 $dropzone-border: $gray-900 !default;
 $collapse-list-item-padding-y: 0.5rem !default;
@@ -3184,6 +3192,165 @@ body.dragging {
 .initialbargroups ul {
     -webkit-margin-start: 0; /* stylelint-disable-line */
     margin-right: -1px;
+}
+
+// "First name" / "Last name" letter filters (participants, grader report...): the label is a fixed-width column, so
+// the letters of both bars start at the same place; the letters are evenly spaced, rounded buttons.
+.initialbar {
+    align-items: center;
+    gap: $spacer * .5;
+
+    .initialbarlabel {
+        margin: 0 !important;
+        color: $gray-700;
+        font-size: .85rem;
+        font-weight: 600;
+        @include media-breakpoint-up(md) {
+            flex: 0 0 6.5rem;
+        }
+    }
+
+    .initialbargroups {
+        flex: 1 1 0;
+        gap: 4px;
+        min-width: 0;
+
+        .pagination {
+            flex-wrap: wrap;
+            gap: 4px;
+            margin: 0;
+        }
+
+        .page-link {
+            min-width: 2rem;
+            margin: 0 !important;
+            padding: .3rem .45rem;
+            border: 1px solid $border-color;
+            border-radius: 6px !important;
+            background: $white;
+            color: $gray-800;
+            font-size: .8rem;
+            line-height: 1.2;
+            text-align: center;
+
+            &:hover,
+            &:focus {
+                border-color: $primary;
+                background: mix(white, $primary, 90%);
+                color: $primary;
+            }
+        }
+
+        .page-item.active .page-link {
+            border-color: $primary;
+            background: $primary;
+            color: color-contrast($primary);
+        }
+
+        .initialbarall .page-link {
+            padding-left: .75rem;
+            padding-right: .75rem;
+        }
+    }
+}
+
+// Participants page: both letter bars in one card under the filters.
+.path-user .firstinitial,
+.path-user .lastinitial {
+    padding: ($spacer * .75) $spacer;
+    border: 1px solid $border-color;
+    background: $white;
+}
+
+.path-user .firstinitial {
+    margin-top: $spacer;
+    border-bottom-style: dashed;
+    border-radius: 10px 10px 0 0;
+}
+
+.path-user .lastinitial {
+    margin-bottom: $spacer;
+    border-top: 0;
+    border-radius: 0 0 10px 10px;
+}
+
+// Filter panel (core/datafilter: participants, reports...): a white card, conditions as evenly sized fields in a
+// row, the actions on their own line.
+.filter-group {
+    padding: $spacer !important;
+    border: 1px solid $border-color !important;
+    border-radius: 10px;
+    background: $white !important;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+
+    [data-filterregion="filtermatch"] {
+        margin-bottom: $spacer * .75;
+        font-size: .9rem;
+
+        label {
+            font-weight: 600;
+        }
+
+        .form-select {
+            width: auto;
+        }
+    }
+
+    [data-filterregion="filter"] > fieldset > div:first-of-type {
+        margin: 0 0 ($spacer * .5) !important;
+        padding: ($spacer * .75) !important;
+        border-radius: 8px;
+        background: $gray-100 !important;
+        gap: $spacer * .75 !important;
+
+        label {
+            margin-bottom: 0;
+            color: $gray-700;
+            font-size: .85rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .form-select {
+            width: auto;
+            min-width: 11rem;
+        }
+    }
+
+    [data-filterregion="joinadverb"] {
+        margin: 0 0 ($spacer * .5) ($spacer * .25);
+        color: $gray-600;
+        font-size: .75rem;
+        letter-spacing: .04em;
+    }
+
+    [data-filterregion="actions"] {
+        flex-wrap: wrap;
+        align-items: center;
+        gap: $spacer * .5;
+        margin-top: $spacer * .5;
+        padding-top: $spacer * .75;
+        border-top: 1px solid $border-color;
+
+        .btn {
+            margin: 0 !important;
+        }
+
+        [data-filteraction="add"] {
+            padding-left: 0;
+            color: $primary !important;
+            font-weight: 600;
+        }
+
+        [data-filteraction="showall"],
+        [data-filteraction="reset"] {
+            margin-left: auto !important;
+        }
+
+        [data-filteraction="showall"] + [data-filteraction="reset"] {
+            margin-left: 0 !important;
+        }
+    }
 }
 
 .page-item {

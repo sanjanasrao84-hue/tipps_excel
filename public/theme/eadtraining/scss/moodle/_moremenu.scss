@@ -1,11 +1,15 @@
 .moremenu {
-    @media (max-width: 767px) {
-        opacity: 0;
-    }
     height: $moremenu-height;
 
-    &.observed {
-        opacity: 1;
+    // Hidden until core/moremenu has moved the tabs that do not fit into "More" (it then adds .observed), on every
+    // screen size: otherwise each page load shows all the tabs in one long row that then jumps back. Only with JS:
+    // without it nothing would ever add .observed.
+    .jsenabled & {
+        opacity: 0;
+
+        &.observed {
+            opacity: 1;
+        }
     }
 
     // core/moremenu detects overflow by the items wrapping onto a second line, but the bundled
