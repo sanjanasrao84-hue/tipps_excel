@@ -66,6 +66,10 @@ class event_form extends \core_form\dynamic_form {
                 $targets['course:' . $course->id] = get_string('targetcourse', 'local_gcal', format_string($course->fullname));
             }
         }
+        // Same rule as calendar_get_allowed_event_types() for personal events.
+        if (has_capability('moodle/calendar:manageownentries', context_system::instance())) {
+            $targets['user:0'] = get_string('targetuser', 'local_gcal');
+        }
         return $targets;
     }
 
@@ -197,7 +201,7 @@ class event_form extends \core_form\dynamic_form {
             [$type, $targetid] = explode(':', $data->target);
             $fields += [
                 'eventtype' => $type,
-                'courseid' => $type === 'course' ? (int) $targetid : SITEID,
+                'courseid' => $type === 'course' ? (int) $targetid : ($type === 'user' ? 0 : SITEID),
                 'categoryid' => $type === 'category' ? (int) $targetid : 0,
                 'userid' => $USER->id,
                 'visible' => 1,

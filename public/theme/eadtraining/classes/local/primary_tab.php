@@ -92,6 +92,46 @@ class primary_tab {
     }
 
     /**
+     * Whether the current request is Logs opened as a course-level report of the site home
+     * (/report/log/index.php?id=1&iscoursepage=1, from Home > Reports). The admin URL (no iscoursepage) is not.
+     *
+     * @return bool
+     */
+    public static function is_site_course_logs(): bool {
+        global $SCRIPT;
+
+        if (empty($SCRIPT) || str_replace('\\', '/', $SCRIPT) !== '/report/log/index.php') {
+            return false;
+        }
+        return optional_param('id', 0, PARAM_INT) == SITEID && optional_param('iscoursepage', false, PARAM_BOOL);
+    }
+
+    /**
+     * Makes Logs opened from Home > Reports behave like the other site reports.
+     *
+     * For the site course, core report/log/index.php calls admin_externalpage_setup(): the page gets the system context,
+     * the admin secondary menu and no "Reports" node, so report_helper::print_report_selector() prints a plain heading
+     * instead of the dropdown. This switches that request to the site course context and drops the navigation core
+     * already built for the admin tree, before the header is printed.
+     *
+     * @param moodle_page $page
+     * @return void
+     */
+    public static function use_site_course_context(moodle_page $page): void {
+        if (!self::is_site_course_logs() || $page->context->contextlevel != CONTEXT_SYSTEM) {
+            return;
+        }
+        $page->set_context(\context_course::instance(SITEID));
+        // The navigation objects are cached on the page (protected properties); drop those built for the system context.
+        (function () {
+            $this->_settingsnav = null;
+            $this->_secondarynav = null;
+            $this->_primarynav = null;
+            $this->_primarynavcombined = null;
+        })->call($page);
+    }
+
+    /**
      * Sets the active primary tab of the page being built, when the page did not choose one and belongs to a tab here.
      *
      * @param moodle_page $page
@@ -101,6 +141,11 @@ class primary_tab {
     public static function apply(moodle_page $page, primary $primary): void {
         global $SCRIPT;
 
+        // Logs opened from Home > Reports: core pins Site administration, but it is a site course report like the others.
+        if (self::is_site_course_logs() && in_array(self::HOME, $primary->get_children_key_list(), true)) {
+            $page->set_primary_active_tab(self::HOME);
+            return;
+        }
         if ($page->get_primary_activate_tab() !== null || empty($SCRIPT)) {
             return;
         }

@@ -23,14 +23,27 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\output\language_menu;
+
 defined('MOODLE_INTERNAL') || die;
 
 $bodyattributes = $OUTPUT->body_attributes();
 
+$loginthemename = theme_eadtraining_default("logintheme", "dark-elegante", '/^[A-Za-z0-9-]+$/');
+$loginbackgroundimageurl = theme_eadtraining_setting_file_url("loginbackgroundimage");
+if (!$loginbackgroundimageurl) {
+    $loginbackgroundimageurl = $OUTPUT->image_url("login/{$loginthemename}", "theme_eadtraining")->out(false);
+}
+
 $templatecontext = [
-    'sitename' => format_string($SITE->shortname, true, ['context' => context_course::instance(SITEID), "escape" => false]),
-    'output' => $OUTPUT,
-    'bodyattributes' => $bodyattributes,
+    "sitename" => format_string($SITE->shortname, true, ["context" => context_course::instance(SITEID), "escape" => false]),
+    "output" => $OUTPUT,
+    "bodyattributes" => $bodyattributes,
+    "login_theme" => $loginthemename,
+    "footer_show_copywriter" => get_config("theme_eadtraining", "footer_show_copywriter"),
+    "footer_copywriter_text" => \theme_eadtraining\output\footer_renderer::get_copywriter_text(),
+    "languagemenu" => (new language_menu($PAGE))->export_for_action_menu($OUTPUT),
+    "loginbackgroundimageurl" => $loginbackgroundimageurl,
 ];
 
-echo $OUTPUT->render_from_template('theme_eadflix/login', $templatecontext);
+echo $OUTPUT->render_from_template("theme_eadtraining/login", $templatecontext);

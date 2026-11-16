@@ -184,8 +184,8 @@ class course_renderer extends \core_course_renderer {
                     break;
 
                 case FRONTPAGECATEGORYCOMBO:
-                    $output .= $this->frontpage_part("skipcourses", "frontpage-category-combo",
-                        get_string("courses"), $this->frontpage_combo_list());
+                    // Combo list shows the user's own bundle (not the category tree of the core combo list).
+                    $output .= $this->frontpage_bundle();
                     break;
 
                 case FRONTPAGECOURSESEARCH:
@@ -196,6 +196,63 @@ class course_renderer extends \core_course_renderer {
             $output .= "<br>";
         }
 
+        return $output;
+    }
+
+    /**
+     * Returns HTML with the logged-in user's own active bundle subscription(s) (local_lmssub): one block per bundle,
+     * named after the plan, with its courses as cards. When there is none, a short message links to the plans page.
+     *
+     * @return string
+     */
+    public function frontpage_bundle(): string {
+        global $DB, $USER;
+
+        if (!class_exists("\\local_lmssub\\plan_manager")) {
+            return "";
+        }
+
+        $output = "";
+        if (isloggedin() && !isguestuser()) {
+            $sql = "SELECT s.*
+                      FROM {local_lmssub_sub} s
+                      JOIN {local_lmssub_plan} p ON p.id = s.planid
+                     WHERE s.userid = :userid AND p.type = :type
+                  ORDER BY s.timeend DESC";
+            $subs = $DB->get_records_sql($sql, ["userid" => $USER->id, "type" => \local_lmssub\plan_manager::TYPE_BUNDLE]);
+            foreach ($subs as $sub) {
+                $plan = \local_lmssub\plan_manager::get_plan($sub->planid);
+                if (\local_lmssub\access_engine::effective_end($sub, $plan) <= time()) {
+                    continue;
+                }
+
+                $courseids = array_keys(\local_lmssub\plan_manager::courses_for_plan($plan->id));
+                $cards = "";
+                if ($courseids) {
+                    foreach ($DB->get_records_list("course", "id", $courseids, "sortorder") as $course) {
+                        if (!$course->visible && !has_capability("moodle/course:viewhiddencourses", context_course::instance($course->id))) {
+                            continue;
+                        }
+                        $card = $this->output->render_from_template("core_course/coursecard", course_card::export($course));
+                        $cards .= html_writer::div($card, "col d-flex px-2 mb-4");
+                    }
+                }
+                if ($cards === "") {
+                    continue;
+                }
+                $contents = html_writer::div($cards, "frontpage-bundle-courses {$this->get_class_row()}");
+                $output .= $this->frontpage_part("skipbundle{$plan->id}", "frontpage-bundle-{$plan->id}",
+                    format_string($plan->name), $contents);
+            }
+        }
+
+        if ($output === "") {
+            $message = html_writer::div(get_string("frontpage_bundle_empty", "theme_eadtraining"), "mb-2") .
+                html_writer::link(new moodle_url("/local/lmssub/index.php"),
+                    get_string("frontpage_bundle_browse", "theme_eadtraining"), ["class" => "btn btn-primary"]);
+            $output = $this->frontpage_part("skipbundle", "frontpage-bundle",
+                get_string("frontpage_bundle_title", "theme_eadtraining"), html_writer::div($message, "frontpage-bundle-empty"));
+        }
         return $output;
     }
 

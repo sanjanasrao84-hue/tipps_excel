@@ -102,22 +102,18 @@
   transform: translateX(5px);
 }
 
-.category-explorer-modern__card--primary {
+.category-explorer-modern__card:hover, .category-explorer-modern__card:focus-visible {
   border-color: transparent;
   background: linear-gradient(135deg, var(--bs-primary), #315fd6);
   color: #fff;
 }
 
-.category-explorer-modern__card--primary:hover {
-  color: #fff;
-}
-
-.category-explorer-modern__card--primary .category-explorer-modern__icon {
+.category-explorer-modern__card:hover .category-explorer-modern__icon, .category-explorer-modern__card:focus-visible .category-explorer-modern__icon {
   background: rgba(255, 255, 255, 0.16);
   color: #fff;
 }
 
-.category-explorer-modern__card--primary small, .category-explorer-modern__card--primary b {
+.category-explorer-modern__card:hover small, .category-explorer-modern__card:focus-visible small, .category-explorer-modern__card:hover b, .category-explorer-modern__card:focus-visible b {
   color: rgba(255, 255, 255, 0.78);
 }
 

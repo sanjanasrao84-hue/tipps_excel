@@ -96,6 +96,7 @@ class hook_callbacks {
         self::vlibras($hook);
         self::mod_page_editor_integration($hook);
         self::contentbank_unlisted();
+        self::participants_filter_change($hook);
 
         if ($COURSE->id == $SITE->id) {
             return;
@@ -173,6 +174,65 @@ class hook_callbacks {
         if ($PAGE->pagetype === 'contentbank') { // contentbank/index.php sets this page type.
             $PAGE->requires->js_call_amd('theme_eadtraining/contentbank_unlisted', 'init');
         }
+    }
+
+    /**
+     * Participants filter: core (lib/amd/src/datafilter.js addFilter) disables a condition's type select once a type is
+     * chosen, so the only way to change it is the row's X button. Clicking the disabled select now does that: it clicks
+     * the row's X and, when the row was removed (not just reset), "Add condition". The select is never re-enabled.
+     * Does nothing when the expected elements are missing. Only on /user/index.php.
+     *
+     * @param before_footer_html_generation $hook
+     * @return void
+     */
+    private static function participants_filter_change(before_footer_html_generation $hook): void {
+        global $SCRIPT;
+
+        if (str_replace('\\', '/', (string) $SCRIPT) !== '/user/index.php') {
+            return;
+        }
+
+        $hook->add_html(
+            <<<HTML
+<style>
+.filter-group[data-table-region] [data-filterregion="filter"] select[data-filterfield="type"]:disabled {
+    pointer-events: none;
+}
+</style>
+<script>
+document.addEventListener('click', function(e) {
+    var group = e.target.closest && e.target.closest('.filter-group[data-table-region]');
+    if (!group) {
+        return;
+    }
+    // Disabled selects take no clicks (pointer-events: none above), so find the one under the pointer.
+    var select = null;
+    group.querySelectorAll('[data-filterregion="filter"] select[data-filterfield="type"]:disabled').forEach(function(s) {
+        var r = s.getBoundingClientRect();
+        if (s.value && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+            select = s;
+        }
+    });
+    if (!select) {
+        return;
+    }
+    var row = select.closest('[data-filterregion="filter"]');
+    var remove = row && row.querySelector('[data-filteraction="remove"]');
+    var add = group.querySelector('[data-filteraction="add"]');
+    if (!remove || !add) {
+        return;
+    }
+    var rows = group.querySelectorAll('[data-filterregion="filter"]').length;
+    e.preventDefault();
+    remove.click();
+    // With several rows the row is removed at once; a single row is only reset in place, so nothing to add.
+    if (rows > 1 && !row.isConnected && !add.disabled) {
+        add.click();
+    }
+});
+</script>
+HTML
+        );
     }
 
     /**
@@ -428,6 +488,8 @@ HTML
             }
             redirect(new moodle_url($redirecturl));
         }
+
+        local\primary_tab::use_site_course_context($PAGE);
 
         $navbarlayout = get_config("theme_eadtraining", "navbarlayout");
         $PAGE->add_body_class("theme_eadtraining-layout-{$navbarlayout}");

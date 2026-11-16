@@ -49,7 +49,7 @@ class event_source {
     ];
 
     /** @var string[] Categories that can be chosen when creating an event. */
-    public const CREATABLE = ['lesson', 'live', 'session', 'assessment', 'course'];
+    public const CREATABLE = ['lesson', 'live', 'session', 'assessment', 'course', 'organisation', 'institution', 'reminder'];
 
     /** @var string[] Modules whose dates are assessments. */
     private const ASSESSMENT_MODULES = ['quiz', 'workshop', 'lesson', 'h5pactivity', 'scorm'];

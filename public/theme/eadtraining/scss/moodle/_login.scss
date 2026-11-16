@@ -126,11 +126,14 @@
                 }
             }
 
-            input:-webkit-autofill + .toggle-password,
-            input:-moz-autofill + .toggle-password,
-            input:autofill + .toggle-password {
-                &, i {
-                    color: #000000 !important;
+            // Not on aurora: its autofilled field is kept dark, so the icon keeps its pale colour.
+            @at-root .page-wrapper-login:not(.aurora) form .password-wrapper {
+                input:-webkit-autofill + .toggle-password,
+                input:-moz-autofill + .toggle-password,
+                input:autofill + .toggle-password {
+                    &, i {
+                        color: #000000 !important;
+                    }
                 }
             }
         }
@@ -424,6 +427,23 @@
                 box-shadow: 0 0 0 2px rgba(124, 235, 197, .35);
                 background: rgba(255, 255, 255, .12);
             }
+        }
+
+        // Chrome paints its own pale background on autofilled fields; cover it with the dark glass colour.
+        .password-wrapper input:-webkit-autofill,
+        .password-wrapper input:-webkit-autofill:hover,
+        .password-wrapper input:-webkit-autofill:focus,
+        .password-wrapper input:autofill {
+            -webkit-text-fill-color: #eaf6ff;
+            caret-color: #eaf6ff;
+            -webkit-box-shadow: 0 0 0 1000px #213537 inset;
+            box-shadow: 0 0 0 1000px #213537 inset;
+            transition: background-color 9999s ease-in-out 0s;
+        }
+
+        .password-wrapper input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px #253a3d inset, 0 0 0 2px rgba(124, 235, 197, .35);
+            box-shadow: 0 0 0 1000px #253a3d inset, 0 0 0 2px rgba(124, 235, 197, .35);
         }
 
         .toggle-sensitive-btn {
@@ -784,7 +804,7 @@
         }
 
         .password-wrapper .toggle-password {
-            color: #64748b;
+            color: #475569;
             border: none;
             background: transparent;
 
@@ -929,7 +949,7 @@
         }
 
         .password-wrapper .toggle-password {
-            color: #64748b;
+            color: #475569;
             background: transparent;
             border-radius: 8px;
 
@@ -1061,10 +1081,10 @@
             }
         }
         .password-wrapper .toggle-password {
-            color: #5d7e62;
+            color: #3b5e42;
             right: 15px;
             &:hover {
-                color: #2e4a35;
+                color: #0f172a;
                 background: transparent;
             }
         }
@@ -1221,9 +1241,9 @@
             display: block;
         }
         .password-wrapper .toggle-password {
-            color: #64748b;
+            color: #475569;
             &:hover {
-                color: var(--med-primary);
+                color: #0f172a;
             }
         }
     }
