@@ -51,7 +51,7 @@ class calendar {
         // Filters: the user's courses and their organisations (top-level categories).
         $courses = [];
         $organisations = [];
-        foreach (calendar_get_default_courses(null, 'id, fullname, category, sortorder', false, $USER->id) as $course) {
+        foreach (event_source::calendar_courses($USER->id, 'id, fullname, category, sortorder') as $course) {
             if ($course->id == SITEID) {
                 continue;
             }
@@ -68,12 +68,23 @@ class calendar {
         }
         usort($courses, fn($a, $b) => strcoll($a['name'], $b['name']));
 
+        // Organisations where the user may create events can be filtered too, even without courses in them.
+        $targets = event_form::targets();
+        foreach (array_keys($targets) as $target) {
+            [$type, $targetid] = explode(':', $target);
+            if ($type === 'category' && !isset($organisations[$targetid])
+                    && ($top = core_course_category::get((int) $targetid, IGNORE_MISSING, true))) {
+                $organisations[$top->id] = ['id' => (int) $top->id, 'name' => $top->get_formatted_name()];
+            }
+        }
+        usort($organisations, fn($a, $b) => strcoll($a['name'], $b['name']));
+
         $categories = [];
         foreach (event_source::CATEGORIES as $key => [, $colour]) {
             $categories[] = ['key' => $key, 'name' => get_string('category_' . $key, 'local_gcal'), 'color' => $colour];
         }
 
-        $cancreate = (bool) event_form::targets();
+        $cancreate = (bool) $targets;
         $initialdate = preg_match('/^\d{4}-\d{2}-\d{2}$/', $initialdate) ? $initialdate : '';
 
         $page->requires->js(new moodle_url('/local/gcal/thirdparty/fullcalendar/index.global.min.js'), $inhead);
@@ -93,7 +104,7 @@ class calendar {
         return $page->get_renderer('core')->render_from_template('local_gcal/calendar', [
             'status' => status::export($USER->id),
             'courses' => $courses,
-            'organisations' => array_values($organisations),
+            'organisations' => $organisations,
             'hasorganisations' => count($organisations) > 1,
             'categories' => $categories,
             'cancreate' => $cancreate,

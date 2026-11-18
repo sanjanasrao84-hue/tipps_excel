@@ -92,18 +92,46 @@ class primary_tab {
     }
 
     /**
-     * Whether the current request is Logs opened as a course-level report of the site home
-     * (/report/log/index.php?id=1&iscoursepage=1, from Home > Reports). The admin URL (no iscoursepage) is not.
+     * Reports of the site home (Home > Reports) and the URL parameter that holds the site course id there.
+     *
+     * Site administration > Reports links to the same scripts without the site course id (Logs "?id=0", Live logs and
+     * Statistics without a course, Event monitoring rules "?courseid=0"), so an explicit site course id means the page
+     * was opened from Home. Some of these scripts then set up the admin page anyway and pin Site administration.
+     */
+    public const SITE_COURSE_REPORTS = [
+        '/report/view.php' => 'courseid',
+        '/report/log/index.php' => 'id',
+        '/report/loglive/index.php' => 'id',
+        '/report/stats/index.php' => 'course',
+        '/report/outline/index.php' => 'id',
+        '/report/participation/index.php' => 'id',
+        '/report/competency/index.php' => 'id',
+        '/report/aiusage/index.php' => 'id',
+        '/admin/tool/monitor/managerules.php' => 'courseid',
+    ];
+
+    /**
+     * Whether the current request is a report of the site home opened from Home > Reports (see SITE_COURSE_REPORTS).
+     *
+     * @return bool
+     */
+    public static function is_site_course_report(): bool {
+        global $SCRIPT;
+
+        $param = self::SITE_COURSE_REPORTS[str_replace('\\', '/', (string) $SCRIPT)] ?? null;
+        return $param !== null && optional_param($param, 0, PARAM_INT) == SITEID;
+    }
+
+    /**
+     * Whether the current request is Logs opened as a report of the site home (/report/log/index.php?id=1, from
+     * Home > Reports, where core adds an empty "iscoursepage"). The Site administration link is "?id=0".
      *
      * @return bool
      */
     public static function is_site_course_logs(): bool {
         global $SCRIPT;
 
-        if (empty($SCRIPT) || str_replace('\\', '/', $SCRIPT) !== '/report/log/index.php') {
-            return false;
-        }
-        return optional_param('id', 0, PARAM_INT) == SITEID && optional_param('iscoursepage', false, PARAM_BOOL);
+        return str_replace('\\', '/', (string) $SCRIPT) === '/report/log/index.php' && self::is_site_course_report();
     }
 
     /**
@@ -141,8 +169,9 @@ class primary_tab {
     public static function apply(moodle_page $page, primary $primary): void {
         global $SCRIPT;
 
-        // Logs opened from Home > Reports: core pins Site administration, but it is a site course report like the others.
-        if (self::is_site_course_logs() && in_array(self::HOME, $primary->get_children_key_list(), true)) {
+        // Reports opened from Home > Reports: core pins Site administration for some (Logs, Statistics, Event monitoring
+        // rules), but they are reports of the site home.
+        if (self::is_site_course_report() && in_array(self::HOME, $primary->get_children_key_list(), true)) {
             $page->set_primary_active_tab(self::HOME);
             return;
         }

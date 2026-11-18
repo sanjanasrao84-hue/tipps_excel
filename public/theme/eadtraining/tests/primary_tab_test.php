@@ -66,6 +66,56 @@ final class primary_tab_test extends \advanced_testcase {
     }
 
     /**
+     * Report URLs and whether they are opened from Home > Reports.
+     *
+     * @return array
+     */
+    public static function site_course_report_provider(): array {
+        return [
+            'Home logs' => ['/report/log/index.php', ['id' => SITEID, 'iscoursepage' => ''], true],
+            'Home live logs' => ['/report/loglive/index.php', ['id' => SITEID], true],
+            'Home statistics' => ['/report/stats/index.php', ['course' => SITEID], true],
+            'Home monitoring rules' => ['/admin/tool/monitor/managerules.php', ['courseid' => SITEID], true],
+            'Admin logs' => ['/report/log/index.php', ['id' => 0], false],
+            'Admin live logs' => ['/report/loglive/index.php', [], false],
+            'Admin statistics' => ['/report/stats/index.php', [], false],
+            'Admin monitoring rules' => ['/admin/tool/monitor/managerules.php', ['courseid' => 0], false],
+            'Course logs' => ['/report/log/index.php', ['id' => SITEID + 1, 'iscoursepage' => 1], false],
+            'Other page' => ['/course/view.php', ['id' => SITEID], false],
+        ];
+    }
+
+    /**
+     * Reports opened from Home > Reports get the Home tab, even when the script pins Site administration.
+     *
+     * @dataProvider site_course_report_provider
+     * @param string $script
+     * @param array $params
+     * @param bool $fromhome
+     */
+    public function test_site_course_report(string $script, array $params, bool $fromhome): void {
+        global $SCRIPT;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $SCRIPT = $script;
+        $_GET = $params;
+        $this->assertSame($fromhome, primary_tab::is_site_course_report());
+
+        $page = new \moodle_page();
+        $page->set_context(\context_system::instance());
+        $page->set_url($script, $params);
+        $page->set_primary_active_tab(primary_tab::ADMIN);
+        $primary = new \core\navigation\views\primary($page);
+        $primary->add('Home', new \moodle_url('/'), \navigation_node::TYPE_SYSTEM, null, primary_tab::HOME);
+        $primary->add('Site administration', new \moodle_url('/admin/search.php'), \navigation_node::TYPE_SITE_ADMIN, null,
+            primary_tab::ADMIN);
+        primary_tab::apply($page, $primary);
+        $this->assertSame($fromhome ? primary_tab::HOME : primary_tab::ADMIN, $page->get_primary_activate_tab());
+        $_GET = [];
+    }
+
+    /**
      * The tab is applied only when the page did not choose one and the user has that tab.
      */
     public function test_apply(): void {

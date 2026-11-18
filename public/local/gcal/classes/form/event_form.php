@@ -201,7 +201,8 @@ class event_form extends \core_form\dynamic_form {
             [$type, $targetid] = explode(':', $data->target);
             $fields += [
                 'eventtype' => $type,
-                'courseid' => $type === 'course' ? (int) $targetid : ($type === 'user' ? 0 : SITEID),
+                // Moodle reads category and user events only with courseid 0, and site events with SITEID.
+                'courseid' => $type === 'course' ? (int) $targetid : ($type === 'site' ? SITEID : 0),
                 'categoryid' => $type === 'category' ? (int) $targetid : 0,
                 'userid' => $USER->id,
                 'visible' => 1,
@@ -233,7 +234,15 @@ class event_form extends \core_form\dynamic_form {
         if ($connection && $connection->is_active()) {
             (new sync_manager($connection))->sync();
         }
-        return ['eventid' => (int) $event->id, 'count' => count($eventids)];
+        // Where the event is shown, so the calendar can clear filters that would hide it.
+        $normalised = (new event_source($USER))->normalise($DB->get_record('event', ['id' => $event->id], '*', MUST_EXIST));
+        return [
+            'eventid' => (int) $event->id,
+            'count' => count($eventids),
+            'courseid' => $normalised->courseid ?? 0,
+            'organisationid' => $normalised->organisationid ?? 0,
+            'category' => $normalised->category ?? $data->category,
+        ];
     }
 
     /**
@@ -251,10 +260,19 @@ class event_form extends \core_form\dynamic_form {
             if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $start)) {
                 $timestart = (new \DateTimeImmutable($start, \core_date::get_user_timezone_object()))->getTimestamp();
             }
-            $this->set_data([
+            $defaults = [
                 'timestart' => $timestart ?: (int) (ceil(time() / HOURSECS) * HOURSECS),
                 'duration' => 60, 'repeats' => 1, 'category' => 'lesson', 'mode' => 'online',
-            ]);
+            ];
+            // Calendar picked from the page's course or organisation filter, when the user may create there.
+            $target = (string) ($this->_ajaxformdata['target'] ?? '');
+            if ($target !== '' && array_key_exists($target, self::targets())) {
+                $defaults['target'] = $target;
+                $defaults['category'] = [
+                    'site' => 'institution', 'category' => 'organisation', 'user' => 'reminder',
+                ][explode(':', $target)[0]] ?? 'lesson';
+            }
+            $this->set_data($defaults);
             return;
         }
         $event = calendar_event::load($id);

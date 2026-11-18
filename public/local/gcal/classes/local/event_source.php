@@ -49,7 +49,8 @@ class event_source {
     ];
 
     /** @var string[] Categories that can be chosen when creating an event. */
-    public const CREATABLE = ['lesson', 'live', 'session', 'assessment', 'course', 'organisation', 'institution', 'reminder'];
+    public const CREATABLE = ['lesson', 'live', 'session', 'assignment', 'assessment', 'activity', 'course', 'organisation',
+        'institution', 'reminder'];
 
     /** @var string[] Modules whose dates are assessments. */
     private const ASSESSMENT_MODULES = ['quiz', 'workshop', 'lesson', 'h5pactivity', 'scorm'];
@@ -85,7 +86,7 @@ class event_source {
         global $CFG;
         require_once($CFG->dirroot . '/calendar/lib.php');
 
-        $courses = calendar_get_default_courses(null, '*', false, $this->user->id);
+        $courses = self::calendar_courses($this->user->id, '*');
         foreach ($courses as $course) {
             $this->courses[$course->id] = $course;
         }
@@ -113,8 +114,32 @@ class event_source {
     }
 
     /**
-     * Categories whose events the user can see: categories of their courses and their parents, and categories they
-     * can manage (computed without the session cache, so it is correct when several users are synchronised).
+     * Courses whose events the user sees: their own courses (Moodle's calendar rule) and every course where they may
+     * create events, so that an event someone creates always shows in their calendar.
+     *
+     * @param int $userid
+     * @param string $fields Course fields, as for calendar_get_default_courses() (must include category)
+     * @return stdClass[] by id
+     */
+    public static function calendar_courses(int $userid, string $fields = '*'): array {
+        global $CFG;
+        require_once($CFG->dirroot . '/calendar/lib.php');
+
+        $courses = calendar_get_default_courses(null, $fields, false, $userid);
+        $fieldsexceptid = implode(',', array_diff(array_map('trim', explode(',', $fields)), ['id', '']));
+        $managed = get_user_capability_course('moodle/calendar:manageentries', $userid, true, $fieldsexceptid) ?: [];
+        foreach ($managed as $course) {
+            if (!isset($courses[$course->id])) {
+                $courses[$course->id] = $course;
+            }
+        }
+        return $courses;
+    }
+
+    /**
+     * Categories whose events the user can see: categories of their courses and their parents, categories they
+     * can manage, and organisations where they may create events (computed without the session cache, so it is
+     * correct when several users are synchronised).
      *
      * @param stdClass[] $courses
      * @return int[]
@@ -124,7 +149,9 @@ class event_source {
         $coursecategories = array_flip(array_map(fn($course) => $course->category, $courses));
         foreach (core_course_category::get_all(['returnhidden' => true]) as $category) {
             if (isset($coursecategories[$category->id])
-                    || has_capability('moodle/category:manage', $category->get_context(), $this->user, false)) {
+                    || has_capability('moodle/category:manage', $category->get_context(), $this->user, false)
+                    || (!$category->parent
+                        && has_capability('moodle/calendar:manageentries', $category->get_context(), $this->user))) {
                 $categories[$category->id] = true;
                 foreach ($category->get_parents() as $parentid) {
                     $categories[$parentid] = true;

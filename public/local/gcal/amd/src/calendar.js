@@ -100,6 +100,8 @@ define([
             course: root.querySelector('[data-filter="course"]'),
             organisation: root.querySelector('[data-filter="organisation"]'),
         };
+        const filterValue = (name) => parseInt(filters[name] ? filters[name].value : 0, 10) || 0;
+
         const hidden = new Set();
         const warnings = root.querySelector('[data-region="warnings"]');
         let calendar = null;
@@ -121,8 +123,8 @@ define([
                 args: {
                     start: Math.floor(info.start.valueOf() / 1000) - pad,
                     end: Math.floor(info.end.valueOf() / 1000) + pad,
-                    courseid: parseInt(filters.course ? filters.course.value : 0, 10) || 0,
-                    organisationid: parseInt(filters.organisation ? filters.organisation.value : 0, 10) || 0,
+                    courseid: filterValue('course'),
+                    organisationid: filterValue('organisation'),
                 },
             }])[0].then((result) => {
                 showWarnings(result.warnings);
@@ -132,7 +134,8 @@ define([
                     start: event.allday ? wallClock(event.start, config.timezone).slice(0, 10)
                         : wallClock(event.start, config.timezone),
                     end: event.end > event.start
-                        ? (event.allday ? wallClock(event.end, config.timezone).slice(0, 10) : wallClock(event.end, config.timezone))
+                        ? (event.allday ? wallClock(event.end, config.timezone).slice(0, 10)
+                            : wallClock(event.end, config.timezone))
                         : null,
                     allDay: event.allday,
                     backgroundColor: event.color,
@@ -152,8 +155,8 @@ define([
             const context = Object.assign({}, event, {
                 when: describeWhen(event, config),
                 personal: event.source === 'google',
-                isactivity: !!event.editdatesurl || event.category === 'assignment' || event.category === 'assessment'
-                    || event.category === 'live' || event.category === 'activity',
+                // Events created in the calendar link to their course, even with an activity category.
+                isactivity: !!event.editdatesurl || /\/mod\//.test(event.url || ''),
                 locationurl: /^https?:\/\//i.test(location),
             });
             Templates.renderForPromise('local_gcal/event_details', context).then(({html}) => Modal.create({
@@ -188,14 +191,44 @@ define([
             }).catch(Notification.exception);
         };
 
+        // Calendar suggested in the form for the current filter (the server ignores it if the user cannot create there).
+        const filterTarget = () => {
+            if (filterValue('course')) {
+                return 'course:' + filterValue('course');
+            }
+            return filterValue('organisation') ? 'category:' + filterValue('organisation') : '';
+        };
+
+        // Clears the filters and shows the category that would hide a just-saved event.
+        const reveal = (saved) => {
+            if (!saved) {
+                return;
+            }
+            if (filters.course && filterValue('course') && filterValue('course') !== saved.courseid) {
+                filters.course.value = '0';
+            }
+            const organisation = filterValue('organisation');
+            if (filters.organisation && organisation && organisation !== saved.organisationid) {
+                filters.organisation.value = '0';
+            }
+            if (saved.category && hidden.has(saved.category)) {
+                hidden.delete(saved.category);
+                const checkbox = root.querySelector(`[data-category="${saved.category}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            }
+        };
+
         const openForm = (eventid, start) => {
             const form = new ModalForm({
                 formClass: '\\local_gcal\\form\\event_form',
-                args: {id: eventid || 0, start: start || ''},
+                args: {id: eventid || 0, start: start || '', target: eventid ? '' : filterTarget()},
                 modalConfig: {title: eventid ? str('editevent') : str('createevent')},
             });
-            form.addEventListener(form.events.FORM_SUBMITTED, () => {
+            form.addEventListener(form.events.FORM_SUBMITTED, (e) => {
                 Toast.add(str('eventsaved'), {type: 'success'});
+                reveal(e.detail);
                 calendar.refetchEvents();
                 refreshStatus();
             });
