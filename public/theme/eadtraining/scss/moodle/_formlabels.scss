@@ -1,0 +1,24 @@
+// Form labels, on every form: no help (?) buttons, and the required mark is a small red asterisk next to the label
+// (the icon itself is mapped to fa-asterisk in classes/output/icon_system_fontawesome.php).
+
+.mform a.help-icon {
+    display: none;
+}
+
+.icon.fa-asterisk.text-danger {
+    width: auto;
+    margin: 0 0 0 .15rem;
+    font-size: .55rem;
+    vertical-align: super;
+}
+
+// Beside a label: sit at the top of the text, like a superscript.
+.mform .form-label-addon {
+    align-self: flex-start;
+
+    .text-danger {
+        display: inline-flex;
+        line-height: 1;
+        padding-top: .15rem;
+    }
+}

@@ -183,6 +183,11 @@ $fa-version: "6.3.0" !default;
 @import "../../eadtraining/scss/moodle/acctoolbar";
 @import "../../eadtraining/scss/moodle/minicolors";
 @import "../../eadtraining/scss/moodle/format-block";
+@import "../../eadtraining/scss/moodle/managecourses";
+@import "../../eadtraining/scss/moodle/formlayout";
+@import "../../eadtraining/scss/moodle/courseedit";
+@import "../../eadtraining/scss/moodle/breadcrumbpath";
+@import "../../eadtraining/scss/moodle/formlabels";
 
 // EadFlix
 @import "eadflix/admin";

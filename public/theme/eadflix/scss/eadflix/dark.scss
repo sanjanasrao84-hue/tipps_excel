@@ -998,3 +998,8 @@ img.icon {
         }
     }
 }
+
+// Path (breadcrumb): the brand colour is too dark for the current-page chip on the dark background.
+body #page-navbar .breadcrumb:not(:empty) .breadcrumb-item:last-child > :is(a, span) {
+    color: var(--bs-primary-text-emphasis);
+}

@@ -1,0 +1,502 @@
+// "Manage course categories and courses" (course/management.php): a cleaner look on top of _coursemanagement.scss.
+// Only styles: core's management JS (drag and drop, AJAX show/hide/move) relies on the markup, so it is not changed.
+
+$mc-radius: 1rem;
+
+#page-course-management {
+    // Toolbar: the view switcher and the course search.
+    .tertiary-navigation {
+        padding: .65rem .85rem;
+        margin-bottom: 1.25rem;
+        background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color);
+        border-radius: $mc-radius;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .04);
+
+        > .d-flex {
+            align-items: center;
+            gap: .75rem;
+            flex-wrap: wrap;
+        }
+
+        .navitem {
+            margin-bottom: 0;
+        }
+
+        .form-select,
+        .form-control {
+            border-radius: .6rem;
+            min-height: 2.5rem;
+        }
+
+        .input-group .form-control {
+            border-radius: .6rem 0 0 .6rem;
+        }
+
+        .input-group .btn {
+            border-radius: 0 .6rem .6rem 0;
+        }
+    }
+
+    #region-main h2 {
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    // Panels.
+    #course-category-listings {
+        row-gap: 1.25rem;
+
+        > div > div {
+            min-height: 0;
+        }
+
+        .card {
+            border: 1px solid var(--bs-border-color);
+            border-radius: $mc-radius;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .04);
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            background: var(--bs-body-bg);
+            border-bottom: 1px solid var(--bs-border-color);
+            padding: 1rem 1.25rem;
+        }
+
+        h3,
+        .card-header h3 {
+            margin: 0;
+            padding: 0;
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1rem 1.25rem 1.25rem;
+        }
+
+        // "Create new ..." as the main action, sort / per page as small pills next to it.
+        .listing-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-start;
+            gap: .5rem;
+            text-align: left;
+            margin-bottom: 1rem !important; // stylelint-disable-line declaration-no-important
+
+            > .btn {
+                border-radius: .6rem;
+                font-weight: 600;
+                padding: .45rem 1rem;
+            }
+
+            > .btn:first-child {
+                background: var(--bs-primary);
+                border-color: var(--bs-primary);
+                color: #fff;
+            }
+
+            .dropdown-toggle {
+                display: inline-flex;
+                align-items: center;
+                gap: .3rem;
+                padding: .35rem .8rem;
+                border: 1px solid var(--bs-border-color);
+                border-radius: 2rem;
+                font-size: .85rem;
+                color: var(--bs-body-color);
+                text-decoration: none;
+
+                &:hover,
+                &:focus-visible {
+                    background: var(--bs-tertiary-bg);
+                }
+            }
+        }
+
+        // Lists of categories and courses.
+        .list-group {
+            margin: 0;
+            border: 1px solid var(--bs-border-color);
+            border-radius: .75rem;
+            overflow: hidden;
+        }
+
+        .listitem {
+            border: 0;
+            border-bottom: 1px solid var(--bs-border-color);
+            padding: .55rem .75rem;
+            background: var(--bs-body-bg);
+            transition: background-color .15s ease;
+
+            &:last-child {
+                border-bottom: 0;
+            }
+
+            &:hover {
+                background: var(--bs-tertiary-bg);
+            }
+
+            // The open category / selected course.
+            &[data-selected="1"] {
+                background: rgba(var(--bs-primary-rgb), .07);
+                box-shadow: inset 4px 0 0 var(--bs-primary);
+                border-left: 0;
+
+                > div > .d-flex > a,
+                > .clearfix > .d-flex > a {
+                    color: var(--bs-primary);
+                    font-weight: 600;
+                }
+            }
+
+            // Hidden ones.
+            &[data-visible="0"] > div > .d-flex > a,
+            &[data-visible="0"] > .clearfix > .d-flex > a {
+                color: var(--bs-secondary-color);
+                font-style: italic;
+            }
+
+            a.coursename,
+            a.categoryname {
+                color: var(--bs-body-color);
+                font-weight: 500;
+                text-decoration: none;
+                margin-bottom: 0 !important; // stylelint-disable-line declaration-no-important
+
+                &:hover,
+                &:focus-visible {
+                    color: var(--bs-primary);
+                    text-decoration: none;
+                }
+            }
+
+            .clearfix,
+            > .d-flex {
+                display: flex;
+                align-items: center;
+                gap: .4rem;
+            }
+
+            .clearfix > .d-flex,
+            > .d-flex > .d-flex {
+                flex: 1 1 auto;
+                align-items: center;
+                min-width: 0;
+                gap: .5rem;
+            }
+
+            .float-end {
+                margin-left: auto;
+                align-items: center;
+                gap: .35rem;
+            }
+
+            .drag-handle {
+                color: var(--bs-secondary-color);
+                opacity: .5;
+                cursor: grab;
+
+                .icon {
+                    margin: 0;
+                }
+            }
+
+            .custom-control {
+                margin: 0 !important; // stylelint-disable-line declaration-no-important
+            }
+
+            // ID number and course count as small pills.
+            .idnumber,
+            > div .text-muted:not(.course-count) {
+                font-size: .75rem;
+                padding: .1rem .5rem;
+                border-radius: 2rem;
+                background: var(--bs-tertiary-bg);
+                color: var(--bs-secondary-color);
+                white-space: nowrap;
+
+                &:empty {
+                    display: none;
+                }
+            }
+
+            .course-count {
+                display: inline-flex;
+                align-items: center;
+                gap: .2rem;
+                min-width: 2.5rem;
+                justify-content: center;
+                font-size: .75rem;
+                font-weight: 600;
+                padding: .1rem .5rem;
+                border-radius: 2rem;
+                background: rgba(var(--bs-primary-rgb), .1);
+                color: var(--bs-primary) !important; // stylelint-disable-line declaration-no-important
+
+                .icon {
+                    margin: 0;
+                    font-size: .7rem;
+                }
+            }
+
+            // Row actions: small square buttons, faded until the row is hovered or focused.
+            .item-actions {
+                display: inline-flex;
+                align-items: center;
+                gap: .1rem;
+                opacity: .55;
+                transition: opacity .15s ease;
+
+                .menubar {
+                    gap: .1rem;
+                }
+
+                // Icon links only, not the items of the category's "..." menu (a.dropdown-item).
+                a:not(.dropdown-item) {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 1.9rem;
+                    height: 1.9rem;
+                    margin: 0 !important; // stylelint-disable-line declaration-no-important
+                    padding: 0 !important; // stylelint-disable-line declaration-no-important
+                    border-radius: .5rem;
+                    color: var(--bs-secondary-color);
+                    text-decoration: none;
+
+                    .icon {
+                        margin: 0;
+                    }
+
+                    &:hover,
+                    &:focus-visible {
+                        background: var(--bs-body-bg);
+                        color: var(--bs-primary);
+                        box-shadow: 0 0 0 1px var(--bs-border-color);
+                    }
+
+                    &.action-delete:hover,
+                    &.action-delete:focus-visible {
+                        color: var(--bs-danger);
+                    }
+                }
+            }
+
+            &:hover .item-actions,
+            &:focus-within .item-actions,
+            &[data-selected="1"] .item-actions {
+                opacity: 1;
+            }
+
+            // The display above beats core's rules that show only one of Hide / Show (core's JS flips data-visible
+            // when either is used): repeat them here.
+            &:not([data-visible="0"]) > div .item-actions .action-show,
+            &[data-visible="0"] > div .item-actions .action-hide {
+                display: none;
+            }
+        }
+
+        // Likewise core's "no Move up on the first row, no Move down on the last".
+        #course-listing > .firstpage .listitem:first-child > div .item-actions .action-moveup,
+        #course-listing > .lastpage .listitem:last-child > div .item-actions .action-movedown,
+        #category-listing .listitem:first-child > div .item-actions .action-moveup,
+        #category-listing .listitem:last-child > div .item-actions .action-movedown {
+            display: none;
+        }
+
+        // Sub-categories: indented with a guide line.
+        ul.ml {
+            margin: .4rem 0 .1rem .9rem;
+            padding-left: .75rem;
+            border-left: 2px solid var(--bs-border-color);
+
+            .listitem {
+                border: 0;
+                border-radius: .5rem;
+                padding: .4rem .5rem;
+            }
+        }
+
+        .listing-pagination-totals {
+            margin: .75rem 0 0;
+            font-size: .85rem;
+            text-align: center;
+        }
+
+        // Bulk actions ("Sorting", "Move selected ... to"): a tinted panel, small labels above the controls.
+        .bulk-actions {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bs-tertiary-bg);
+            border-radius: .75rem;
+
+            .detail-pair {
+                display: flex;
+                flex-direction: column;
+                gap: .35rem;
+                margin: 0 0 .85rem !important; // stylelint-disable-line declaration-no-important
+
+                &:last-child {
+                    margin-bottom: 0 !important; // stylelint-disable-line declaration-no-important
+                }
+            }
+
+            .pair-key,
+            .pair-value {
+                flex: 0 0 auto;
+                width: 100%;
+                max-width: 100%;
+                padding: 0;
+            }
+
+            .pair-key {
+                font-size: .75rem;
+                font-weight: 600;
+                letter-spacing: .03em;
+                text-transform: uppercase;
+                color: var(--bs-secondary-color);
+            }
+
+            .pair-value > div {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: .5rem;
+
+                > div {
+                    flex: 1 1 12rem;
+                }
+            }
+
+            .form-select {
+                margin: 0 !important; // stylelint-disable-line declaration-no-important
+                border-radius: .6rem;
+                min-height: 2.4rem;
+                width: 100%;
+            }
+
+            .pair-value .d-flex > .form-select {
+                flex: 1 1 14rem;
+                width: auto;
+            }
+
+            .btn {
+                border-radius: .6rem;
+                font-weight: 600;
+                padding: .45rem 1.1rem;
+                background: var(--bs-body-bg);
+                border: 1px solid var(--bs-primary);
+                color: var(--bs-primary);
+
+                &:hover,
+                &:focus-visible {
+                    background: var(--bs-primary);
+                    color: #fff;
+                }
+            }
+        }
+
+        // Course details.
+        .course-detail {
+            .listing-actions {
+                gap: .4rem;
+
+                .btn {
+                    margin: 0 !important; // stylelint-disable-line declaration-no-important
+                    padding: .35rem .85rem;
+                    border-radius: 2rem;
+                    font-size: .85rem;
+                    font-weight: 600;
+                    background: var(--bs-body-bg);
+                    border: 1px solid var(--bs-border-color);
+                    color: var(--bs-body-color);
+
+                    &:first-child {
+                        background: var(--bs-primary);
+                        border-color: var(--bs-primary);
+                        color: #fff;
+                    }
+
+                    &:not(:first-child):hover,
+                    &:not(:first-child):focus-visible {
+                        border-color: var(--bs-primary);
+                        color: var(--bs-primary);
+                    }
+
+                    &[href*="/course/delete.php"]:hover,
+                    &[href*="/course/delete.php"]:focus-visible {
+                        border-color: var(--bs-danger);
+                        color: var(--bs-danger);
+                    }
+                }
+            }
+
+            // Label / value tiles in a grid.
+            .card-body {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+                gap: .6rem;
+
+                > .listing-actions {
+                    grid-column: 1 / -1;
+                }
+            }
+
+            .detail-pair {
+                display: flex;
+                flex-direction: column;
+                gap: .2rem;
+                margin: 0;
+                padding: .65rem .85rem;
+                border: 1px solid var(--bs-border-color);
+                border-radius: .75rem;
+
+                // Long lists (sections, activities used) get the whole row.
+                &.sections,
+                &.modulesused {
+                    grid-column: 1 / -1;
+                }
+            }
+
+            .pair-key,
+            .pair-value {
+                flex: 0 0 auto;
+                width: 100%;
+                max-width: 100%;
+                padding: 0;
+            }
+
+            .pair-key {
+                font-size: .72rem;
+                letter-spacing: .03em;
+                text-transform: uppercase;
+                color: var(--bs-secondary-color);
+                font-weight: 600 !important; // stylelint-disable-line declaration-no-important
+            }
+
+            .pair-value {
+                font-weight: 500;
+                word-break: break-word;
+
+                > .d-flex {
+                    display: block !important; // stylelint-disable-line declaration-no-important
+                }
+
+                &:has(> .d-flex:empty)::after {
+                    content: "—";
+                    color: var(--bs-secondary-color);
+                }
+
+                a {
+                    text-decoration: none;
+                }
+            }
+        }
+    }
+}

@@ -98,6 +98,9 @@ class navbar implements \renderable {
             if ($this->page->pagetype === 'admin-roles-check') {
                 $this->remove('permissions');
             }
+            if ($this->page->pagetype === 'course-edit') {
+                $this->order_add_course_path();
+            }
         }
         if ($this->page->context->contextlevel == CONTEXT_COURSE) {
             $courseformat = course_get_format($this->page->course);
@@ -204,6 +207,40 @@ class navbar implements \renderable {
 
         // Make sure that the last item is not a link. Not sure if this is always a good idea.
         $this->remove_last_item_action();
+    }
+
+    /**
+     * "Add a new course" (course/edit.php in a category): core builds Courses > categories > Manage courses and
+     * categories > Add a new course. Put "Manage courses and categories" before the categories, and point the
+     * categories at their management page, which lists their courses:
+     * Courses > Manage courses and categories > Parent > Category > Add a new course.
+     */
+    protected function order_add_course_path(): void {
+        $manageurl = new \moodle_url('/course/management.php');
+        $manage = null;
+        $categories = [];
+        $before = [];
+        $after = [];
+        foreach ($this->items as $item) {
+            // The category nodes are shared with any other navbar built for this page, and already point at
+            // management.php?categoryid=X if one was: check the type first and match the management URL exactly.
+            if ($item->type == \breadcrumb_navigation_node::TYPE_CATEGORY) {
+                $categories[] = $item;
+            } else if ($item->action instanceof \moodle_url && $item->action->compare($manageurl, URL_MATCH_EXACT)) {
+                $manage = $item;
+            } else if (!$categories && !$manage) {
+                $before[] = $item;
+            } else {
+                $after[] = $item;
+            }
+        }
+        if (!$manage || !$categories) {
+            return;
+        }
+        foreach ($categories as $category) {
+            $category->action = new \moodle_url('/course/management.php', ['categoryid' => $category->key]);
+        }
+        $this->items = array_merge($before, [$manage], $categories, $after);
     }
 
     /**

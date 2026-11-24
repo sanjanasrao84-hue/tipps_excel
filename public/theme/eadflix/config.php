@@ -192,7 +192,8 @@ $THEME->yuicssmodules = [];
 $THEME->rendererfactory = "theme_overridden_renderer_factory";
 $THEME->requiredblocks = "";
 $THEME->addblockposition = BLOCK_ADDBLOCK_POSITION_FLATNAV;
-$THEME->iconsystem = \core\output\icon_system::FONTAWESOME;
+// Font Awesome, with a red asterisk for required fields.
+$THEME->iconsystem = \theme_eadtraining\output\icon_system_fontawesome::class;
 $THEME->haseditswitch = true;
 $THEME->usescourseindex = true;
 // By default, all boost theme do not need their titles displayed.

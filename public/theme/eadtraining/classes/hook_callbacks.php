@@ -97,6 +97,7 @@ class hook_callbacks {
         self::mod_page_editor_integration($hook);
         self::contentbank_unlisted();
         self::participants_filter_change($hook);
+        self::settings_forms();
 
         if ($COURSE->id == $SITE->id) {
             return;
@@ -173,6 +174,23 @@ class hook_callbacks {
 
         if ($PAGE->pagetype === 'contentbank') { // contentbank/index.php sets this page type.
             $PAGE->requires->js_call_amd('theme_eadtraining/contentbank_unlisted', 'init');
+        }
+    }
+
+    /**
+     * Settings forms (any form in the main region with collapsible sections): section chips, Required/Optional badges
+     * (theme_eadtraining/form_layout, styles in scss/moodle/_formlayout.scss). The course settings form
+     * (course/edit.php) gets theme_eadtraining/course_edit instead, which does the same plus its own extras.
+     *
+     * @return void
+     */
+    private static function settings_forms(): void {
+        global $PAGE;
+
+        if ($PAGE->pagetype === 'course-edit') {
+            $PAGE->requires->js_call_amd('theme_eadtraining/course_edit', 'init');
+        } else {
+            $PAGE->requires->js_call_amd('theme_eadtraining/form_layout', 'init');
         }
     }
 

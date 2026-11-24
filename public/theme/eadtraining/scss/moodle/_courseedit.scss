@@ -1,0 +1,89 @@
+// "Add a new course" / "Edit course settings" (course/edit.php): what only this page has. The card sections, labels,
+// grid and section chips are the same on every settings form: see _formlayout.scss.
+
+#page-course-edit {
+    // Title and intro.
+    #region-main .ce-title {
+        margin-bottom: .25rem;
+        font-weight: 700;
+    }
+
+    .ce-intro {
+        color: var(--bs-secondary-color);
+        margin-bottom: 1.5rem;
+        max-width: 60rem;
+    }
+
+    form.mform {
+        #fitem_id_fullname input.form-control {
+            font-size: 1.1rem;
+            min-height: 3rem;
+        }
+
+        // Shown as a plain dropdown by course_edit.js; undo the space core reserves for its autocomplete.
+        #fitem_id_category select.form-select {
+            width: 100%;
+            max-width: none;
+            height: auto;
+            margin-top: 0;
+            overflow: visible;
+            vertical-align: middle;
+        }
+    }
+
+    .ce-field-hint {
+        flex: 0 0 100%;
+        margin-top: .35rem;
+        font-size: .85rem;
+        color: var(--bs-secondary-color);
+
+        .icon {
+            margin-right: .15rem;
+            color: var(--bs-primary);
+        }
+    }
+
+    // Show/Hide toggle for the course visibility. Fills its column at the height of the inputs next to it.
+    .ce-segmented {
+        display: flex;
+        width: 100%;
+        height: 2.6rem;
+        padding: .2rem;
+        border-radius: .6rem;
+        background: var(--bs-tertiary-bg);
+        border: 1px solid var(--bs-border-color);
+    }
+
+    .ce-segment {
+        border: 0;
+        background: transparent;
+        flex: 1 1 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bs-secondary-color);
+        padding: 0 1rem;
+        border-radius: .45rem;
+        font-weight: 500;
+        transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+
+        .icon {
+            margin-right: .25rem;
+        }
+
+        &:hover {
+            color: var(--bs-body-color);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--bs-primary);
+            outline-offset: 1px;
+        }
+
+        &.active {
+            background: var(--bs-body-bg);
+            color: var(--bs-primary);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+        }
+    }
+}
