@@ -83,6 +83,7 @@ class helper {
         $shadow = self::SHADOW[$a['shadow']] ?? self::SHADOW['soft'];
         return color::accent_vars($a['primarycolor'])
             . '--mu-accent:' . $a['accentcolor'] . ';'
+            . '--mu-accent-rgb:' . implode(',', color::rgb($a['accentcolor'])) . ';'
             . '--mu-bg:' . $bg . ';'
             . '--mu-bg-rgb:' . implode(',', color::rgb($bg)) . ';'
             . '--mu-font:' . self::font_stack($a) . ';'

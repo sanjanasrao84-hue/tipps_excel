@@ -1,0 +1,117 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template theme_modernui/dashboard_hero
+
+    Personal welcome hero on the Dashboard (theme_modernui\output\dashboard_hero), rendered after the page
+    header by theme_modernui\output\core_renderer::full_header().
+
+    One primary action: "Continue" when there is something to continue, otherwise "Browse courses".
+
+    Example context (json):
+    {
+        "greeting": "Good morning, Sam",
+        "date": "Tuesday, 25 November 2026",
+        "message": "You're 42% of the way through your courses in progress.",
+        "chips": [{"text": "3 courses", "icon": "fa-book-open"}, {"text": "1 completed", "icon": "fa-trophy"}],
+        "celebrate": {"text": "You completed Intro to Psychology. Brilliant work!", "url": "#"},
+        "continue": {
+            "url": "#",
+            "coursename": "Intro to Psychology",
+            "activity": {"name": "Week 3 quiz", "modname": "Quiz", "iconurl": "#"},
+            "image": "data:image/svg+xml;base64,",
+            "fresh": false,
+            "hasprogress": true,
+            "progress": 42
+        },
+        "browseurl": "#",
+        "hascourses": true
+    }
+}}
+<section class="mu-hero" aria-labelledby="mu-hero-title">
+    <div class="mu-hero-main">
+        <p class="mu-hero-date">{{date}}</p>
+        <h2 class="mu-hero-title" id="mu-hero-title">{{greeting}}</h2>
+        <p class="mu-hero-message">{{message}}</p>
+        {{#haschips}}
+        <ul class="mu-hero-chips">
+            {{#chips}}
+            <li class="mu-chip"><i class="icon fa {{icon}} fa-fw" aria-hidden="true"></i>{{text}}</li>
+            {{/chips}}
+        </ul>
+        {{/haschips}}
+        {{#celebrate}}
+        <div class="mu-celebrate" role="status">
+            <span class="mu-celebrate-burst" aria-hidden="true"></span>
+            <i class="icon fa fa-trophy fa-fw mu-celebrate-icon" aria-hidden="true"></i>
+            <a href="{{url}}" class="mu-celebrate-text">{{text}}</a>
+        </div>
+        {{/celebrate}}
+    </div>
+
+    {{#continue}}
+    <div class="mu-continue">
+        <div class="mu-continue-cover">
+            <img src="{{{image}}}" alt="" loading="lazy" decoding="async">
+        </div>
+        <div class="mu-continue-body">
+            <p class="mu-continue-label">
+                {{#fresh}}{{#str}} continue_label_fresh, theme_modernui {{/str}}{{/fresh}}
+                {{^fresh}}{{#str}} continue_label, theme_modernui {{/str}}{{/fresh}}
+            </p>
+            {{#activity}}
+            <p class="mu-continue-title">
+                <img class="icon mu-continue-modicon" src="{{iconurl}}" alt="" aria-hidden="true">
+                <span>{{name}}</span>
+            </p>
+            <p class="mu-continue-course"><span class="visually-hidden">{{modname}}, </span>{{coursename}}</p>
+            {{/activity}}
+            {{^activity}}
+            <p class="mu-continue-title"><span>{{coursename}}</span></p>
+            {{/activity}}
+            <div class="mu-continue-actions">
+                <a href="{{url}}" class="btn btn-primary mu-continue-btn stretched-link">
+                    {{#fresh}}{{#str}} cta_start, theme_modernui {{/str}}{{/fresh}}
+                    {{^fresh}}{{#str}} continue_action, theme_modernui {{/str}}{{/fresh}}
+                    <span class="visually-hidden">{{#activity}}{{name}}, {{/activity}}{{coursename}}</span>
+                    <i class="icon fa fa-arrow-right fa-fw ms-1 me-0" aria-hidden="true"></i>
+                </a>
+                {{#hasprogress}}
+                <div class="mu-ring" style="--mu-ring-value: {{progress}}">
+                    <svg viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+                        <circle class="mu-ring-track" cx="18" cy="18" r="15.5"/>
+                        <circle class="mu-ring-value" cx="18" cy="18" r="15.5" pathLength="100"/>
+                    </svg>
+                    <span class="mu-ring-text">{{#str}} percent, theme_modernui, {{progress}} {{/str}}</span>
+                    <span class="visually-hidden">{{#str}} completepercent, block_myoverview, {{progress}} {{/str}}</span>
+                </div>
+                {{/hasprogress}}
+            </div>
+        </div>
+    </div>
+    {{/continue}}
+    {{^continue}}
+    <div class="mu-continue mu-continue-empty">
+        {{> theme_modernui/empty_illustration }}
+        <p class="mu-continue-title">
+            {{#hascourses}}{{#str}} hero_empty_title_enrolled, theme_modernui {{/str}}{{/hascourses}}
+            {{^hascourses}}{{#str}} hero_empty_title, theme_modernui {{/str}}{{/hascourses}}
+        </p>
+        <a href="{{browseurl}}" class="btn btn-primary">{{#str}} browsecourses, theme_modernui {{/str}}</a>
+    </div>
+    {{/continue}}
+</section>

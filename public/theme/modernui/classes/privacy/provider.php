@@ -10,7 +10,7 @@ class provider implements
     \core_privacy\local\metadata\provider,
     \core_privacy\local\request\user_preference_provider {
 
-    const PREFS = ['mode', 'accent', 'fontsize', 'density', 'motion', 'contrast'];
+    const PREFS = ['mode', 'accent', 'fontsize', 'density', 'motion', 'contrast', 'celebrated'];
 
     public static function get_metadata(collection $collection): collection {
         foreach (self::PREFS as $p) {

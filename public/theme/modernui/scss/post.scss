@@ -20,6 +20,17 @@
   --mu-brand-rgb: var(--mu-primary-rgb);
   --mu-brand-hover: var(--mu-primary-hover);
   --mu-on-brand: var(--mu-on-primary);
+  // Tinted surfaces and gradients, all derived from the brand / accent colours.
+  --mu-tint: rgba(var(--mu-brand-rgb), 0.08);
+  --mu-tint-strong: rgba(var(--mu-brand-rgb), 0.16);
+  --mu-grad-brand: linear-gradient(135deg, var(--mu-primary) 0%, var(--mu-primary-hover) 100%);
+  --mu-glow-accent: radial-gradient(circle at 85% 15%, rgba(var(--mu-accent-rgb), 0.22), transparent 55%);
+  --mu-scrim-rgb: 15, 23, 42; // shadows and image scrims: always dark, in both modes
+  --mu-shadow-hover: 0 12px 28px rgba(var(--mu-scrim-rgb), 0.12), 0 2px 6px rgba(var(--mu-scrim-rgb), 0.08);
+  // Motion. Zeroed by Reduce motion (below and in the user-preferences section).
+  --mu-dur-fast: 150ms;
+  --mu-dur: 220ms;
+  --mu-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 // ---- Dark palette (used with data-bs-theme="dark") ----
@@ -33,6 +44,8 @@ html[data-bs-theme="dark"] {
   --mu-muted: #a7b4c7;
   --mu-border: #334155;
   --mu-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --mu-scrim-rgb: 0, 0, 0;
+  --mu-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
   --mu-brand: var(--mu-lift);
   --mu-brand-rgb: var(--mu-lift-rgb);
   --mu-brand-hover: var(--mu-lift-hover);
@@ -47,6 +60,16 @@ html[data-mu-density="compact"] { --mu-pad: 0.5rem; }
 html[data-mu-contrast="high"] {
   --mu-border: currentColor;
   --mu-muted: var(--mu-text);
+}
+html[data-mu-motion="reduce"] {
+  --mu-dur-fast: 0ms;
+  --mu-dur: 0ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mu-dur-fast: 0ms;
+    --mu-dur: 0ms;
+  }
 }
 html[data-mu-motion="reduce"] *,
 html[data-mu-motion="reduce"] *::before,
@@ -226,3 +249,4 @@ html[data-bs-theme="dark"] .border, html[data-bs-theme="dark"] .border-bottom, h
 // ---- Pages and components (one partial each; var(--mu-*) only) ----
 @import "modernui/login";
 @import "modernui/appearance";
+@import "modernui/dashboard";
