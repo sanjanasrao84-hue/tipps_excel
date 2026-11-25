@@ -15,6 +15,7 @@
   --mu-pad: 1rem;
   --mu-content-max: 1200px;
   --mu-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.2);
+  --mu-rainbow: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); // custom-colour swatch only
   --mu-brand: var(--mu-primary);
   --mu-brand-rgb: var(--mu-primary-rgb);
   --mu-brand-hover: var(--mu-primary-hover);
@@ -222,67 +223,6 @@ html[data-bs-theme="dark"] .text-dark, html[data-bs-theme="dark"] .text-body { c
 html[data-bs-theme="dark"] .text-muted { color: var(--mu-muted) !important; }
 html[data-bs-theme="dark"] .border, html[data-bs-theme="dark"] .border-bottom, html[data-bs-theme="dark"] .border-top { border-color: var(--mu-border) !important; }
 
-// ---- Login page (best effort; refine with a template override later) ----
-html[data-mu-login="split"] body#page-login-index,
-html[data-mu-login="centered"] body#page-login-index {
-  background-color: var(--mu-bg);
-  background-image: var(--mu-login-bg, none);
-  background-size: cover;
-  background-position: center;
-}
-html[data-mu-login="split"] body#page-login-index #page { background: transparent; }
-@media (min-width: 992px) {
-  html[data-mu-login="split"] body#page-login-index {
-    background-size: 50% 100%;
-    background-repeat: no-repeat;
-    background-position: left center;
-  }
-  html[data-mu-login="split"] body#page-login-index #page-content,
-  html[data-mu-login="split"] body#page-login-index #region-main-box {
-    width: 50%;
-    margin-left: 50%;
-    background: var(--mu-bg);
-    min-height: 100vh;
-  }
-}
-
-// ---- Appearance panel ----
-.mu-appearance-toggle {
-  position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 1040;
-  border-radius: 999px;
-  width: 3rem;
-  height: 3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--mu-shadow);
-}
-.mu-appearance-panel {
-  position: fixed;
-  right: 1rem;
-  bottom: 5rem;
-  z-index: 1041;
-  width: min(22rem, calc(100vw - 2rem));
-  max-height: calc(100vh - 7rem);
-  overflow-y: auto;
-  padding: 1rem;
-  background: var(--mu-surface);
-  color: var(--mu-text);
-  border: 1px solid var(--mu-border);
-  border-radius: var(--mu-radius-lg);
-  box-shadow: var(--mu-shadow-lg);
-}
-.mu-appearance-panel[hidden] { display: none; }
-.mu-appearance-panel legend { float: none; width: auto; margin-bottom: 0.4rem; }
-.mu-swatch {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  border: 2px solid var(--mu-border);
-  padding: 0;
-}
-.mu-swatch[aria-pressed="true"] { outline: 3px solid var(--mu-text); outline-offset: 2px; }
-#mu-custom-color { width: 2.25rem; height: 2rem; padding: 0; border: 0; background: none; }
+// ---- Pages and components (one partial each; var(--mu-*) only) ----
+@import "modernui/login";
+@import "modernui/appearance";

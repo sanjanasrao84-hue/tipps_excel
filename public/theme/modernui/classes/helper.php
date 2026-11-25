@@ -147,7 +147,6 @@ class helper {
             'data-mu-motion' => $e['motion'] ? 'reduce' : 'normal',
             'data-mu-contrast' => $e['contrast'] ? 'high' : 'normal',
             'data-mu-width' => $a['contentwidth'] === 'full' ? 'full' : 'boxed',
-            'data-mu-login' => $a['loginlayout'] === 'centered' ? 'centered' : 'split',
         ];
         $json = json_encode($attrs);
         $html .= '<script>(function(){var d=document.documentElement,a=' . $json . ';'

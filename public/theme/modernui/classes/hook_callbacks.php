@@ -23,10 +23,41 @@ class hook_callbacks {
             return;
         }
         $e = helper::effective($PAGE->theme);
-        $swatches = ['4F46E5', '0EA5E9', '047857', 'C2410C', 'BE185D', '7C3AED'];
+        // The six accent swatches (data, like the presets). The key names the colour for screen readers.
+        $swatches = [
+            'indigo' => '#4F46E5', 'sky' => '#0EA5E9', 'emerald' => '#047857',
+            'orange' => '#C2410C', 'pink' => '#BE185D', 'violet' => '#7C3AED',
+        ];
+        $option = fn(string $value, string $current, string $label) => [
+            'value' => $value,
+            'label' => get_string($label, 'theme_modernui'),
+            'checked' => $value === $current,
+        ];
+        $modes = [$option('light', $e['mode'], 'mode_light')];
+        if ($e['darkenabled']) {
+            $modes[] = $option('dark', $e['mode'], 'mode_dark');
+            $modes[] = $option('auto', $e['mode'], 'mode_auto');
+        }
         $context = [
             'darkenabled' => $e['darkenabled'],
-            'swatches' => array_map(fn($h) => ['hex' => '#' . $h], $swatches),
+            'modes' => $modes,
+            'fontsizes' => [
+                $option('small', $e['fontsize'], 'size_small'),
+                $option('medium', $e['fontsize'], 'size_medium'),
+                $option('large', $e['fontsize'], 'size_large'),
+            ],
+            'densities' => [
+                $option('comfortable', $e['density'], 'density_comfortable'),
+                $option('compact', $e['density'], 'density_compact'),
+            ],
+            'motion' => $e['motion'],
+            'contrast' => $e['contrast'],
+            'customcolor' => strtolower($e['accent'] ?: $e['admin']['primarycolor']),
+            'swatches' => array_map(fn($key, $hex) => [
+                'hex' => $hex,
+                'name' => get_string('swatch_' . $key, 'theme_modernui'),
+                'pressed' => strcasecmp($hex, $e['accent']) === 0,
+            ], array_keys($swatches), $swatches),
         ];
         $hook->add_html($PAGE->get_renderer('core')->render_from_template('theme_modernui/appearance', $context));
         $PAGE->requires->js_call_amd('theme_modernui/appearance', 'init', [[

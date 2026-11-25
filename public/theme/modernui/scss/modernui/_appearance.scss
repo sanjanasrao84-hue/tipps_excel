@@ -1,0 +1,134 @@
+// Modern UI: the per-user Appearance drawer (templates/appearance.mustache), opened from the user menu.
+// var(--mu-*) only.
+
+.mu-appearance.offcanvas {
+    --bs-offcanvas-width: min(24rem, 100vw);
+    --bs-offcanvas-bg: var(--mu-surface);
+    --bs-offcanvas-color: var(--mu-text);
+    --bs-offcanvas-border-color: var(--mu-border);
+    --bs-offcanvas-padding-x: calc(var(--mu-pad) * 1.25);
+    --bs-offcanvas-padding-y: var(--mu-pad);
+    // post.scss rounds every .offcanvas; a drawer flush with the screen edge only rounds its inner corners.
+    border-radius: var(--mu-radius-lg) 0 0 var(--mu-radius-lg);
+    box-shadow: var(--mu-shadow-lg);
+
+    .offcanvas-header {
+        border-bottom: 1px solid var(--mu-border);
+    }
+
+    .offcanvas-title {
+        font-weight: 600;
+    }
+}
+
+[dir="rtl"] .mu-appearance.offcanvas {
+    border-radius: 0 var(--mu-radius-lg) var(--mu-radius-lg) 0;
+}
+
+.mu-appearance-intro,
+.mu-appearance-note {
+    color: var(--mu-muted);
+    font-size: 0.875rem;
+}
+
+.mu-appearance-note {
+    margin: calc(var(--mu-pad) * 0.5) 0 0;
+}
+
+.mu-appearance-group {
+    margin-bottom: calc(var(--mu-pad) * 1.5);
+
+    legend {
+        float: none;
+        width: auto;
+        margin-bottom: calc(var(--mu-pad) * 0.5);
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--mu-text);
+    }
+
+    .form-check {
+        margin-bottom: calc(var(--mu-pad) * 0.5);
+    }
+}
+
+// Segmented control: radio buttons styled as one button group that fills the width.
+.mu-segmented {
+    display: flex;
+    width: 100%;
+
+    .btn {
+        flex: 1 1 0;
+        min-height: 2.75rem;
+        white-space: nowrap;
+    }
+}
+
+// Accent swatches. The colour comes from --mu-swatch, set per swatch from the theme's swatch list.
+.mu-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: calc(var(--mu-pad) * 0.625);
+    align-items: center;
+}
+
+.mu-swatch {
+    position: relative;
+    // 2.75rem = 44px: the minimum touch target size.
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border: 2px solid var(--mu-surface);
+    border-radius: 50%;
+    background-color: var(--mu-swatch, var(--mu-surface-2));
+    box-shadow: 0 0 0 1px var(--mu-border);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+
+    &:hover {
+        transform: scale(1.06);
+    }
+
+    &:focus-visible {
+        outline: 3px solid var(--mu-text);
+        outline-offset: 3px;
+    }
+
+    // Selected: a ring in the text colour plus a check mark, so the state does not rely on colour alone.
+    &[aria-pressed="true"] {
+        box-shadow: 0 0 0 2px var(--mu-surface), 0 0 0 4px var(--mu-text);
+
+        &::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            width: 0.75rem;
+            height: 0.4rem;
+            border-left: 2px solid var(--mu-surface);
+            border-bottom: 2px solid var(--mu-surface);
+            transform: translateY(-15%) rotate(-45deg);
+            filter: drop-shadow(0 0 1px var(--mu-text));
+        }
+    }
+}
+
+// The custom-colour picker shares the swatch shape; a conic rainbow marks it as "any colour".
+.mu-swatch-custom {
+    overflow: hidden;
+    background-image: var(--mu-rainbow);
+
+    &:focus-within {
+        outline: 3px solid var(--mu-text);
+        outline-offset: 3px;
+    }
+
+    input[type="color"] {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+}

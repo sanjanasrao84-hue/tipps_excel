@@ -1,6 +1,8 @@
 // Per-user Appearance panel: applies choices instantly and saves them as user preferences.
 import {setUserPreference} from 'core_user/repository';
 import Notification from 'core/notification';
+import {getString} from 'core/str';
+import Offcanvas from 'theme_boost/bootstrap/offcanvas';
 
 const PREF = 'theme_modernui_';
 const root = document.documentElement;
@@ -49,14 +51,61 @@ const applyMode = (mode) => {
     root.setAttribute('data-bs-theme', dark ? 'dark' : 'light');
 };
 
-const save = (name, value) => setUserPreference(PREF + name, value).catch(Notification.exception);
+const save = (name, value) => setUserPreference(PREF + name, value);
+
+/**
+ * Add the "Appearance" item to the user menu, just above the divider before "Log out".
+ *
+ * Done here rather than by overriding core/user_menu: the menu items come from core and end with Log out, which a
+ * Mustache override cannot single out, and a copied core template would drift on every upgrade.
+ *
+ * @param {HTMLElement} panel The offcanvas panel.
+ * @returns {HTMLElement|null} The menu item, or null when the page has no user menu (popup/embedded layouts).
+ */
+const addMenuItem = (panel) => {
+    const menu = document.querySelector('#user-action-menu #carousel-item-main');
+    const template = document.getElementById('mu-appearance-menuitem');
+    if (!menu || !template) {
+        return null;
+    }
+    const item = template.content.firstElementChild.cloneNode(true);
+    const logout = menu.querySelector('a[href*="/login/logout.php"]');
+    let anchor = logout;
+    if (logout && logout.previousElementSibling && logout.previousElementSibling.classList.contains('dropdown-divider')) {
+        anchor = logout.previousElementSibling;
+    }
+    if (anchor) {
+        menu.insertBefore(item, anchor);
+    } else {
+        menu.appendChild(item);
+    }
+    item.addEventListener('click', (e) => {
+        e.preventDefault();
+        Offcanvas.getOrCreateInstance(panel).show();
+    });
+    return item;
+};
 
 export const init = (cfg) => {
-    const toggle = document.getElementById('mu-appearance-toggle');
     const panel = document.getElementById('mu-appearance-panel');
-    if (!toggle || !panel) {
+    if (!panel || !addMenuItem(panel)) {
         return;
     }
+    // The opener sat in a dropdown that has closed by now, so hand focus back to the user menu button.
+    panel.addEventListener('hidden.bs.offcanvas', () => {
+        const usermenu = document.getElementById('user-menu-toggle');
+        if (usermenu) {
+            usermenu.focus();
+        }
+    });
+    const status = panel.querySelector('#mu-appearance-status');
+    const announce = (key) => getString(key, 'theme_modernui').then((text) => {
+        status.textContent = text;
+        return text;
+    }).catch(Notification.exception);
+    const persist = (name, value) => save(name, value)
+        .then(() => announce('appearance_saved'))
+        .catch(Notification.exception);
     const state = {...cfg};
 
     const radios = (name) => panel.querySelectorAll('input[name="mu-' + name + '"]');
@@ -68,67 +117,48 @@ export const init = (cfg) => {
         });
         panel.querySelector('#mu-motion').checked = !!state.motion;
         panel.querySelector('#mu-contrast').checked = !!state.contrast;
-        panel.querySelectorAll('.mu-swatch').forEach((s) => {
-            s.setAttribute('aria-pressed', String(!!state.accent && s.dataset.color.toUpperCase() === state.accent.toUpperCase()));
+        panel.querySelectorAll('.mu-swatch[data-color]').forEach((s) => {
+            const pressed = !!state.accent && s.dataset.color.toUpperCase() === state.accent.toUpperCase();
+            s.setAttribute('aria-pressed', String(pressed));
         });
         if (state.accent) {
             panel.querySelector('#mu-custom-color').value = state.accent.toLowerCase();
         }
     };
 
-    const open = (show) => {
-        panel.hidden = !show;
-        toggle.setAttribute('aria-expanded', String(show));
-        if (show) {
-            const first = panel.querySelector('input, button');
-            if (first) {
-                first.focus();
-            }
-        } else {
-            toggle.focus();
-        }
-    };
-    toggle.addEventListener('click', () => open(panel.hidden));
-    panel.querySelector('#mu-appearance-close').addEventListener('click', () => open(false));
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && !panel.hidden) {
-            open(false);
-        }
-    });
-
     radios('mode').forEach((r) => r.addEventListener('change', () => {
         state.mode = r.value;
         applyMode(r.value);
-        save('mode', r.value);
+        persist('mode', r.value);
     }));
     radios('fontsize').forEach((r) => r.addEventListener('change', () => {
         state.fontsize = r.value;
         root.setAttribute('data-mu-fontsize', r.value);
-        save('fontsize', r.value);
+        persist('fontsize', r.value);
     }));
     radios('density').forEach((r) => r.addEventListener('change', () => {
         state.density = r.value;
         root.setAttribute('data-mu-density', r.value);
-        save('density', r.value);
+        persist('density', r.value);
     }));
     panel.querySelector('#mu-motion').addEventListener('change', (e) => {
         state.motion = e.target.checked;
         root.setAttribute('data-mu-motion', e.target.checked ? 'reduce' : 'normal');
-        save('motion', e.target.checked ? 1 : null);
+        persist('motion', e.target.checked ? 1 : null);
     });
     panel.querySelector('#mu-contrast').addEventListener('change', (e) => {
         state.contrast = e.target.checked;
         root.setAttribute('data-mu-contrast', e.target.checked ? 'high' : 'normal');
-        save('contrast', e.target.checked ? 1 : null);
+        persist('contrast', e.target.checked ? 1 : null);
     });
 
     const setAccent = (hex) => {
         state.accent = hex;
         applyAccent(hex);
-        save('accent', hex ? hex.replace('#', '') : null);
+        persist('accent', hex ? hex.replace('#', '') : null);
         syncUi();
     };
-    panel.querySelectorAll('.mu-swatch').forEach((s) => {
+    panel.querySelectorAll('.mu-swatch[data-color]').forEach((s) => {
         s.addEventListener('click', () => setAccent(s.dataset.color.toUpperCase()));
     });
     panel.querySelector('#mu-custom-color').addEventListener('change', (e) => setAccent(e.target.value.toUpperCase()));
@@ -148,7 +178,9 @@ export const init = (cfg) => {
         root.setAttribute('data-mu-density', 'comfortable');
         root.setAttribute('data-mu-motion', 'normal');
         root.setAttribute('data-mu-contrast', 'normal');
-        ['mode', 'accent', 'fontsize', 'density', 'motion', 'contrast'].forEach((n) => save(n, null));
+        Promise.all(['mode', 'accent', 'fontsize', 'density', 'motion', 'contrast'].map((n) => save(n, null)))
+            .then(() => announce('appearance_resetdone'))
+            .catch(Notification.exception);
         syncUi();
     });
 

@@ -80,6 +80,11 @@ if ($ADMIN->fulltree) {
     $s = new admin_setting_configstoredfile("$c/loginbg", get_string('loginbg', $c), get_string('loginbg_desc', $c), 'loginbg');
     $s->set_updatedcallback($cb);
     $page->add($s);
+    // Rendered by layout/login.php on each request, so no cache reset is needed.
+    $page->add(new admin_setting_configtext("$c/loginwelcometitle", get_string('loginwelcometitle', $c),
+        get_string('loginwelcometitle_desc', $c), '', PARAM_TEXT));
+    $page->add(new admin_setting_confightmleditor("$c/loginwelcometext", get_string('loginwelcometext', $c),
+        get_string('loginwelcometext_desc', $c), ''));
     $settings->add($page);
 
     // Dark mode.

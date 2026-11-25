@@ -1,0 +1,297 @@
+// Modern UI: login page (and the other login-flow pages that use the "login" layout).
+// Markup: templates/core/login_layout.mustache + templates/core/login_panel.mustache; layout class on <body> from
+// layout/login.php (mu-login-split / mu-login-centered). var(--mu-*) only.
+//
+// Brand background: the admin's login image (--mu-login-bg, set by theme_modernui_get_extra_scss) under a
+// primary-colour scrim, or a primary gradient when there is no image. Text on it uses --mu-on-primary, which
+// lib computes for contrast against the primary colour; the scrim keeps photos from breaking that contrast.
+
+:root {
+    --mu-login-scrim: rgba(var(--mu-primary-rgb), 0.86);
+    --mu-login-brand-bg:
+        linear-gradient(var(--mu-login-scrim), var(--mu-login-scrim)),
+        var(--mu-login-bg, linear-gradient(135deg, var(--mu-primary), var(--mu-primary-hover)));
+    --mu-login-card-max: 28rem;
+}
+
+// Selectors start with "html body.pagelayout-login #page" so they outrank the rules theme_boost_get_extra_scss
+// emits for Boost's default photo and its watermark, which run after this file.
+html body.pagelayout-login #page {
+    background-color: var(--mu-bg);
+    color: var(--mu-text);
+
+    .login-layout-left {
+        background-color: var(--mu-primary);
+        background-image: var(--mu-login-brand-bg);
+        background-size: cover;
+        background-position: center;
+        color: var(--mu-on-primary);
+
+        &::after {
+            content: none;
+        }
+    }
+
+    .login-layout-right {
+        background-color: var(--mu-bg);
+    }
+}
+
+// ---- Brand panel ----
+.mu-login-panel.login-layout-left-content {
+    max-width: 30rem;
+    margin-bottom: 0;
+    padding: calc(var(--mu-pad) * 2);
+    text-align: start;
+    color: var(--mu-on-primary);
+    background-color: transparent;
+    border-radius: var(--mu-radius-lg);
+
+    a {
+        color: inherit;
+        text-decoration: underline;
+    }
+
+    blockquote {
+        color: inherit;
+        border-inline-start: 4px solid var(--mu-accent);
+        padding-inline-start: var(--mu-pad);
+    }
+}
+
+.mu-login-brand {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--mu-pad) * 0.75);
+    margin-bottom: calc(var(--mu-pad) * 2.5);
+}
+
+.mu-login-logo {
+    width: 3rem;
+    height: 3rem;
+    object-fit: contain;
+    border-radius: var(--mu-radius);
+}
+
+.mu-login-sitename {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.mu-login-title {
+    color: inherit;
+    font-size: 2.25rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: var(--mu-pad);
+
+    // Decorative underline in the on-primary colour: always visible on the panel (the accent colour can
+    // match the primary, e.g. Sunset, 1.1:1).
+    &::after {
+        content: "";
+        display: block;
+        width: 3rem;
+        height: 0.25rem;
+        margin-top: var(--mu-pad);
+        border-radius: var(--mu-radius-sm);
+        background-color: var(--mu-on-primary);
+        opacity: 0.8;
+    }
+}
+
+.mu-login-text {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+
+    p:last-child {
+        margin-bottom: 0;
+    }
+}
+
+// ---- Form column ----
+.mu-login .login-layout-right-content {
+    max-width: var(--mu-login-card-max);
+}
+
+.mu-login .login-container {
+    padding: calc(var(--mu-pad) * 2);
+    background-color: var(--mu-surface);
+    color: var(--mu-text);
+    border: 1px solid var(--mu-border);
+    border-radius: var(--mu-radius-lg);
+    box-shadow: var(--mu-shadow);
+
+    h1,
+    .h2 {
+        color: var(--mu-text);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .text-muted {
+        color: var(--mu-muted) !important;
+    }
+
+    a:not(.btn) {
+        color: var(--mu-brand);
+    }
+
+    .login-form .login-input-wrapper {
+        .form-control {
+            min-height: 2.875rem;
+            background-color: var(--mu-surface-2);
+            border-color: var(--mu-border);
+            color: var(--mu-text);
+            border-radius: var(--mu-radius);
+
+            &::placeholder {
+                color: var(--mu-muted);
+                opacity: 1;
+            }
+
+            &:hover {
+                background-color: var(--mu-surface-2);
+            }
+
+            &:focus {
+                background-color: var(--mu-surface);
+                border-color: var(--mu-brand);
+                box-shadow: 0 0 0 0.2rem rgba(var(--mu-brand-rgb), 0.3);
+            }
+        }
+
+        .login-input-icon {
+            color: var(--mu-muted);
+        }
+    }
+
+    .login-form .toggle-sensitive-wrapper .toggle-sensitive-btn {
+        --bs-btn-bg: var(--mu-surface-2);
+        --bs-btn-border-color: var(--mu-border);
+        --bs-btn-hover-bg: var(--mu-surface-2);
+        --bs-btn-hover-border-color: var(--mu-border);
+        --bs-btn-active-bg: var(--mu-surface-2);
+        --bs-btn-active-border-color: var(--mu-border);
+        color: var(--mu-muted);
+
+        &:focus,
+        &:focus-visible {
+            background-color: var(--mu-surface);
+            border-color: var(--mu-brand);
+            box-shadow: 0 0 0 0.2rem rgba(var(--mu-brand-rgb), 0.3);
+        }
+    }
+
+    #loginbtn {
+        min-height: 2.875rem;
+        font-weight: 600;
+    }
+
+    .login-separator {
+        color: var(--mu-muted);
+
+        &::before,
+        &::after {
+            border-top-color: var(--mu-border);
+        }
+    }
+
+    .login-identityprovider-btn {
+        background-color: var(--mu-surface);
+        border-color: var(--mu-border);
+        color: var(--mu-text);
+
+        &:hover,
+        &:focus {
+            background-color: var(--mu-surface-2);
+            border-color: var(--mu-muted);
+            color: var(--mu-text);
+        }
+    }
+
+    .login-cookiesnotice .btn-link {
+        color: var(--mu-muted);
+
+        &:hover,
+        &:focus {
+            color: var(--mu-text);
+        }
+    }
+
+    .alert {
+        border-radius: var(--mu-radius);
+    }
+}
+
+// ---- Short welcome above the form (split layout below lg; centred layout always) ----
+.mu-login-intro {
+    margin-bottom: calc(var(--mu-pad) * 1.5);
+    color: var(--mu-text);
+}
+
+.mu-login-intro-title {
+    margin-bottom: calc(var(--mu-pad) * 0.25);
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.mu-login-intro-text {
+    color: var(--mu-muted);
+
+    p:last-child {
+        margin-bottom: 0;
+    }
+}
+
+// ---- Centred layout: the brand background fills the page, the card floats over it ----
+html body.pagelayout-login.mu-login-centered #page {
+    background-color: var(--mu-primary);
+    background-image: var(--mu-login-brand-bg);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+
+    .login-layout-right {
+        align-items: center;
+        background-color: transparent;
+    }
+
+    .mu-login-intro {
+        color: var(--mu-on-primary);
+        text-align: center;
+    }
+
+    .mu-login-intro-text {
+        color: var(--mu-on-primary);
+    }
+
+    .mu-login-intro-text a {
+        color: inherit;
+        text-decoration: underline;
+    }
+}
+
+// ---- Small screens: tighter card, no fixed backgrounds (janky on mobile) ----
+@include media-breakpoint-down(lg) {
+    .mu-login .login-container {
+        padding: calc(var(--mu-pad) * 1.25);
+    }
+
+    html body.pagelayout-login.mu-login-centered #page {
+        background-attachment: scroll;
+    }
+}
+
+@include media-breakpoint-down(sm) {
+    .mu-login .login-container {
+        border: 0;
+        box-shadow: none;
+        padding: var(--mu-pad);
+    }
+
+    html body.pagelayout-login.mu-login-split #page .login-layout-right {
+        background-color: var(--mu-surface);
+    }
+}
