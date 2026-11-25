@@ -1,102 +1,79 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * Library functions for theme_modernui.
- *
- * SCSS pipeline (theme_config runs the parent's callbacks first):
- *   1. theme_boost_get_pre_scss()      Boost's own variables. Reads $theme->settings, so this theme must not
- *                                      define the setting names brandcolor / scsspre.
- *   2. theme_modernui_get_pre_scss()   (Step 3/4) SCSS variables that feed the token definitions.
- *   3. theme_modernui_get_main_scss_content()  Boost default preset + scss/modernui.scss.
- *   4. theme_boost_get_extra_scss()    Boost's background images and its "scss" setting, so this theme must
- *                                      not define the setting names scss / backgroundimage.
- *   5. theme_modernui_get_extra_scss() (Step 3/4) The :root CSS variables from the settings, then the custom SCSS.
- *
- * @package    theme_modernui
- * @copyright  2026
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
-/**
- * Returns the main SCSS content: Boost's default preset (Bootstrap + Moodle) followed by this theme's SCSS.
- *
- * @param theme_config $theme The theme config object.
- * @return string
- */
-function theme_modernui_get_main_scss_content($theme): string {
-    global $CFG;
+use theme_modernui\helper;
 
-    $scss = file_get_contents($CFG->dirroot . '/theme/boost/scss/preset/default.scss');
-    $scss .= "\n" . file_get_contents(__DIR__ . '/scss/modernui.scss');
+/**
+ * Main SCSS: Boost's SCSS plus this theme's post.scss (variable-driven, no fixed colours).
+ */
+function theme_modernui_get_main_scss_content($theme) {
+    global $CFG;
+    require_once($CFG->dirroot . '/theme/boost/lib.php');
+    $scss = theme_boost_get_main_scss_content($theme);
+    $scss .= file_get_contents(__DIR__ . '/scss/post.scss');
     return $scss;
 }
 
 /**
- * Returns SCSS to prepend. Filled in by the design-system and settings steps.
- *
- * @param theme_config $theme The theme config object.
- * @return string
+ * Pre SCSS: lets Bootstrap's compile-time variables follow the admin brand colour.
+ * (Per-user colour changes are applied at runtime through CSS variables.)
  */
-function theme_modernui_get_pre_scss($theme): string {
-    return '';
+function theme_modernui_get_pre_scss($theme) {
+    $a = helper::admin($theme);
+    $scss = '$primary: ' . $a['primarycolor'] . ";\n";
+    $scss .= '$font-family-sans-serif: ' . helper::font_stack($a) . ";\n";
+    return $scss;
 }
 
 /**
- * Returns SCSS to append. Filled in by the design-system and settings steps.
- *
- * @param theme_config $theme The theme config object.
- * @return string
+ * Extra SCSS: CSS variables from admin settings, login background, then the admin's custom SCSS.
  */
-function theme_modernui_get_extra_scss($theme): string {
-    return '';
+function theme_modernui_get_extra_scss($theme) {
+    $a = helper::admin($theme);
+    $css = ':root{' . helper::css_variables($a) . '}';
+    $url = $theme->setting_file_url('loginbg', 'loginbg');
+    if (!empty($url)) {
+        $css .= ':root{--mu-login-bg:url("' . $url . '");}';
+    }
+    if (!empty($theme->settings->scsspost)) {
+        $css .= "\n" . $theme->settings->scsspost;
+    }
+    return $css;
 }
 
 /**
- * Serves the files stored by the theme settings (logos, login background...).
- *
- * @param stdClass $course
- * @param stdClass $cm
- * @param context $context
- * @param string $filearea
- * @param array $args
- * @param bool $forcedownload
- * @param array $options
- * @return bool
+ * Serve the files uploaded in theme settings (login background).
  */
 function theme_modernui_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
-    $fileareas = ['logo', 'logocompact', 'favicon', 'loginbgimage'];
-    if ($context->contextlevel == CONTEXT_SYSTEM && in_array($filearea, $fileareas, true)) {
+    if ($context->contextlevel == CONTEXT_SYSTEM && $filearea === 'loginbg') {
         $theme = theme_config::load('modernui');
-        // By default, theme files must be cache-able by both browsers and proxies.
-        if (!array_key_exists('cacheability', $options)) {
-            $options['cacheability'] = 'public';
-        }
-        return $theme->setting_file_serve($filearea, $args, $forcedownload, $options);
+        return $theme->setting_file_serve('loginbg', $args, $forcedownload, $options);
     }
     send_file_not_found();
 }
 
 /**
- * The user preferences this theme owns. Filled in by the Appearance step.
- *
- * @return array[]
+ * User preferences this theme stores (so the Appearance panel can save them via the API).
  */
 function theme_modernui_user_preferences(): array {
-    return [];
+    // NULL_ALLOWED: the Appearance panel saves null to delete a preference ("Reset to site defaults"), so the
+    // admin setting applies again. With NULL_NOT_ALLOWED core would store '' / 0 instead of deleting it.
+    // permissioncallback: every logged-in user may set their own look, like Boost's preferences. Without it core
+    // falls back to moodle/user:editownprofile, which some roles do not have.
+    $base = [
+        'null' => NULL_ALLOWED,
+        'permissioncallback' => [core_user::class, 'is_current_user'],
+    ];
+    $text = function (array $choices) use ($base) {
+        return $base + ['type' => PARAM_ALPHA, 'default' => null, 'choices' => $choices];
+    };
+    $flag = $base + ['type' => PARAM_INT, 'default' => null, 'choices' => [0, 1]];
+    return [
+        'theme_modernui_mode' => $text(['light', 'dark', 'auto']),
+        'theme_modernui_accent' => $base + ['type' => PARAM_ALPHANUM, 'default' => null],
+        'theme_modernui_fontsize' => $text(['small', 'medium', 'large']),
+        'theme_modernui_density' => $text(['comfortable', 'compact']),
+        'theme_modernui_motion' => $flag,
+        'theme_modernui_contrast' => $flag,
+    ];
 }

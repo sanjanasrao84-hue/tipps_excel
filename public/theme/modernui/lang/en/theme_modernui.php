@@ -1,33 +1,106 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * Language strings for theme_modernui.
- *
- * @package    theme_modernui
- * @copyright  2026
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
-$string['choosereadme'] = 'Modern UI is a fully customisable child theme of Boost. Every colour, font, size, corner radius and layout choice comes from the theme settings, and each user can pick their own appearance (light, dark or auto mode, accent colour, font size, density, reduced motion and high contrast).';
-$string['configtitle'] = 'Modern UI';
-$string['generalsettings'] = 'General';
 $string['pluginname'] = 'Modern UI';
-$string['privacy:metadata'] = 'The Modern UI theme does not store any personal data yet.';
+$string['choosereadme'] = 'Modern UI is a clean, card-based, fully customisable child theme of Boost. Admins set the defaults; every user can choose their own look.';
+$string['configtitle'] = 'Modern UI settings';
 $string['region-side-pre'] = 'Right';
-$string['scaffoldnote'] = 'The Modern UI settings (Brand, Typography, Shape, Layout, Login page, Presets, Dark mode and Advanced) are not built yet.';
+
+// Tabs.
+$string['tabpresets'] = 'Presets';
+$string['tabbrand'] = 'Brand';
+$string['tabtypography'] = 'Typography';
+$string['tabshape'] = 'Shape';
+$string['tablayout'] = 'Layout';
+$string['tablogin'] = 'Login page';
+$string['tabdark'] = 'Dark mode';
+$string['tabadvanced'] = 'Advanced';
+
+// Presets.
+$string['designpreset'] = 'Design preset';
+$string['designpreset_desc'] = 'Click a preset to fill in the colour, font and corner fields on the other tabs, then press Save changes. You can still edit any value afterwards.';
+$string['presetmatches'] = 'Current values match';
+$string['presetreset'] = 'Reset to preset defaults';
+$string['preset_indigo'] = 'Indigo';
+$string['preset_emerald'] = 'Emerald';
+$string['preset_sunset'] = 'Sunset';
+$string['preset_mono'] = 'Monochrome';
+$string['preset_custom'] = 'Custom';
+
+// Brand.
+$string['primarycolor'] = 'Primary colour';
+$string['primarycolor_desc'] = 'Buttons, links and highlights. Text colour on top of it is chosen automatically for readability.';
+$string['accentcolor'] = 'Accent colour';
+$string['accentcolor_desc'] = 'Secondary highlight colour.';
+$string['backgroundcolor'] = 'Page background colour';
+$string['backgroundcolor_desc'] = 'Background of the page in light mode.';
+$string['logonote'] = 'The site logo, compact logo and favicon are set in Site administration > Appearance > Logos. The theme uses them automatically.';
+
+// Typography.
+$string['fontfamily'] = 'Font';
+$string['fontfamily_desc'] = 'Inter, Roboto and Poppins are loaded from Google Fonts. Choose "System font" to avoid any external request.';
+$string['fontsystem'] = 'System font (no external request)';
+$string['customfont'] = 'Other Google font name';
+$string['customfont_desc'] = 'Optional. Exact Google Fonts family name, for example "Nunito". Overrides the font above.';
+$string['basefontsize'] = 'Base font size';
+
+// Shape.
+$string['radius'] = 'Corner radius';
+$string['radius_sharp'] = 'Sharp';
+$string['radius_medium'] = 'Medium';
+$string['radius_rounded'] = 'Rounded';
+$string['shadow'] = 'Shadow strength';
+$string['shadow_none'] = 'None';
+$string['shadow_soft'] = 'Soft';
+$string['shadow_strong'] = 'Strong';
+
+// Layout.
+$string['contentwidth'] = 'Content width';
+$string['contentwidth_desc'] = 'Boxed keeps text lines readable; full width uses the whole screen.';
+$string['width_boxed'] = 'Boxed';
+$string['width_full'] = 'Full width';
+
+// Login.
+$string['loginlayout'] = 'Login layout';
+$string['login_split'] = 'Split screen (image beside the form)';
+$string['login_centered'] = 'Centered card over the image';
+$string['loginbg'] = 'Login background image';
+$string['loginbg_desc'] = 'Optional image shown on the login page.';
+
+// Dark mode.
+$string['darkmodeenabled'] = 'Allow dark mode';
+$string['darkmodeenabled_desc'] = 'If disabled, the dark option is hidden and everyone sees light mode.';
+$string['defaultmode'] = 'Default mode';
+$string['defaultmode_desc'] = 'Used for users who have not chosen their own. Auto follows the device setting.';
+$string['mode_light'] = 'Light';
+$string['mode_dark'] = 'Dark';
+$string['mode_auto'] = 'Auto (follow device)';
+
+// Advanced.
+$string['scsspost'] = 'Custom SCSS';
+$string['scsspost_desc'] = 'Extra SCSS or CSS added at the end of the theme.';
+
+// Appearance panel.
+$string['appearance'] = 'Appearance';
+$string['appearance_close'] = 'Close';
+$string['appearance_mode'] = 'Mode';
+$string['appearance_accent'] = 'Accent colour';
+$string['appearance_custom'] = 'Custom colour';
+$string['appearance_fontsize'] = 'Font size';
+$string['appearance_density'] = 'Density';
+$string['appearance_motion'] = 'Reduce motion';
+$string['appearance_contrast'] = 'High contrast';
+$string['appearance_reset'] = 'Reset to site defaults';
+$string['size_small'] = 'Small';
+$string['size_medium'] = 'Medium';
+$string['size_large'] = 'Large';
+$string['density_comfortable'] = 'Comfortable';
+$string['density_compact'] = 'Compact';
+
+// Privacy.
+$string['privacy:metadata:preference:mode'] = 'The light, dark or auto mode the user chose.';
+$string['privacy:metadata:preference:accent'] = 'The accent colour the user chose.';
+$string['privacy:metadata:preference:fontsize'] = 'The font size the user chose.';
+$string['privacy:metadata:preference:density'] = 'The layout density the user chose.';
+$string['privacy:metadata:preference:motion'] = 'Whether the user chose to reduce motion.';
+$string['privacy:metadata:preference:contrast'] = 'Whether the user chose high contrast.';

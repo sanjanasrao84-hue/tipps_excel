@@ -1,0 +1,64 @@
+{{!
+    @template theme_modernui/appearance
+
+    The per-user Appearance button and panel.
+
+    Example context (json):
+    {
+        "darkenabled": true,
+        "swatches": [{"hex": "#4F46E5"}, {"hex": "#0EA5E9"}]
+    }
+}}
+<button type="button" id="mu-appearance-toggle" class="mu-appearance-toggle btn btn-primary"
+        aria-expanded="false" aria-controls="mu-appearance-panel">
+    <i class="icon fa fa-palette fa-fw" aria-hidden="true"></i>
+    <span class="visually-hidden">{{#str}} appearance, theme_modernui {{/str}}</span>
+</button>
+<div id="mu-appearance-panel" class="mu-appearance-panel" role="dialog" aria-labelledby="mu-appearance-title" hidden>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 id="mu-appearance-title" class="h5 m-0">{{#str}} appearance, theme_modernui {{/str}}</h2>
+        <button type="button" class="btn-close" id="mu-appearance-close" aria-label="{{#str}} appearance_close, theme_modernui {{/str}}"></button>
+    </div>
+
+    <fieldset class="mb-3">
+        <legend class="fs-6 fw-bold">{{#str}} appearance_mode, theme_modernui {{/str}}</legend>
+        <label class="me-3"><input type="radio" name="mu-mode" value="light"> {{#str}} mode_light, theme_modernui {{/str}}</label>
+        {{#darkenabled}}
+        <label class="me-3"><input type="radio" name="mu-mode" value="dark"> {{#str}} mode_dark, theme_modernui {{/str}}</label>
+        <label><input type="radio" name="mu-mode" value="auto"> {{#str}} mode_auto, theme_modernui {{/str}}</label>
+        {{/darkenabled}}
+    </fieldset>
+
+    <fieldset class="mb-3">
+        <legend class="fs-6 fw-bold">{{#str}} appearance_accent, theme_modernui {{/str}}</legend>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            {{#swatches}}
+            <button type="button" class="mu-swatch" data-color="{{hex}}" style="background: {{hex}}" aria-label="{{hex}}" aria-pressed="false"></button>
+            {{/swatches}}
+            <label class="ms-2 mb-0">
+                <span class="visually-hidden">{{#str}} appearance_custom, theme_modernui {{/str}}</span>
+                <input type="color" id="mu-custom-color" value="#4f46e5" title="{{#str}} appearance_custom, theme_modernui {{/str}}">
+            </label>
+        </div>
+    </fieldset>
+
+    <fieldset class="mb-3">
+        <legend class="fs-6 fw-bold">{{#str}} appearance_fontsize, theme_modernui {{/str}}</legend>
+        <label class="me-3"><input type="radio" name="mu-fontsize" value="small"> {{#str}} size_small, theme_modernui {{/str}}</label>
+        <label class="me-3"><input type="radio" name="mu-fontsize" value="medium"> {{#str}} size_medium, theme_modernui {{/str}}</label>
+        <label><input type="radio" name="mu-fontsize" value="large"> {{#str}} size_large, theme_modernui {{/str}}</label>
+    </fieldset>
+
+    <fieldset class="mb-3">
+        <legend class="fs-6 fw-bold">{{#str}} appearance_density, theme_modernui {{/str}}</legend>
+        <label class="me-3"><input type="radio" name="mu-density" value="comfortable"> {{#str}} density_comfortable, theme_modernui {{/str}}</label>
+        <label><input type="radio" name="mu-density" value="compact"> {{#str}} density_compact, theme_modernui {{/str}}</label>
+    </fieldset>
+
+    <div class="mb-3">
+        <label class="d-block"><input type="checkbox" id="mu-motion"> {{#str}} appearance_motion, theme_modernui {{/str}}</label>
+        <label class="d-block"><input type="checkbox" id="mu-contrast"> {{#str}} appearance_contrast, theme_modernui {{/str}}</label>
+    </div>
+
+    <button type="button" class="btn btn-secondary w-100" id="mu-reset">{{#str}} appearance_reset, theme_modernui {{/str}}</button>
+</div>
