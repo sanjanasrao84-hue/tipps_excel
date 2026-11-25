@@ -52,7 +52,12 @@ php -r '$s=json_decode(file_get_contents("lib/plugins.json"),true)["standard"];$
   - `report_orgreports` reports on organisation sales and payments and reads the lmssub payment data.
 - **Google Calendar.** `local_gcal` handles the OAuth connection. `block_gcal_upcoming` depends on it
   (it was renamed so it can sit next to core `block_calendar_upcoming`).
-- **Themes.** `theme_eadflix` is a child of `theme_eadtraining`, which is a child of `theme_boost`.
+- **Themes.**
+  - `theme_eadtraining` is a standalone theme (`parents = []`, its own renderers). It is not a Boost
+    child. Some of its hook callbacks (`db/hooks.php`) run whatever theme is active.
+  - `theme_eadflix` is a child of `theme_eadtraining`.
+  - `theme_modernui` (in progress, branch `new-ui-theme`) is a real Boost child that uses only settings and
+    `--mu-*` CSS variables. See `public/theme/modernui/README.md`.
 - **Other plugins.** `mod_customcert` (third-party, kept up to date from upstream), `mod_scheduler`, `mod_zoom`,
   `mod_zoomlink`, `block_allcourses`, `filter_vdocipher`.
 

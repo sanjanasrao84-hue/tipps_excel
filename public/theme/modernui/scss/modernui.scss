@@ -1,0 +1,13 @@
+// Modern UI: entry point, compiled after Boost's default preset (Bootstrap + Moodle).
+//
+// Rule: the partials below may use only CSS custom properties (var(--mu-*)). Raw colours, fonts and sizes
+// belong in the token definitions and presets only (modernui/_tokens.scss, modernui/_presets.scss).
+//
+// Order:
+//   tokens   - the --mu-* defaults (Step 3).
+//   presets  - Indigo, Emerald, Sunset, Monochrome (Step 3).
+//   bridge   - maps --mu-* onto Bootstrap 5.3 --bs-* and Moodle design-system --mds-* (Step 3).
+//   shell    - navbar, drawers, footer, breadcrumbs (Step 6).
+//   pages    - login, dashboard, course, activities... (Step 7).
+
+@import "modernui/tokens";
