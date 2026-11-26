@@ -1,33 +1,31 @@
-// The course cards themselves use the theme's course card styles (scss/moodle/_dashboard.scss).
+/* All courses: catalogue grid; the cards themselves come from scss/moodle/_coursecard.scss. */
 .block_themeeditor.all-courses-section {
-    padding: clamp(40px, 6vw, 72px) 20px;
-
-    .all-courses-section__head {
-        margin-bottom: 1.75rem;
-
-        h2 {
-            margin: 0 0 .5rem;
-            color: color-mix(in srgb, var(--bs-primary) 45%, #000);
-            font-size: clamp(1.75rem, 1.3rem + 1.5vw, 2.5rem);
-            font-weight: 800;
-            line-height: 1.2;
-        }
-
-        p {
-            max-width: 680px;
-            margin: 0;
-            color: #5b6476;
-            font-size: 1.0625rem;
-        }
-    }
-
-    .all-courses-section__empty {
-        color: #5b6476;
-    }
-
-    .paging-morelink,
-    .paging {
-        margin-top: 1.5rem;
-        text-align: center;
-    }
+  padding: clamp(48px, 6vw, 88px) 20px;
+  background: transparent;
+}
+.block_themeeditor.all-courses-section .all-courses-section__head {
+  margin-bottom: 1.9rem;
+}
+.block_themeeditor.all-courses-section .all-courses-section__head h2 {
+  margin: 0 0 0.5rem;
+  color: var(--g-ink, #0f2a33);
+  font-family: var(--g-head, "Manrope", sans-serif);
+  font-size: clamp(1.9rem, 1.4rem + 1.6vw, 2.8rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+.block_themeeditor.all-courses-section .all-courses-section__head p {
+  max-width: 680px;
+  margin: 0;
+  color: var(--g-muted, #5c6d75);
+  font-size: 1.0625rem;
+}
+.block_themeeditor.all-courses-section .all-courses-section__empty {
+  color: var(--g-muted, #5c6d75);
+}
+.block_themeeditor.all-courses-section .paging-morelink,
+.block_themeeditor.all-courses-section .paging {
+  margin-top: 1.5rem;
+  text-align: center;
 }

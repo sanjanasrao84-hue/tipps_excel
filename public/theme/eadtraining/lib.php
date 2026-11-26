@@ -201,6 +201,9 @@ function theme_eadtraining_get_pre_scss($theme) {
     }
     $scss[] = "\$primary      : {$primarycolor};";
 
+    // Colour theme (Site administration > Appearance > Themes > Colour theme): sets $primary and the glass palette.
+    $scss[] = \theme_eadtraining\local\palettes::scss();
+
     $secondarycolor = "#ced4da";
     $secondary = get_config("theme_boost", "secondary");
     if (isset($secondary[3]) && preg_match('/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/', $secondary)) {

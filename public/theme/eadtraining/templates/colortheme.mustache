@@ -1,0 +1,50 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template theme_eadtraining/colortheme
+
+    Colour theme picker: one row per theme (radio, name, its 4 colours), then Save.
+
+    Example context (json):
+    {
+        "action": "#", "sesskey": "abc",
+        "themes": [{"key": "clinical", "name": "Clinical Teal", "active": true, "recommended": true,
+            "swatches": [{"color": "#0f7c80"}, {"color": "#2dd4bf"}]}]
+    }
+}}
+<form method="post" action="{{action}}" class="ct">
+    <input type="hidden" name="sesskey" value="{{sesskey}}">
+    <p class="ct-intro">{{#str}}colortheme_intro, theme_eadtraining{{/str}}</p>
+    <fieldset class="ct-list gd-card">
+        <legend class="visually-hidden">{{#str}}colortheme, theme_eadtraining{{/str}}</legend>
+        {{#themes}}
+            <label class="ct-row" for="ct-{{key}}">
+                <input type="radio" class="ct-row__input" name="colortheme" id="ct-{{key}}" value="{{key}}" {{#active}}checked{{/active}}>
+                <span class="ct-check" aria-hidden="true"><i class="fa fa-check"></i></span>
+                <span class="ct-row__name">{{name}}</span>
+                {{#recommended}}<span class="badge bg-info">{{#str}}colortheme_recommended, theme_eadtraining{{/str}}</span>{{/recommended}}
+                {{#active}}<span class="badge bg-success">{{#str}}colortheme_inuse, theme_eadtraining{{/str}}</span>{{/active}}
+                <span class="ct-swatches" aria-hidden="true">
+                    {{#swatches}}<span style="background: {{color}}"></span>{{/swatches}}
+                </span>
+            </label>
+        {{/themes}}
+    </fieldset>
+    <div>
+        <button type="submit" class="btn btn-primary">{{#str}}savechanges{{/str}}</button>
+    </div>
+</form>

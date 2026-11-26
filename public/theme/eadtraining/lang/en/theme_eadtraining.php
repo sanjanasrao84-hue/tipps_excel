@@ -443,3 +443,45 @@ $string['top_scroll_background_color_desc'] = 'Set the background color when scr
 $string['top_scroll_fix'] = 'Pin the menu when scrolling the page';
 $string['top_scroll_fix_desc'] = 'When enabled, the menu will be pinned to the top of the screen while you scroll the page, ensuring easy access to menu options.';
 $string['userprofilesettings'] = 'User Profile';
+
+// Dashboard learning overview (theme_eadtraining\output\glass_dashboard).
+$string['gd_activelearners'] = 'Active learners (30 days)';
+$string['gd_activitiesdone'] = 'Activities done';
+$string['gd_activity'] = 'Your activity';
+$string['gd_activitydesc'] = 'Lessons, quizzes and other activities you opened or worked on, per day, over the last 14 days.';
+$string['gd_activitytotal'] = '{$a} in 14 days';
+$string['gd_admin'] = 'Site overview';
+$string['gd_completions30'] = 'Activities completed (30 days)';
+$string['gd_complete'] = 'Complete';
+$string['gd_courseprogress'] = 'Learning progress';
+$string['gd_enrolments'] = 'Active enrolments';
+$string['gd_newenrolments'] = 'New enrolments per week';
+$string['gd_noactivity'] = 'No activity to show for this period yet.';
+$string['gd_nocourses'] = 'Courses you are enrolled in will appear here with your progress.';
+$string['gd_norecent'] = 'Activities you complete will appear here.';
+$string['gd_notoplearners'] = 'No activities were completed in the last 30 days.';
+$string['gd_overview'] = 'Learning overview';
+$string['gd_recent'] = 'Recent activity';
+$string['gd_remaining'] = 'Remaining';
+$string['gd_status'] = 'Course status';
+$string['gd_subscriptions'] = 'Active subscriptions';
+$string['gd_subtitle'] = 'Here is how your learning is going.';
+$string['gd_toplearners'] = 'Most active learners (30 days)';
+$string['gd_welcome'] = 'Welcome back, {$a}!';
+
+// Colour themes (colortheme.php, classes/local/palettes.php).
+$string['colortheme'] = 'Colour theme';
+$string['colortheme_applied'] = 'The {$a} colour theme is now applied across the whole site.';
+$string['colortheme_intro'] = 'Choose the colours for the whole site. Only colours change; the design, layout and features stay the same.';
+$string['colortheme_inuse'] = 'In use';
+$string['colortheme_berry'] = 'Berry Bloom';
+$string['colortheme_candy'] = 'Candy Sky';
+$string['colortheme_clinical'] = 'Clinical Teal';
+$string['colortheme_coralcoast'] = 'Coral Coast';
+$string['colortheme_earth'] = 'Earth & Sun';
+$string['colortheme_harvest'] = 'Fresh Harvest';
+$string['colortheme_orchid'] = 'Orchid Dream';
+$string['colortheme_regatta'] = 'Classic Regatta';
+$string['colortheme_seaside'] = 'Seaside Sunset';
+$string['colortheme_recommended'] = 'Recommended for learning';
+$string['colortheme_settings_link'] = '<div class="alert alert-info d-flex flex-wrap align-items-center gap-3 mb-0"><span><strong>Colour themes</strong> &middot; Choose a 4-colour theme for the whole site.</span><a class="btn btn-primary btn-sm ms-auto" href="{$a}">Open colour themes</a></div>';

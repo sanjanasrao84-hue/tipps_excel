@@ -185,6 +185,9 @@
                             </div>
                         {{/course_summary}}
 
+                        {{#glassdashboard}}
+                            {{> theme_eadtraining/glass_dashboard }}
+                        {{/glassdashboard}}
                         {{{ output.main_content }}}
                         {{{ output.activity_navigation }}}
                         {{{ output.course_content_footer }}}

@@ -32,6 +32,10 @@ if ($hassiteconfig) {
     $url = new moodle_url("/admin/settings.php?section=themesettingeadtraining");
     $ADMIN->add("themes", new admin_externalpage("theme_eadtraining_link1", $title, $url));
 
+    $title = "{$pluginname} - " . get_string("colortheme", "theme_eadtraining");
+    $url = new moodle_url("/theme/eadtraining/colortheme.php");
+    $ADMIN->add("themes", new admin_externalpage("theme_eadtraining_colortheme", $title, $url));
+
     $title = "{$pluginname} - " . get_string("quickstart_title", "theme_eadtraining");
     $url = new moodle_url("/theme/eadtraining/quickstart/");
     $ADMIN->add("themes", new admin_externalpage("theme_eadtraining_link2", $title, $url));

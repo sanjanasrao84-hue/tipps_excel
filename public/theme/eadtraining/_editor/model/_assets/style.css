@@ -6,7 +6,8 @@
 .sec-title h2 {
   font-size: 2.4rem;
   font-weight: 700;
-  color: #222222;
+  color: var(--g-ink, #0f2a33);
+  font-family: var(--g-head, "Manrope", sans-serif);
   margin-bottom: 15px;
   position: relative;
   display: inline-block;
@@ -22,7 +23,7 @@
 }
 .sec-title .subtitle {
   font-size: 1.1rem;
-  color: #666666;
+  color: var(--g-muted, #5c6d75);
   max-width: 600px;
   margin: 0 auto;
 }
@@ -61,25 +62,25 @@
     --psy-shadow: 0 1px 2px rgba(31, 41, 51, .04), 0 12px 32px rgba(31, 41, 51, .06);
     position: relative;
     padding: clamp(64px, 8vw, 104px) 0;
-    background: #fff;
+    background: transparent;
     color: var(--psy-body);
     font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
-.psy-section--soft { background: var(--psy-surface); }
+.psy-section--soft { background: transparent; }
 .psy-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-.psy-section h1, .psy-section h2, .psy-section h3 { color: var(--psy-ink); font-family: inherit; }
+.psy-section h1, .psy-section h2, .psy-section h3 { color: var(--g-ink, var(--psy-ink)); font-family: var(--g-head, inherit); }
 .psy-head { max-width: 680px; margin: 0 auto clamp(36px, 5vw, 56px); text-align: center; }
 .psy-head--left { margin-left: 0; text-align: left; }
-.psy-head h2 { margin: 12px 0 14px; font-size: clamp(1.75rem, 3vw, 2.4rem); font-weight: 700; line-height: 1.2; letter-spacing: -.02em; }
+.psy-head h2 { margin: 14px 0 14px; font-size: clamp(1.9rem, 3.2vw, 2.8rem); font-weight: 800; line-height: 1.2; letter-spacing: -.02em; }
 .psy-head p { margin: 0; font-size: 1.075rem; line-height: 1.7; color: var(--psy-body); }
-.psy-eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: var(--psy-teal-50); color: var(--psy-teal-700); font-size: .8rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.psy-eyebrow { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px; border: 1px solid rgba(255, 255, 255, .85); border-radius: 999px; background: rgba(255, 255, 255, .62); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); color: var(--g-teal-deep, #0b6468); font-size: .74rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; box-shadow: 0 8px 22px -12px rgba(16, 40, 74, .2); }
 .psy-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 12px 24px; border: 1.5px solid transparent; border-radius: 12px; font-size: 1rem; font-weight: 600; line-height: 1.2; text-decoration: none; transition: background-color .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease; }
 .psy-btn:hover, .psy-btn:focus { text-decoration: none; transform: translateY(-1px); }
 .psy-btn:focus-visible { outline: 3px solid var(--psy-sky-500); outline-offset: 3px; }
-.psy-btn--primary { background: var(--psy-teal-600); color: #fff; box-shadow: 0 10px 24px rgba(15, 124, 128, .22); }
-.psy-btn--primary:hover, .psy-btn--primary:focus { background: var(--psy-teal-700); color: #fff; }
-.psy-btn--secondary { background: #fff; border-color: var(--psy-line); color: var(--psy-ink); }
-.psy-btn--secondary:hover, .psy-btn--secondary:focus { border-color: var(--psy-teal-600); color: var(--psy-teal-700); }
+.psy-btn--primary { background: var(--g-grad-primary, linear-gradient(135deg, #0b6468, #0f7c80)); color: #fff; box-shadow: 0 10px 24px -10px rgba(var(--g-teal-rgb), .7); }
+.psy-btn--primary:hover, .psy-btn--primary:focus { color: #fff; background: linear-gradient(135deg, var(--g-teal-deep, #0b6468) -20%, var(--g-teal-bright, #14b8a6) 120%); box-shadow: 0 14px 28px -10px rgba(var(--g-teal-rgb), .75); }
+.psy-btn--secondary { background: rgba(255, 255, 255, .7); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-color: rgba(255, 255, 255, .9); color: var(--g-ink, #0f2a33); box-shadow: 0 8px 22px -12px rgba(16, 40, 74, .22); }
+.psy-btn--secondary:hover, .psy-btn--secondary:focus { background: #fff; border-color: rgba(var(--g-teal-rgb), .3); color: var(--g-teal-deep, #0b6468); }
 .psy-btn--ghost { padding-left: 4px; padding-right: 4px; color: var(--psy-teal-700); }
 .psy-btn--ghost:hover, .psy-btn--ghost:focus { color: var(--psy-ink); }
 .psy-btn svg { flex: none; }

@@ -1,0 +1,199 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template theme_eadtraining/glass_dashboard
+
+    Learning overview at the top of the Dashboard (theme_eadtraining\output\glass_dashboard).
+    Charts are plain HTML: each has a visually hidden data table for screen readers.
+
+    Example context (json):
+    {
+        "firstname": "Sam",
+        "learner": {
+            "overall": 40, "remaining": 60, "hascourses": true, "coursecount": 1,
+            "courses": [{"name": "Course", "url": "#", "percent": 40}],
+            "status": {"total": 1, "segments": [{"key": "inprogress", "count": 1, "label": "In progress", "share": 100, "hascount": true}]},
+            "activity": {"hasdata": true, "max": 3, "days": [{"label": "01 Jan", "short": "Mon", "count": 3, "height": 100, "iszero": false}]},
+            "activitytotal": 3, "completedactivities": 2,
+            "recent": [{"name": "Quiz", "url": "#", "course": "Course", "icon": "", "modname": "Quiz", "when": "1 Jan"}]
+        }
+    }
+}}
+<section class="gd" aria-label="{{#str}}gd_overview, theme_eadtraining{{/str}}">
+    {{#learner}}
+    <div class="gd-hero gd-card">
+        <div class="gd-hero__intro">
+            <span class="gd-hero__mark" aria-hidden="true"><i class="fa fa-graduation-cap"></i></span>
+            <div>
+                <h2 class="gd-hero__title">{{#str}}gd_welcome, theme_eadtraining, {{firstname}}{{/str}}</h2>
+                <p class="gd-hero__subtitle">{{#str}}gd_subtitle, theme_eadtraining{{/str}}</p>
+            </div>
+        </div>
+        <div class="gd-chips">
+            <div class="gd-chip">
+                <span class="gd-chip__icon gd-chip__icon--teal" aria-hidden="true"><i class="fa fa-bullseye"></i></span>
+                <div><strong class="gd-num">{{#hascourses}}{{overall}}%{{/hascourses}}{{^hascourses}}–{{/hascourses}}</strong><small>{{#str}}gd_complete, theme_eadtraining{{/str}}</small></div>
+            </div>
+            <div class="gd-chip">
+                <span class="gd-chip__icon gd-chip__icon--amber" aria-hidden="true"><i class="fa fa-hourglass-half"></i></span>
+                <div><strong class="gd-num">{{#hascourses}}{{remaining}}%{{/hascourses}}{{^hascourses}}–{{/hascourses}}</strong><small>{{#str}}gd_remaining, theme_eadtraining{{/str}}</small></div>
+            </div>
+            <div class="gd-chip">
+                <span class="gd-chip__icon gd-chip__icon--blue" aria-hidden="true"><i class="fa fa-check-circle"></i></span>
+                <div><strong class="gd-num">{{completedactivities}}</strong><small>{{#str}}gd_activitiesdone, theme_eadtraining{{/str}}</small></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="gd-grid gd-grid--2">
+        <div class="gd-card">
+            <div class="gd-card__head">
+                <h3>{{#str}}gd_courseprogress, theme_eadtraining{{/str}}</h3>
+                <span class="gd-card__meta">{{coursecount}} {{#str}}courses{{/str}}</span>
+            </div>
+            <div class="gd-donut-row">
+                <div class="gd-donut{{^hascourses}} gd-donut--empty{{/hascourses}}" style="--gd-p: {{overall}}"
+                     role="img" aria-label="{{overall}}% {{#str}}gd_complete, theme_eadtraining{{/str}}, {{remaining}}% {{#str}}gd_remaining, theme_eadtraining{{/str}}">
+                    <span class="gd-donut__hole">
+                        <strong class="gd-num">{{#hascourses}}{{overall}}%{{/hascourses}}{{^hascourses}}–{{/hascourses}}</strong>
+                        <small>{{#str}}gd_complete, theme_eadtraining{{/str}}</small>
+                    </span>
+                </div>
+                <ul class="gd-legend gd-legend--stack">
+                    <li><span class="gd-swatch gd-swatch--completed" aria-hidden="true"></span>{{#str}}gd_complete, theme_eadtraining{{/str}}
+                        <strong class="gd-num">{{#hascourses}}{{overall}}%{{/hascourses}}{{^hascourses}}–{{/hascourses}}</strong></li>
+                    <li><span class="gd-swatch gd-swatch--remaining" aria-hidden="true"></span>{{#str}}gd_remaining, theme_eadtraining{{/str}}
+                        <strong class="gd-num">{{#hascourses}}{{remaining}}%{{/hascourses}}{{^hascourses}}–{{/hascourses}}</strong></li>
+                </ul>
+            </div>
+            {{#hascourses}}
+                <ul class="gd-meters">
+                    {{#courses}}
+                        <li class="gd-meter">
+                            <a class="gd-meter__name" href="{{url}}">{{name}}</a>
+                            <span class="gd-meter__value gd-num">{{percent}}%</span>
+                            <span class="gd-meter__track" role="progressbar" aria-valuenow="{{percent}}" aria-valuemin="0" aria-valuemax="100" aria-label="{{name}}">
+                                <span class="gd-meter__fill" style="width: {{percent}}%"></span>
+                            </span>
+                        </li>
+                    {{/courses}}
+                </ul>
+            {{/hascourses}}
+            {{^hascourses}}
+                <p class="gd-empty"><i class="fa fa-book-open" aria-hidden="true"></i>{{#str}}gd_nocourses, theme_eadtraining{{/str}}</p>
+            {{/hascourses}}
+        </div>
+
+        <div class="gd-card">
+            <div class="gd-card__head">
+                <h3>{{#str}}gd_activity, theme_eadtraining{{/str}}</h3>
+                <span class="gd-card__meta">{{#str}}gd_activitytotal, theme_eadtraining, {{activitytotal}}{{/str}}</span>
+            </div>
+            <p class="gd-card__desc">{{#str}}gd_activitydesc, theme_eadtraining{{/str}}</p>
+            {{#activity}}
+                {{> theme_eadtraining/glass_dashboard_columns }}
+            {{/activity}}
+        </div>
+    </div>
+
+    <div class="gd-grid gd-grid--2">
+        <div class="gd-card">
+            <div class="gd-card__head">
+                <h3>{{#str}}gd_status, theme_eadtraining{{/str}}</h3>
+                <span class="gd-card__meta">{{status.total}} {{#str}}courses{{/str}}</span>
+            </div>
+            <div class="gd-segbar{{^status.total}} gd-segbar--empty{{/status.total}}" aria-hidden="true">
+                {{#status.segments}}{{#hascount}}
+                    <span class="gd-segbar__part gd-segbar__part--{{key}}" style="flex-grow: {{count}}" title="{{label}}: {{count}}">{{count}}</span>
+                {{/hascount}}{{/status.segments}}
+                {{^status.total}}<span class="gd-segbar__note">{{#str}}gd_nocourses, theme_eadtraining{{/str}}</span>{{/status.total}}
+            </div>
+            <ul class="gd-legend">
+                {{#status.segments}}
+                    <li><span class="gd-swatch gd-swatch--{{key}}" aria-hidden="true"></span>{{label}} <strong class="gd-num">{{count}}</strong></li>
+                {{/status.segments}}
+            </ul>
+        </div>
+
+        <div class="gd-card">
+            <div class="gd-card__head">
+                <h3>{{#str}}gd_recent, theme_eadtraining{{/str}}</h3>
+            </div>
+            {{#recent.0}}
+                <ol class="gd-timeline">
+                    {{#recent}}
+                        <li class="gd-timeline__item">
+                            <img class="gd-timeline__icon" src="{{icon}}" alt="" aria-hidden="true">
+                            <div class="gd-timeline__body">
+                                {{#url}}<a href="{{url}}">{{name}}</a>{{/url}}{{^url}}<strong>{{name}}</strong>{{/url}}
+                                <small>{{course}} · {{when}}</small>
+                            </div>
+                            <span class="gd-timeline__done" aria-hidden="true"><i class="fa fa-check"></i></span>
+                        </li>
+                    {{/recent}}
+                </ol>
+            {{/recent.0}}
+            {{^recent.0}}
+                <p class="gd-empty"><i class="fa fa-clock" aria-hidden="true"></i>{{#str}}gd_norecent, theme_eadtraining{{/str}}</p>
+            {{/recent.0}}
+        </div>
+    </div>
+    {{/learner}}
+
+    {{#admin}}
+    <div class="gd-section-title">
+        <h2>{{#str}}gd_admin, theme_eadtraining{{/str}}</h2>
+    </div>
+    <div class="gd-kpis">
+        <div class="gd-kpi gd-card"><small>{{#str}}gd_activelearners, theme_eadtraining{{/str}}</small><strong class="gd-num">{{activelearners}}</strong></div>
+        <div class="gd-kpi gd-card"><small>{{#str}}gd_enrolments, theme_eadtraining{{/str}}</small><strong class="gd-num">{{enrolments}}</strong></div>
+        <div class="gd-kpi gd-card"><small>{{#str}}gd_completions30, theme_eadtraining{{/str}}</small><strong class="gd-num">{{completions}}</strong></div>
+        {{#hassubscriptions}}
+            <div class="gd-kpi gd-card"><small>{{#str}}gd_subscriptions, theme_eadtraining{{/str}}</small><strong class="gd-num">{{subscriptions}}</strong></div>
+        {{/hassubscriptions}}
+    </div>
+    <div class="gd-grid gd-grid--2">
+        <div class="gd-card">
+            <div class="gd-card__head">
+                <h3>{{#str}}gd_newenrolments, theme_eadtraining{{/str}}</h3>
+            </div>
+            {{#enrolchart}}
+                {{> theme_eadtraining/glass_dashboard_columns }}
+            {{/enrolchart}}
+        </div>
+        <div class="gd-card">
+            <div class="gd-card__head">
+                <h3>{{#str}}gd_toplearners, theme_eadtraining{{/str}}</h3>
+            </div>
+            {{#hastoplearners}}
+                <ul class="gd-meters">
+                    {{#toplearners}}
+                        <li class="gd-meter">
+                            <a class="gd-meter__name" href="{{url}}">{{name}}</a>
+                            <span class="gd-meter__value gd-num">{{done}}</span>
+                            <span class="gd-meter__track" aria-hidden="true"><span class="gd-meter__fill" style="width: {{percent}}%"></span></span>
+                        </li>
+                    {{/toplearners}}
+                </ul>
+            {{/hastoplearners}}
+            {{^hastoplearners}}
+                <p class="gd-empty"><i class="fa fa-trophy" aria-hidden="true"></i>{{#str}}gd_notoplearners, theme_eadtraining{{/str}}</p>
+            {{/hastoplearners}}
+        </div>
+    </div>
+    {{/admin}}
+</section>
