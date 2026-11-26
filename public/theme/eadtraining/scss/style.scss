@@ -234,6 +234,7 @@ $warning-outline: #a6670e;
     }
 }
 @import "moodle/dashboard";
+@import "moodle/timeline";
 @import "moodle/profilepopup";
 @import "moodle/siteadmin";
 @import "moodle/managecourses";
@@ -241,6 +242,10 @@ $warning-outline: #a6670e;
 @import "moodle/courseedit";
 @import "moodle/breadcrumbpath";
 @import "moodle/formlabels";
+@import "moodle/navbar_flexible";
 
 // Soft Modern Glass design system (must stay last).
 @import "moodle/glass";
+
+// Refined layout and components, built on the glass tokens (must come after it).
+@import "moodle/refine";

@@ -1,0 +1,66 @@
+// Flexible top bar: slides out of view while scrolling down, back in on scroll up
+// (the class is toggled by the script in templates/navbar.mustache).
+.navbar.fixed-top {
+    transition: transform .25s ease;
+
+    &.navbar-hidden {
+        transform: translateY(-100%);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .navbar.fixed-top {
+        transition: none;
+    }
+}
+
+// Icons-only top bar (templates/navbar.mustache): no bar, just a floating glass group at the top right with
+// notifications, messaging and the user menu. The empty rest of the bar lets clicks through to the page.
+.navbar.fixed-top.navbar-icons-only {
+    border: 0;
+    background: transparent !important; /* stylelint-disable-line declaration-no-important */
+    box-shadow: none;
+    pointer-events: none;
+
+    > .container-fluid {
+        justify-content: flex-end;
+        padding-right: 1rem;
+    }
+
+    .navbar-icons-only__toggler,
+    .usernavigation {
+        pointer-events: auto;
+        border: 1px solid var(--g-glass-border, rgba(255, 255, 255, .78));
+        background: var(--g-glass, rgba(255, 255, 255, .72));
+        -webkit-backdrop-filter: var(--g-blur, blur(14px));
+        backdrop-filter: var(--g-blur, blur(14px));
+        box-shadow: 0 6px 20px -8px rgba(16, 40, 74, .25);
+    }
+
+    .navbar-icons-only__toggler {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        margin-right: auto;
+        padding: 0;
+        border-radius: 14px;
+    }
+
+    .usernavigation {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 2px;
+        min-height: 48px;
+        padding: 2px 6px;
+        border-radius: 999px;
+    }
+
+    // The bar's own pieces are gone: no dividers or fading background.
+    .navbar-content-background,
+    .usernavigation .divider {
+        display: none;
+    }
+}

@@ -36,43 +36,96 @@
         </div>
     {{/issetup}}
 
-    <div class="lgc-top">
-        <div data-region="status">
-            {{#status}}{{> local_gcal/status }}{{/status}}
+    <section class="lgc-hero" aria-labelledby="lgc-hero-title">
+        <div class="lgc-hero__intro">
+            <h2 class="lgc-hero__title" id="lgc-hero-title">{{#str}} yourschedule, local_gcal {{/str}}</h2>
+            <p class="lgc-hero__subtitle">{{#str}} schedulesubtitle, local_gcal {{/str}}</p>
+            <div class="lgc-hero__filters">
+                {{#hasorganisations}}
+                    <div class="lgc-field">
+                        <label class="lgc-field__label" for="lgc-organisation">{{#str}} organisation, local_gcal {{/str}}</label>
+                        <select class="form-select lgc-select" id="lgc-organisation" data-filter="organisation">
+                            <option value="0">{{#str}} allorganisations, local_gcal {{/str}}</option>
+                            {{#organisations}}<option value="{{id}}">{{name}}</option>{{/organisations}}
+                        </select>
+                    </div>
+                {{/hasorganisations}}
+                <div class="lgc-field">
+                    <label class="lgc-field__label" for="lgc-course">{{#str}} course, local_gcal {{/str}}</label>
+                    <select class="form-select lgc-select" id="lgc-course" data-filter="course">
+                        <option value="0">{{#str}} allcourses, local_gcal {{/str}}</option>
+                        {{#courses}}<option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/courses}}
+                    </select>
+                </div>
+            </div>
         </div>
-        {{#cancreate}}
-            <button type="button" class="btn btn-primary lgc-create" data-action="create">
-                <span aria-hidden="true">+</span> {{#str}} createevent, local_gcal {{/str}}
-            </button>
-        {{/cancreate}}
-    </div>
+        <dl class="lgc-stats" aria-live="polite">
+            <div class="lgc-stat">
+                <dt class="lgc-stat__label">{{#str}} eventsthismonth, local_gcal {{/str}}</dt>
+                <dd class="lgc-stat__value" data-stat="events">–</dd>
+            </div>
+            <div class="lgc-stat">
+                <dt class="lgc-stat__label">{{#str}} activedays, local_gcal {{/str}}</dt>
+                <dd class="lgc-stat__value" data-stat="days">–</dd>
+            </div>
+            <div class="lgc-stat">
+                <dt class="lgc-stat__label">{{#str}} daysuntilnext, local_gcal {{/str}}</dt>
+                <dd class="lgc-stat__value" data-stat="next">–</dd>
+            </div>
+        </dl>
+    </section>
 
     <div class="lgc-layout">
-        <aside class="lgc-sidebar" aria-label="{{#str}} filters, local_gcal {{/str}}">
-            {{#hasorganisations}}
-                <label class="lgc-label" for="lgc-organisation">{{#str}} organisation, local_gcal {{/str}}</label>
-                <select class="form-select" id="lgc-organisation" data-filter="organisation">
-                    <option value="0">{{#str}} allorganisations, local_gcal {{/str}}</option>
-                    {{#organisations}}<option value="{{id}}">{{name}}</option>{{/organisations}}
-                </select>
-            {{/hasorganisations}}
+        <div class="lgc-main lgc-card">
+            <div class="lgc-toolbar">
+                <div class="lgc-toolbar__nav">
+                    <button type="button" class="lgc-iconbtn" data-nav="prev" aria-label="{{#str}} previous, local_gcal {{/str}}">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <button type="button" class="lgc-iconbtn" data-nav="next" aria-label="{{#str}} next, local_gcal {{/str}}">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                    <button type="button" class="lgc-btn lgc-btn--ghost" data-nav="today">{{#str}} today, local_gcal {{/str}}</button>
+                    <h3 class="lgc-toolbar__title" data-region="title" aria-live="polite"></h3>
+                </div>
+                <div class="lgc-toolbar__end">
+                    <div class="lgc-segmented" role="group" aria-label="{{#str}} calendarview, local_gcal {{/str}}">
+                        <button type="button" data-view="dayGridMonth" aria-pressed="true">{{#str}} viewmonth, local_gcal {{/str}}</button>
+                        <button type="button" data-view="timeGridWeek" aria-pressed="false">{{#str}} viewweek, local_gcal {{/str}}</button>
+                        <button type="button" data-view="timeGridDay" aria-pressed="false">{{#str}} viewday, local_gcal {{/str}}</button>
+                        <button type="button" data-view="listWeek" aria-pressed="false">{{#str}} viewagenda, local_gcal {{/str}}</button>
+                    </div>
+                    {{#cancreate}}
+                        <button type="button" class="lgc-btn lgc-btn--primary" data-action="create">
+                            <span aria-hidden="true">+</span> {{#str}} createevent, local_gcal {{/str}}
+                        </button>
+                    {{/cancreate}}
+                </div>
+            </div>
+            <div class="lgc-warnings" data-region="warnings"></div>
+            <div class="lgc-calendar" data-region="calendar"></div>
+        </div>
 
-            <label class="lgc-label" for="lgc-course">{{#str}} course, local_gcal {{/str}}</label>
-            <select class="form-select" id="lgc-course" data-filter="course">
-                <option value="0">{{#str}} allcourses, local_gcal {{/str}}</option>
-                {{#courses}}<option value="{{id}}" {{#selected}}selected{{/selected}}>{{name}}</option>{{/courses}}
-            </select>
+        <aside class="lgc-agenda lgc-card" aria-label="{{#str}} viewagenda, local_gcal {{/str}}">
+            <section class="lgc-agenda__day">
+                <h3 class="lgc-agenda__heading" data-region="dayheading"></h3>
+                <ul class="lgc-list" data-region="dayevents"></ul>
+                {{#cancreate}}
+                    <button type="button" class="lgc-btn lgc-btn--ghost lgc-btn--block" data-action="createonday">
+                        <span aria-hidden="true">+</span> {{#str}} addonday, local_gcal {{/str}}
+                    </button>
+                {{/cancreate}}
+            </section>
 
-            <fieldset class="lgc-categories">
-                <legend class="lgc-label">{{#str}} eventcategories, local_gcal {{/str}}</legend>
-                {{#categories}}
-                    <label class="lgc-category">
-                        <input type="checkbox" checked data-category="{{key}}">
-                        <span class="lgc-dot" style="background: {{color}}"></span>
-                        {{name}}
-                    </label>
-                {{/categories}}
-            </fieldset>
+            <section class="lgc-nextup" data-region="nextup" hidden>
+                <p class="lgc-nextup__label">{{#str}} nextup, local_gcal {{/str}}</p>
+                <button type="button" class="lgc-nextup__event" data-region="nextupevent"></button>
+            </section>
+
+            <section class="lgc-agenda__upcoming" data-region="upcomingsection">
+                <h3 class="lgc-agenda__heading">{{#str}} comingup, local_gcal {{/str}}</h3>
+                <ul class="lgc-list" data-region="upcoming"></ul>
+            </section>
 
             {{#status.personalavailable}}
                 <div class="form-check form-switch lgc-personal">
@@ -81,11 +134,10 @@
                 </div>
                 <p class="lgc-hint">{{#str}} personalprivacy, local_gcal {{/str}}</p>
             {{/status.personalavailable}}
-        </aside>
 
-        <div class="lgc-main">
-            <div class="lgc-warnings" data-region="warnings"></div>
-            <div class="lgc-calendar" data-region="calendar"></div>
-        </div>
+            <div class="lgc-agenda__status" data-region="status">
+                {{#status}}{{> local_gcal/status }}{{/status}}
+            </div>
+        </aside>
     </div>
 </div>

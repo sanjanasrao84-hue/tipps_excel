@@ -55,115 +55,30 @@
         ]
     }
 }}
-<nav class="navbar fixed-top navbar-light navbar-expand {{{output.brandcolor_background_menu_class}}}"
+{{!
+    Icons-only top bar: no bar, logo or menus (navigation is in the side bar, glass-sidebar below), just the
+    notifications, messaging and user menu as a floating group at the top right.
+    The menu button stays on screens without the side bar (below lg), and the edit mode switch stays
+    because it is the only place to turn editing on.
+}}
+<nav class="navbar fixed-top navbar-light navbar-expand navbar-icons-only"
      aria-label="{{#str}}sitemenubar, admin{{/str}}">
-    <div class="navbar-content-background"></div>
     <div class="container-fluid">
-        {{#output.navbar_layout_is_institutional}}
-            <div class="d-flex flex-column align-items-stretch w-100 p-0">
-                {{! First row: logo + usernavigation }}
-                <div class="navbar-row-top d-flex align-items-center w-100 px-2 px-md-3">
-                    <button class="navbar-toggler aabtn d-block d-md-none px-1 my-1 border-0 me-2"
-                            data-toggler="drawers"
-                            data-action="toggle" data-target="theme_eadtraining-drawers-primary">
-                        <span class="navbar-toggler-icon"></span>
-                        <span class="sr-only">{{#str}}sidepanel, core{{/str}}</span>
-                    </button>
+        <button class="navbar-toggler navbar-icons-only__toggler aabtn d-lg-none" data-toggler="drawers"
+                data-action="toggle" data-target="theme_eadtraining-drawers-primary">
+            <span class="navbar-toggler-icon"></span>
+            <span class="sr-only">{{#str}}sidepanel, core{{/str}}</span>
+        </button>
 
-                    <a href="{{{ config.homeurl }}}" class="navbar-brand d-flex align-items-center m-0 me-3 p-0 aabtn">
-                        {{# output.should_display_navbar_logo }}
-                            <img src="{{{output.get_compact_logo_url}}}" class="logo me-1" alt="{{{sitename}}}">
-                        {{/ output.should_display_navbar_logo }}
-                        {{^ output.should_display_navbar_logo }}
-                            {{{sitename}}}
-                        {{/ output.should_display_navbar_logo }}
-                    </a>
-
-                    <div id="usernavigation" class="usernavigation navbar-nav ms-auto">
-                        <div class="divider h-75 align-self-center"></div>
-
-                        {{# output.search_box }}
-                            {{{ output.search_box }}}
-                            <div class="divider border-start h-75 align-self-center mx-1"></div>
-                        {{/output.search_box}}
-
-                        {{#langmenu}}
-                            {{> theme_eadtraining/language_menu }}
-                            <div class="divider border-start h-75 align-self-center mx-1"></div>
-                        {{/langmenu}}
-
-                        {{{ output.navbar_plugin_output }}}
-
-                        <div class="d-flex align-items-stretch usermenu-container" data-region="usermenu">
-                            {{#usermenu}}
-                                {{> core/user_menu }}
-                            {{/usermenu}}
-                        </div>
-
-                        {{{ output.edit_switch }}}
-                    </div>
-                </div>
-
-                {{! Second row: primary navigation + page heading menu }}
-                <div class="navbar-row-bottom d-flex align-items-center w-100 px-2 px-md-3">
-                    {{#primarymoremenu}}
-                        <div class="primary-navigation flex-grow-1">
-                            {{> core/moremenu}}
-                        </div>
-                    {{/primarymoremenu}}
-
-                    <ul class="navbar-nav d-none d-md-flex my-1 px-1">
-                        {{{ output.page_heading_menu }}}
-                    </ul>
-                </div>
+        <div id="usernavigation" class="usernavigation navbar-nav ms-auto">
+            {{{ output.navbar_plugin_output }}}
+            <div class="d-flex align-items-stretch usermenu-container" data-region="usermenu">
+                {{#usermenu}}
+                    {{> core/user_menu }}
+                {{/usermenu}}
             </div>
-        {{/output.navbar_layout_is_institutional}}
-        {{^output.navbar_layout_is_institutional}}
-            <button class="navbar-toggler aabtn d-block d-md-none px-1 my-1 border-0" data-toggler="drawers"
-                    data-action="toggle" data-target="theme_eadtraining-drawers-primary">
-                <span class="navbar-toggler-icon"></span>
-                <span class="sr-only">{{#str}}sidepanel, core{{/str}}</span>
-            </button>
-
-            <a href="{{{ config.homeurl }}}"
-               class="navbar-brand d-none d-md-flex align-items-center m-0 me-4 p-0 aabtn">
-
-                {{# output.should_display_navbar_logo }}
-                    <img src="{{{output.get_compact_logo_url}}}" class="logo me-1" alt="{{{sitename}}}">
-                {{/ output.should_display_navbar_logo }}
-                {{^ output.should_display_navbar_logo }}
-                    {{{sitename}}}
-                {{/ output.should_display_navbar_logo }}
-            </a>
-            {{#primarymoremenu}}
-                <div class="primary-navigation">
-                    {{> core/moremenu}}
-                </div>
-            {{/primarymoremenu}}
-
-            <ul class="navbar-nav d-none d-md-flex my-1 px-1">
-                {{{ output.page_heading_menu }}}
-            </ul>
-
-            <div id="usernavigation" class="usernavigation navbar-nav ms-auto">
-                <div class="divider h-75 align-self-center"></div>
-                {{# output.search_box }}
-                    {{{ output.search_box }}}
-                    <div class="divider border-start h-75 align-self-center mx-1"></div>
-                {{/output.search_box}}
-                {{#langmenu}}
-                    {{> theme_eadtraining/language_menu }}
-                    <div class="divider border-start h-75 align-self-center mx-1"></div>
-                {{/langmenu}}
-                {{{ output.navbar_plugin_output }}}
-                <div class="d-flex align-items-stretch usermenu-container" data-region="usermenu">
-                    {{#usermenu}}
-                        {{> core/user_menu }}
-                    {{/usermenu}}
-                </div>
-                {{{ output.edit_switch }}}
-            </div>
-        {{/output.navbar_layout_is_institutional}}
+            {{{ output.edit_switch }}}
+        </div>
     </div>
 </nav>
 
@@ -256,8 +171,48 @@
             navbar.style.setProperty("--navbar-height", `${newHeight}px`);
 
             const navbarcontentbackground = document.querySelector(".navbar.fixed-top .navbar-content-background");
-            navbarcontentbackground.style.opacity = 1 - (newHeight - 61) / (91 - 61);
+            if (navbarcontentbackground) {
+                navbarcontentbackground.style.opacity = 1 - (newHeight - 61) / (91 - 61);
+            }
         }
     }
+})();
+
+// Flexible top bar: it slides away while the user scrolls down and comes back as soon as they scroll up.
+// It always shows at the top of the page, while one of its menus is open and while it has keyboard focus.
+(function () {
+    const navbar = document.querySelector(".navbar.fixed-top");
+    if (!navbar) {
+        return;
+    }
+    const TOLERANCE = 8; // px of scroll before it reacts, so small jitters do nothing.
+    let lastY = window.scrollY;
+    let ticking = false;
+
+    const inUse = () => navbar.contains(document.activeElement) || !!navbar.querySelector(".dropdown-menu.show");
+
+    const update = () => {
+        ticking = false;
+        const y = Math.max(window.scrollY, 0);
+        if (y <= navbar.offsetHeight) {
+            navbar.classList.remove("navbar-hidden");
+            lastY = y;
+            return;
+        }
+        const delta = y - lastY;
+        if (Math.abs(delta) < TOLERANCE) {
+            return;
+        }
+        navbar.classList.toggle("navbar-hidden", delta > 0 && !inUse());
+        lastY = y;
+    };
+
+    window.addEventListener("scroll", () => {
+        if (!ticking) {
+            ticking = true;
+            window.requestAnimationFrame(update);
+        }
+    }, {passive: true});
+    navbar.addEventListener("focusin", () => navbar.classList.remove("navbar-hidden"));
 })();
 </script>

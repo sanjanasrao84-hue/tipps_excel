@@ -69,9 +69,8 @@ $dashboard-control-height: 40px;
         padding: 1rem !important; /* stylelint-disable-line declaration-no-important */
     }
 
-    // Toolbars of the course overview and timeline blocks.
-    .eadtraining-overview-toolbar,
-    .block_timeline [data-region="timeline"] > :first-child {
+    // Toolbar of the course overview block (the Timeline toolbar is in moodle/_timeline.scss).
+    .eadtraining-overview-toolbar {
         .btn-outline-secondary {
             display: inline-flex;
             align-items: center;
@@ -434,41 +433,6 @@ $dashboard-control-height: 40px;
                 border-radius: 10px;
                 font-weight: 600;
             }
-        }
-    }
-
-    // Timeline: same toolbar as the course overview.
-    .block_timeline {
-        [data-region="timeline"] > :first-child {
-            margin-bottom: 1rem;
-            padding: .75rem !important; /* stylelint-disable-line declaration-no-important */
-            border: 1px solid $dashboard-border;
-            border-radius: 12px;
-            background: $dashboard-tint;
-
-            > .d-flex {
-                gap: .5rem !important; /* stylelint-disable-line declaration-no-important */
-            }
-
-            .mb-1 {
-                margin-bottom: 0 !important; /* stylelint-disable-line declaration-no-important */
-            }
-
-            > .border-bottom {
-                display: none;
-            }
-
-            .nav-search {
-                flex: 1 1 220px;
-            }
-        }
-
-        .paged-content-page-container {
-            background-color: transparent;
-        }
-
-        .list-group-item {
-            border-color: $dashboard-border;
         }
     }
 }

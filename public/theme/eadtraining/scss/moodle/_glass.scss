@@ -140,6 +140,34 @@ $g-active-palette: map-get($g-palettes, $g-palette-key);
     --bs-border-radius-sm: var(--g-r-sm);
     --bs-border-radius-lg: var(--g-r-lg);
     --bs-focus-ring-color: rgba(var(--g-teal-rgb), .28);
+
+    // Layout and component tokens of the refined UI (moodle/_refine.scss). Change the look here.
+    --ui-gutter: clamp(16px, 2.4vw, 32px);         // space between the content and the screen edges
+    --ui-content-max: 1480px;                      // widest the content gets on large screens
+    --ui-page-top: 80px;                           // space above the content (under the menu button and icons)
+    --ui-pill-space: 0px;                          // room kept free beside the page title for the top-right icons
+    --ui-gap: clamp(16px, 1.6vw, 24px);            // between cards
+    --ui-card-r: 18px;
+    --ui-card-pad: clamp(20px, 1.8vw, 24px);
+    --ui-card-bg: rgba(255, 255, 255, .74);
+    --ui-panel-bg: var(--g-glass-strong);
+    --ui-panel-pad: clamp(16px, 2.2vw, 32px);
+    --ui-shadow-card: 0 1px 2px rgba(16, 40, 74, .05), 0 8px 24px -14px rgba(16, 40, 74, .2);
+    --ui-shadow-hover: 0 2px 6px rgba(16, 40, 74, .06), 0 18px 36px -18px rgba(16, 40, 74, .3);
+    --ui-header-grad: linear-gradient(120deg, rgba(var(--g-teal-rgb), .1) 0%, rgba(var(--g-teal-rgb), .03) 60%, rgba(255, 255, 255, 0) 100%);
+    --ui-avatar: 56px;
+    --ui-link: var(--g-teal-deep);
+    --ui-link-hover-bg: rgba(var(--g-teal-rgb), .1);
+    --ui-focus: 0 0 0 3px rgba(var(--g-teal-rgb), .35);
+    --ui-dur: .18s;
+    --ui-line-height: 1.6;
+}
+
+@include media-breakpoint-up(lg) {
+    :root {
+        --ui-page-top: 28px;     // the side bar holds the navigation, so content starts near the top
+        --ui-pill-space: 200px;  // ...beside the notification, message and user icons
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1686,255 +1714,8 @@ label {
     --orgr-radius-sm: var(--g-r-sm);
 }
 
-// Google Calendar (local_gcal / block_gcal_calendar).
-.lgc-main,
-.lgc-sidebar,
-.lgc-status {
-    border-color: var(--g-glass-border) !important;
-    background: var(--g-glass-strong) !important;
-    box-shadow: var(--g-shadow-sm);
-}
-
-.lgc-main {
-    border-radius: var(--g-r-xl) !important;
-}
-
-// Filters panel: tidy section labels and soft rows for the event types.
-.lgc-sidebar {
-    border-radius: var(--g-r-xl) !important;
-
-    .lgc-label {
-        color: var(--g-muted);
-        font-size: .7rem;
-        letter-spacing: .1em;
-    }
-
-    .lgc-category {
-        margin: 0 -8px;
-        padding: 5px 8px;
-        border-radius: var(--g-r-sm);
-        color: var(--g-ink-2);
-        transition: background .15s ease;
-
-        &:hover {
-            background: var(--g-teal-tint);
-        }
-    }
-}
-
-// The calendar itself (FullCalendar). Only its look changes; its behaviour stays in local_gcal.
-.lgc-calendar {
-    --fc-border-color: rgba(15, 42, 51, .07);
-    --fc-page-bg-color: transparent;
-    --fc-neutral-bg-color: rgba(255, 255, 255, .4);
-    --fc-today-bg-color: rgba(var(--g-teal-rgb), .07);
-    --fc-button-bg-color: rgba(255, 255, 255, .7);
-    --fc-button-border-color: var(--g-line-strong);
-    --fc-button-text-color: var(--g-ink-2);
-    --fc-button-hover-bg-color: #fff;
-    --fc-button-hover-border-color: rgba(var(--g-teal-rgb), .35);
-    --fc-button-active-bg-color: var(--g-teal);
-    --fc-button-active-border-color: transparent;
-    --fc-event-border-color: transparent;
-    --fc-list-event-hover-bg-color: var(--g-teal-tint);
-    --fc-highlight-color: rgba(var(--g-teal-rgb), .1);
-
-    // Toolbar: round arrows, a strong title, and the views as one segmented pill.
-    .fc-header-toolbar.fc-toolbar {
-        gap: 12px;
-        margin-bottom: 18px !important;
-    }
-
-    .fc-toolbar-title {
-        color: var(--g-ink);
-        font-family: var(--g-head);
-        font-size: 1.35rem !important;
-        font-weight: 800;
-        letter-spacing: -.02em;
-    }
-
-    .fc-button {
-        border-radius: 999px !important;
-        font-weight: 600;
-        font-size: .86rem;
-        box-shadow: var(--g-shadow-sm) !important;
-        text-transform: none;
-        transition: background .15s ease, color .15s ease, box-shadow .15s ease;
-
-        &:focus-visible {
-            box-shadow: 0 0 0 3px rgba(var(--g-teal-rgb), .25) !important;
-        }
-    }
-
-    .fc-prev-button,
-    .fc-next-button {
-        display: inline-grid;
-        place-items: center;
-        width: 38px;
-        height: 38px;
-        padding: 0 !important;
-    }
-
-    .fc-button-group {
-        gap: 8px;
-    }
-
-    // Month / Week / Day / Agenda: one glass track with a glossy active segment.
-    .fc-toolbar-chunk:last-child .fc-button-group {
-        gap: 2px;
-        padding: 4px;
-        border: 1px solid var(--g-glass-border);
-        border-radius: 999px;
-        background: rgba(255, 255, 255, .55);
-        box-shadow: var(--g-rim);
-
-        .fc-button {
-            border: 0;
-            border-radius: 999px !important;
-            background: transparent;
-            box-shadow: none !important;
-
-            &:hover {
-                background: var(--g-teal-tint);
-            }
-
-            &.fc-button-active {
-                color: #fff;
-                background: var(--g-grad-primary);
-                box-shadow: var(--g-glow) !important;
-            }
-        }
-    }
-
-    // Grid: hairlines, rounded frame, quiet weekday labels.
-    .fc-scrollgrid {
-        overflow: hidden;
-        border: 1px solid var(--g-glass-border) !important;
-        border-radius: var(--g-r-lg);
-        background: rgba(255, 255, 255, .55);
-        box-shadow: var(--g-rim);
-    }
-
-    .fc-col-header-cell {
-        border-color: transparent;
-        background: rgba(255, 255, 255, .5);
-    }
-
-    .fc-col-header-cell-cushion {
-        padding: 10px 4px !important;
-        color: var(--g-muted);
-        font-size: .72rem;
-        font-weight: 700;
-        letter-spacing: .1em;
-        text-transform: uppercase;
-        text-decoration: none;
-    }
-
-    .fc-daygrid-day {
-        transition: background .15s ease;
-
-        &:hover {
-            background: rgba(var(--g-teal-rgb), .04);
-        }
-    }
-
-    .fc-daygrid-day-top {
-        flex-direction: row;
-        padding: 6px 6px 0;
-    }
-
-    .fc-daygrid-day-number {
-        display: inline-grid;
-        place-items: center;
-        min-width: 28px;
-        height: 28px;
-        padding: 0 6px !important;
-        border-radius: 999px;
-        color: var(--g-ink-2);
-        font-size: .85rem;
-        font-weight: 600;
-        font-variant-numeric: tabular-nums;
-        text-decoration: none;
-    }
-
-    .fc-day-other .fc-daygrid-day-number {
-        color: rgba(15, 42, 51, .3);
-    }
-
-    .fc-day-today {
-        .fc-daygrid-day-number {
-            color: #fff;
-            background: var(--g-grad-primary);
-            box-shadow: var(--g-glow);
-        }
-    }
-
-    .fc-day-sat,
-    .fc-day-sun {
-        background: rgba(15, 42, 51, .015);
-    }
-
-    // Events: rounded chips.
-    .fc-event {
-        margin: 1px 4px !important;
-        padding: 2px 6px;
-        border-radius: 8px !important;
-        font-size: .78rem;
-        font-weight: 600;
-        box-shadow: 0 2px 6px -3px rgba(15, 42, 51, .35);
-        transition: transform .12s ease, box-shadow .12s ease;
-
-        &:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 12px -6px rgba(15, 42, 51, .45);
-        }
-    }
-
-    .fc-daygrid-dot-event {
-        background: rgba(255, 255, 255, .8);
-
-        .fc-event-title,
-        .fc-event-time {
-            color: var(--g-ink);
-        }
-    }
-
-    .fc-daygrid-more-link {
-        color: var(--g-teal-deep);
-        font-weight: 700;
-    }
-
-    // Week and day views.
-    .fc-timegrid-slot-label-cushion,
-    .fc-timegrid-axis-cushion {
-        color: var(--g-muted);
-        font-size: .75rem;
-    }
-
-    // Agenda (list) view.
-    .fc-list {
-        overflow: hidden;
-        border: 1px solid var(--g-glass-border) !important;
-        border-radius: var(--g-r-lg);
-    }
-
-    .fc-list-day-cushion {
-        background: rgba(255, 255, 255, .6) !important;
-        color: var(--g-ink);
-        font-weight: 700;
-    }
-
-    .fc-list-empty {
-        background: transparent;
-        color: var(--g-muted);
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .lgc-calendar .fc-event:hover {
-        transform: none;
-    }
-}
+// Google Calendar (local_gcal / block_gcal_calendar): styled by its own stylesheet, local/gcal/styles.css
+// (teal banner, toolbar, month grid and agenda panel). No overrides here, so that design shows as it is.
 
 // ---------------------------------------------------------------------------
 // Colour theme picker (colortheme.php): one row per theme with its 4 colours.
@@ -2673,10 +2454,6 @@ label {
     .lgc-layout {
         grid-template-columns: minmax(0, 1fr);
     }
-}
-
-.lgc-sidebar .form-select {
-    max-width: 100%;
 }
 
 @include media-breakpoint-down(sm) {

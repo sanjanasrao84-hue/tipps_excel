@@ -1,0 +1,419 @@
+// Refined UI, loaded after the glass design system (moodle/_glass.scss) and built only from its tokens:
+// the --g-* colours and the --ui-* layout tokens in the same :root block. Change the look there, not here.
+// Moodle markup and class names only; no template is needed for anything in this file.
+
+// ---------------------------------------------------------------------------
+// Page frame: less empty space above the content, an even gutter on both sides.
+// ---------------------------------------------------------------------------
+#page-wrapper #page.drawers {
+    margin-top: var(--ui-page-top);
+}
+
+#page.drawers #topofscroll {
+    max-width: var(--ui-content-max);
+    margin-top: 0;
+    padding-right: var(--ui-gutter);
+    padding-left: var(--ui-gutter);
+}
+
+#page.drawers #region-main-box,
+#page.drawers #region-main,
+#page.drawers div[role="main"] {
+    min-width: 0;
+}
+
+#page.drawers #region-main {
+    background: transparent;
+    line-height: var(--ui-line-height);
+}
+
+// The content panel of ordinary pages (glass, see _glass.scss): stronger glass and the shared padding.
+body:not(.homemode-editor):not(.pagelayout-mydashboard):not(.pagelayout-mycourses) #page.drawers div[role="main"] {
+    padding: var(--ui-panel-pad);
+    background: var(--ui-panel-bg);
+}
+
+// backdrop-filter makes the panel the containing block of fixed elements, which pinned Moodle's sticky footer
+// (grader report, bulk actions, ...) inside the panel instead of the bottom of the screen. No blur there.
+#page.drawers div[role="main"]:has(.stickyfooter, #sticky-footer) {
+    -webkit-backdrop-filter: none !important; /* stylelint-disable-line declaration-no-important */
+    backdrop-filter: none !important; /* stylelint-disable-line declaration-no-important */
+}
+
+// ---------------------------------------------------------------------------
+// Compact page header: title, picture and actions in one row, on a subtle gradient when there is a picture.
+// ---------------------------------------------------------------------------
+#page-header {
+    margin-bottom: 16px;
+    padding-right: var(--ui-pill-space);
+
+    h1.h2,
+    .page-header-headings h1 {
+        margin: 0;
+        font-size: #{"clamp(1.4rem, 1.05rem + 1vw, 1.9rem)"};
+        line-height: 1.2;
+    }
+}
+
+// Moodle's page header puts the breadcrumb and the page buttons ("Reset page to default", ...) in a row above
+// the title. As a grid, the buttons sit at the end of the title row instead.
+#page-header > .w-100:has(> .d-flex.flex-wrap > #page-navbar) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px 16px;
+
+    > .d-flex.flex-wrap:first-child {
+        display: contents !important; /* stylelint-disable-line declaration-no-important */ // .d-flex is !important
+
+        > #page-navbar {
+            grid-row: 1;
+            grid-column: 1 / -1;
+        }
+
+        > .ms-auto {
+            grid-row: 2;
+            grid-column: 2;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+            margin: 0 !important; /* stylelint-disable-line declaration-no-important */
+        }
+
+        > #course-header {
+            grid-row: 3;
+            grid-column: 1 / -1;
+        }
+    }
+
+    > .d-flex.align-items-center {
+        grid-row: 2;
+        grid-column: 1;
+        min-width: 0;
+    }
+
+    > :not(.d-flex) {
+        grid-column: 1 / -1;
+    }
+
+    #page-navbar:empty,
+    #course-header:empty {
+        display: none;
+    }
+
+    @include media-breakpoint-down(sm) {
+        grid-template-columns: minmax(0, 1fr);
+
+        > .d-flex.flex-wrap:first-child > .ms-auto {
+            grid-row: 3;
+            grid-column: 1;
+            justify-content: flex-start;
+        }
+    }
+}
+
+// Pages with a picture in the header (profile, edit profile, ...): a light band instead of a large block.
+#page-header:has(.page-header-image) {
+    padding: 14px 18px;
+    border: 1px solid var(--g-glass-border);
+    border-radius: var(--ui-card-r);
+    background: var(--ui-header-grad), var(--ui-card-bg);
+    box-shadow: var(--ui-shadow-card);
+
+    @include media-breakpoint-up(lg) {
+        margin-right: var(--ui-pill-space);
+        padding-right: 18px;
+    }
+}
+
+// The title row (title, then actions such as the admin search box) wraps on small screens.
+#page-header > .w-100 > .d-flex.align-items-center {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+
+    > .me-auto {
+        min-width: 0;
+    }
+}
+
+#page-header .header-actions-container {
+    min-width: 0;
+    max-width: 100%;
+    margin-left: auto;
+
+    .simplesearchform,
+    form {
+        max-width: 100%;
+    }
+}
+
+#page-header .page-context-header {
+    flex-wrap: nowrap !important; /* stylelint-disable-line declaration-no-important */
+    gap: 14px;
+    margin: 0 !important; /* stylelint-disable-line declaration-no-important */
+    padding: 0;
+
+    .page-header-image {
+        flex: none;
+        margin: 0;
+
+        .userpicture,
+        .userinitials,
+        .userinitials.size-100,
+        img {
+            width: var(--ui-avatar);
+            height: var(--ui-avatar);
+            margin: 0;
+            font-size: calc(var(--ui-avatar) * .34);
+            line-height: var(--ui-avatar);
+        }
+    }
+
+    .page-header-headings {
+        min-width: 0;
+
+        h1 {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    .header-button-group {
+        margin: 0 !important; /* stylelint-disable-line declaration-no-important */
+    }
+
+    @include media-breakpoint-down(sm) {
+        flex-wrap: wrap !important; /* stylelint-disable-line declaration-no-important */
+    }
+}
+
+// Header buttons (Message, Reset page to default, ...): small outline pills.
+#page-header .header-button-group .btn,
+#page-header .singlebutton .btn,
+#page-header .ms-auto > .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--g-line-strong);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .7);
+    color: var(--g-ink);
+    font-size: .875rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background-color var(--ui-dur) var(--g-ease), border-color var(--ui-dur) var(--g-ease);
+
+    &:hover {
+        border-color: rgba(var(--g-teal-rgb), .45);
+        background: #fff;
+        color: var(--g-teal-deep);
+    }
+}
+
+#page-header .singlebutton,
+#page-header .singlebutton form {
+    margin: 0;
+}
+
+// ---------------------------------------------------------------------------
+// Links: brand colour, no heavy underline, a soft background on hover.
+// Inside running text they keep a thin underline, so they stay recognisable without colour (accessibility).
+// ---------------------------------------------------------------------------
+#page.drawers #region-main a:not(.btn):not(.dropdown-item):not(.nav-link):not(.list-group-item):not(.aalink.stretched-link) {
+    border-radius: 6px;
+    color: var(--ui-link);
+    text-decoration: none;
+    transition: background-color var(--ui-dur) var(--g-ease), box-shadow var(--ui-dur) var(--g-ease), color var(--ui-dur) var(--g-ease);
+
+    &:hover {
+        background-color: var(--ui-link-hover-bg);
+        box-shadow: 0 0 0 3px var(--ui-link-hover-bg);
+        color: var(--g-teal);
+    }
+}
+
+#page.drawers #region-main {
+    p a,
+    li > p a,
+    .no-overflow a,
+    .text_to_html a,
+    .summary a,
+    .description a {
+        text-decoration: underline;
+        text-decoration-color: rgba(var(--g-teal-rgb), .35);
+        text-decoration-thickness: 1px;
+        text-underline-offset: .2em;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Cards inside the content: one radius, padding, shadow and title style everywhere.
+// ---------------------------------------------------------------------------
+#page.drawers #region-main .card:not(.dashboard-card):not(.course-card) {
+    border: 1px solid var(--g-glass-border);
+    border-radius: var(--ui-card-r);
+    background: var(--ui-card-bg);
+    box-shadow: var(--ui-shadow-card);
+
+    > .card-body {
+        padding: var(--ui-card-pad);
+    }
+
+    > .card-header {
+        padding: 14px var(--ui-card-pad);
+    }
+}
+
+// Card titles: same size and weight, with a thin divider under them.
+#page.drawers #region-main .card > .card-body > .card-title,
+#page.drawers #region-main .card > .card-body > h3.lead,
+#page.drawers #region-main .card > .card-body > h2:first-child,
+#page.drawers #region-main .card > .card-body > h3:first-child,
+.block.card > .card-body > .card-title {
+    margin: 0 0 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--g-line);
+    color: var(--g-ink);
+    font-family: var(--g-head);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -.01em;
+}
+
+// Cards that are links as a whole lift on hover (the glass design already does it for course cards).
+#page.drawers #region-main a.card,
+#page.drawers #region-main .card:has(> .card-body > .stretched-link) {
+    transition: transform var(--ui-dur) var(--g-ease), box-shadow var(--ui-dur) var(--g-ease);
+
+    &:hover {
+        box-shadow: var(--ui-shadow-hover);
+        transform: translateY(-2px);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// User profile: cards in a responsive grid straight on the page (no panel around them).
+// ---------------------------------------------------------------------------
+.pagelayout-mypublic #page.drawers #region-main div[role="main"] {
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
+
+// Fluid columns, not a grid: Moodle's profile cards differ a lot in height, and grid rows would leave gaps under
+// the short ones. column-width gives 1, 2 or 3 columns as the space allows.
+.userprofile .profile_tree,
+#page.drawers .profile_tree {
+    column-gap: var(--ui-gap);
+    column-count: auto;
+    column-width: 320px;
+
+    .node_category {
+        display: block !important; /* stylelint-disable-line declaration-no-important */
+        width: auto !important; /* stylelint-disable-line declaration-no-important */
+        margin: 0 0 var(--ui-gap) !important; /* stylelint-disable-line declaration-no-important */
+        break-inside: avoid;
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        li + li {
+            margin-top: 10px;
+        }
+
+        dl {
+            margin: 0;
+        }
+
+        dt {
+            color: var(--g-muted);
+            font-size: .8rem;
+            font-weight: 600;
+            letter-spacing: .02em;
+        }
+
+        dd {
+            margin: 2px 0 0;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tables: soft header, row hover, and wide tables scroll inside their own box instead of the page.
+// ---------------------------------------------------------------------------
+#page.drawers #region-main {
+    .generaltable,
+    .table {
+        th {
+            border-bottom-color: var(--g-line-strong);
+            color: var(--g-ink);
+            font-size: .85rem;
+            font-weight: 700;
+        }
+
+        tbody tr {
+            transition: background-color var(--ui-dur) var(--g-ease);
+        }
+
+        tbody tr:hover > * {
+            background-color: rgba(var(--g-teal-rgb), .04);
+        }
+    }
+
+    .gradeparent,
+    .table-responsive,
+    .reportbuilder-wrapper {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Side bar: smooth hover on its links.
+// ---------------------------------------------------------------------------
+.glass-sidebar__link,
+.glass-sidebar__sublink {
+    transition: background-color var(--ui-dur) var(--g-ease), color var(--ui-dur) var(--g-ease), transform var(--ui-dur) var(--g-ease);
+
+    &:hover:not(.active) {
+        transform: translateX(2px);
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Focus: one visible ring on every interactive element reached by keyboard.
+// ---------------------------------------------------------------------------
+a,
+button,
+.btn,
+input,
+select,
+textarea,
+summary,
+[tabindex] {
+    &:focus-visible {
+        outline: 0;
+        box-shadow: var(--ui-focus);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #page.drawers #region-main a,
+    #page.drawers #region-main .card,
+    #page-header .btn,
+    .glass-sidebar__link,
+    .glass-sidebar__sublink {
+        transition: none;
+        transform: none !important; /* stylelint-disable-line declaration-no-important */
+    }
+}

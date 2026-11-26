@@ -1,0 +1,479 @@
+/**
+ Timeline block (block_timeline): a white card with a toolbar, a vertical rail with one marker per day, and the
+ events as cards with a coloured left edge. Same palette as the calendar (local_gcal).
+ The event cards are rendered by the theme override js/esm/build/overrides/block_timeline/views/EventListItem.js.
+ */
+$tl-teal: #0f766e;
+$tl-teal-dark: #0b5f59;
+$tl-teal-tint: #eaf6f4;
+$tl-ink: #1f2933;
+$tl-muted: #5b6773;
+$tl-line: #e6eaee;
+$tl-surface: #f8fafb;
+$tl-danger: #c92a2a;
+$tl-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 4px 16px rgba(16, 24, 40, .06);
+$tl-shadow-hover: 0 6px 16px rgba(16, 24, 40, .1);
+$tl-ease: 160ms cubic-bezier(.2, .7, .2, 1);
+
+.block_timeline {
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    &.card {
+        border: 1px solid $tl-line;
+        border-radius: 16px;
+        background: #fff;
+        box-shadow: $tl-shadow;
+    }
+
+    .card-title {
+        color: $tl-ink;
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: -.01em;
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+        outline: 3px solid rgba($tl-teal, .45);
+        outline-offset: 2px;
+        box-shadow: none;
+    }
+
+    // ---- Toolbar: day filter, sort and search ----
+    [data-region="timeline"] > :first-child {
+        margin-bottom: .75rem;
+        padding: 12px !important; /* stylelint-disable-line declaration-no-important */
+        border: 1px solid $tl-line;
+        border-radius: 14px;
+        background: $tl-surface;
+
+        > .d-flex {
+            align-items: center;
+            gap: 10px !important; /* stylelint-disable-line declaration-no-important */
+        }
+
+        > .border-bottom {
+            display: none;
+        }
+
+        .mb-1 {
+            margin-bottom: 0 !important; /* stylelint-disable-line declaration-no-important */
+        }
+
+        .nav-search {
+            flex: 1 1 220px;
+        }
+
+        .btn-outline-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            height: 44px;
+            padding: 0 14px;
+            border: 1px solid $tl-line;
+            border-radius: 12px;
+            background: #fff;
+            color: $tl-ink;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: border-color $tl-ease, box-shadow $tl-ease;
+
+            &:hover,
+            &.show,
+            &[aria-expanded="true"] {
+                border-color: rgba($tl-teal, .45);
+                background: #fff;
+                box-shadow: 0 2px 8px rgba(16, 24, 40, .06);
+                color: $tl-ink;
+            }
+        }
+
+        .dropdown-menu {
+            padding: 6px;
+            border: 1px solid $tl-line;
+            border-radius: 12px;
+            box-shadow: 0 12px 32px rgba(16, 24, 40, .14);
+        }
+
+        .dropdown-item {
+            border-radius: 8px;
+            color: $tl-ink;
+            font-size: .9rem;
+
+            &:hover {
+                background: $tl-surface;
+            }
+
+            &.active,
+            &.dropdown-item-active {
+                background: $tl-teal-tint;
+                color: $tl-teal-dark;
+                font-weight: 600;
+            }
+        }
+
+        .dropdown-header {
+            color: $tl-muted;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .searchbar .form-control {
+            height: 44px;
+            padding-left: 40px;
+            border: 1px solid $tl-line;
+            border-radius: 12px !important; /* stylelint-disable-line declaration-no-important */
+            background: #fff url([[pix:core|a/search]]) no-repeat 14px center / 16px 16px;
+            color: $tl-ink;
+
+            &::placeholder {
+                color: $tl-muted;
+            }
+
+            &:focus {
+                border-color: rgba($tl-teal, .6);
+                box-shadow: 0 0 0 3px rgba($tl-teal, .15);
+            }
+        }
+    }
+
+    .paged-content-page-container {
+        background-color: transparent;
+    }
+
+    // ---- Day groups on a vertical rail ----
+    [data-region="view-dates"] [data-region="event-list-wrapper"] {
+        padding: 0 4px;
+
+        > div {
+            position: relative;
+            padding-left: 30px;
+
+            // The rail, from this day's marker to the next one.
+            &::before {
+                content: "";
+                position: absolute;
+                top: 30px;
+                bottom: -18px;
+                left: 9px;
+                width: 2px;
+                border-radius: 2px;
+                background: $tl-line;
+            }
+
+            &:last-child::before {
+                bottom: 12px;
+            }
+        }
+
+        [data-region="event-list-content-date"] {
+            position: relative;
+            margin: 18px 0 10px !important; /* stylelint-disable-line declaration-no-important */
+
+            // The day's marker on the rail.
+            &::before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: -27px;
+                width: 14px;
+                height: 14px;
+                border: 3px solid $tl-teal;
+                border-radius: 50%;
+                background: #fff;
+                box-shadow: 0 0 0 4px #fff;
+                transform: translateY(-50%);
+            }
+        }
+    }
+
+    [data-region="event-list-content-date"] h4 {
+        padding: 0 !important; /* stylelint-disable-line declaration-no-important */
+        color: $tl-muted;
+        font-size: .75rem;
+        font-weight: 700 !important; /* stylelint-disable-line declaration-no-important */
+        letter-spacing: .07em;
+        text-transform: uppercase;
+    }
+
+    // ---- Event cards ----
+    .list-group {
+        gap: 8px;
+    }
+
+    .list-group-item.tl-item {
+        --tl-c: #5c677d;
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 12px;
+        margin: 0;
+        padding: 12px 14px;
+        border: 1px solid $tl-line;
+        border-left: 3px solid var(--tl-c);
+        border-radius: 12px;
+        background: #fff;
+        color: $tl-ink;
+        transition: transform $tl-ease, box-shadow $tl-ease, border-color $tl-ease;
+
+        &:hover {
+            border-color: #d5dde4;
+            border-left-color: var(--tl-c);
+            box-shadow: $tl-shadow-hover;
+            transform: translateY(-1px);
+        }
+
+        &:focus-within {
+            border-color: rgba($tl-teal, .5);
+            border-left-color: var(--tl-c);
+        }
+    }
+
+    // Colour of the left edge: calendar page events, then the activity purpose (same specificity as the default).
+    .list-group-item.tl-item--calendar {
+        --tl-c: #{$tl-teal};
+    }
+
+    .list-group-item.tl-item--assessment {
+        --tl-c: #e8590c;
+    }
+
+    .list-group-item.tl-item--collaboration {
+        --tl-c: #3b5bdb;
+    }
+
+    .list-group-item.tl-item--communication {
+        --tl-c: #2f9e44;
+    }
+
+    .list-group-item.tl-item--content {
+        --tl-c: #1f7fb6;
+    }
+
+    .list-group-item.tl-item--interactivecontent {
+        --tl-c: #6f5fb8;
+    }
+
+    .list-group-item.tl-item--administration,
+    .list-group-item.tl-item--interface {
+        --tl-c: #7b8aa0;
+    }
+
+    .list-group-item.tl-item--overdue {
+        --tl-c: #{$tl-danger};
+        background: #fffafa;
+    }
+
+    .tl-item__time {
+        flex: none;
+        min-width: 58px;
+        padding: 5px 8px;
+        border-radius: 8px;
+        background: $tl-surface;
+        color: $tl-ink;
+        font-size: .8rem;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        text-align: center;
+    }
+
+    .tl-item__icon {
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+    }
+
+    .tl-item__body {
+        flex: 1 1 180px;
+        min-width: 0;
+        line-height: 1.35;
+    }
+
+    .tl-item__title {
+        margin: 0 0 2px;
+        overflow: hidden;
+        font-size: .95rem;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        a {
+            color: $tl-ink;
+            text-decoration: none;
+
+            // The whole card opens the event; the action stays its own link (above this layer).
+            &::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: 12px;
+            }
+
+            &:hover {
+                color: $tl-teal-dark;
+            }
+        }
+    }
+
+    .tl-item__meta {
+        margin: 0;
+        overflow: hidden;
+        color: $tl-muted;
+        font-size: .8rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .tl-item__end {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex: none;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+
+        .event-action {
+            margin: 0;
+            padding: 0;
+        }
+    }
+
+    .tl-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .02em;
+        white-space: nowrap;
+    }
+
+    .tl-badge--overdue {
+        background: #fdecec;
+        color: #a61e1e;
+    }
+
+    .list-group-item-action.tl-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        width: auto;
+        min-height: 36px;
+        padding: 0 14px;
+        border: 0;
+        border-radius: 10px;
+        background: $tl-teal;
+        color: #fff;
+        font-size: .82rem;
+        font-weight: 600;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background-color $tl-ease, box-shadow $tl-ease;
+
+        &:hover,
+        &:focus {
+            background: $tl-teal-dark;
+            box-shadow: 0 4px 12px rgba($tl-teal, .3);
+            color: #fff;
+        }
+    }
+
+    .tl-action__count {
+        padding: 1px 7px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .22);
+        font-size: .72rem;
+    }
+
+    // ---- Sort by courses: one card per course ----
+    [data-region="courses-list"] > .list-group-item {
+        background: transparent;
+    }
+
+    [data-region="course-events-container"] {
+        padding: 16px !important; /* stylelint-disable-line declaration-no-important */
+        border: 1px solid $tl-line;
+        border-radius: 14px;
+        background: $tl-surface;
+
+        > h4 {
+            margin-bottom: 4px;
+            color: $tl-ink;
+            font-size: 1rem;
+        }
+
+        [data-region="event-list-content-date"] {
+            margin: 12px 0 8px !important; /* stylelint-disable-line declaration-no-important */
+        }
+    }
+
+    // ---- Empty states and "More activities" ----
+    [data-region="no-events-empty-message"],
+    [data-region="no-courses-empty-message"] {
+        margin: 12px 4px 4px;
+        padding: 28px 16px;
+        border: 1px dashed #c5cfd8;
+        border-radius: 14px;
+        background: $tl-surface;
+
+        p {
+            margin: 8px 0 0;
+            color: $tl-muted !important; /* stylelint-disable-line declaration-no-important */
+            font-size: .9rem;
+        }
+    }
+
+    .timeline-empty-icon {
+        width: 64px;
+        height: 64px;
+    }
+
+    [data-region="more-events-button-container"],
+    [data-region="more-courses-button-container"] {
+        padding: 12px 0 4px 30px !important; /* stylelint-disable-line declaration-no-important */
+
+        .btn,
+        button {
+            min-height: 40px;
+            padding: 0 18px;
+            font-size: .9rem;
+            border: 1px solid $tl-line;
+            border-radius: 12px;
+            background: #fff;
+            color: $tl-teal-dark;
+            font-weight: 600;
+
+            &:hover {
+                border-color: rgba($tl-teal, .45);
+                background: $tl-teal-tint;
+            }
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .tl-item__end {
+            justify-content: flex-end;
+            width: 100%;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .list-group-item.tl-item,
+        .list-group-item-action.tl-action,
+        [data-region="timeline"] > :first-child .btn-outline-secondary {
+            transition: none;
+        }
+
+        .list-group-item.tl-item:hover {
+            transform: none;
+        }
+    }
+}

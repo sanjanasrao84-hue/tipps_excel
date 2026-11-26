@@ -92,6 +92,7 @@ class calendar {
             'viewmonth', 'viewweek', 'viewday', 'viewagenda', 'today', 'allday', 'cancelevent', 'cancelconfirm', 'editevent',
             'createevent', 'eventcancelled', 'eventsaved', 'opencourse', 'openactivity', 'openingoogle', 'editdates', 'syncing',
             'syncfailed', 'notsynced', 'syncedtogoogle', 'personalnote', 'deadline', 'noevents', 'location', 'course', 'close',
+            'moreevents', 'nothingcomingup', 'nothingonday',
         ], 'local_gcal');
         $page->requires->js_call_amd('local_gcal/calendar', 'init', [[
             'timezone' => core_date::get_user_timezone($USER),
