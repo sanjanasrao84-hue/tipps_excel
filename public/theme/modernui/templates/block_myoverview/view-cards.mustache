@@ -1,0 +1,107 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_myoverview/view-cards
+
+    Modern UI override of the course overview's Card view (rendered in the browser by block_myoverview/view).
+
+    Kept from core for the block's JavaScript: data-region="card-deck", role list/listitem,
+    data-region="course-content" with data-course-id, the favourite icon (core_course/favouriteicon) and the
+    course action menu (block_myoverview/course-action-menu: star / unstar / remove from view).
+
+    The primary button's label depends on progress, without extra JavaScript: data-progress holds the
+    percentage ("" when completion is not tracked) and scss/modernui/_dashboard.scss shows one of
+    Start (0) / Continue (1-99) / Review (100) / Open (not tracked). The hidden labels are display:none, so
+    screen readers read only the visible one.
+
+    Example context (json):
+    {
+        "courses": [
+            {
+                "id": 2,
+                "uniqid": "abc",
+                "viewurl": "https://moodlesite/course/view.php?id=2",
+                "courseimage": "https://moodlesite/pluginfile/123/course/overviewfiles/123.jpg",
+                "fullname": "Statistical and Computational Tools",
+                "shortname": "STAT101",
+                "showshortname": true,
+                "hasprogress": true,
+                "progress": 10,
+                "coursecategory": "Category 1",
+                "showcoursecategory": true,
+                "isfavourite": false,
+                "visible": true
+            }
+        ]
+    }
+}}
+<div class="card-grid mu-course-grid" data-region="card-deck" role="list">
+{{#courses}}
+    <div class="card course-card mu-course-card" role="listitem"
+        data-region="course-content"
+        data-course-id="{{{id}}}"
+        data-progress="{{#hasprogress}}{{progress}}{{/hasprogress}}">
+        <div class="mu-course-cover">
+            <img src="{{{courseimage}}}" alt="" loading="lazy" decoding="async">
+            {{#showcoursecategory}}
+            <span class="mu-chip mu-course-category">
+                <span class="visually-hidden">{{#str}}aria:coursecategory, core_course{{/str}}</span>
+                <span class="text-truncate">{{{coursecategory}}}</span>
+            </span>
+            {{/showcoursecategory}}
+            {{#hasprogress}}
+            <span class="mu-chip mu-course-done">
+                <i class="icon fa fa-circle-check fa-fw" aria-hidden="true"></i>{{#str}} completed, theme_modernui {{/str}}
+            </span>
+            {{/hasprogress}}
+        </div>
+        <div class="card-body course-info-container" id="course-info-container-{{id}}-{{uniqid}}">
+            {{#showshortname}}
+            <p class="mu-course-shortname">
+                <span class="visually-hidden">{{#str}}aria:courseshortname, core_course{{/str}}</span>
+                {{{shortname}}}
+            </p>
+            {{/showshortname}}
+            <h4 class="mu-course-title">
+                <a href="{{viewurl}}" class="aalink coursename" title="{{fullname}}">
+                    {{> core_course/favouriteicon }}
+                    <span class="visually-hidden">{{#str}}aria:coursename, core_course{{/str}}</span>
+                    <span class="multiline">{{{fullname}}}</span>
+                </a>
+            </h4>
+            {{^visible}}
+            <span class="badge mu-badge-muted">{{#str}} hiddenfromstudents {{/str}}</span>
+            {{/visible}}
+            {{#hasprogress}}
+                {{> block_myoverview/progress-bar }}
+            {{/hasprogress}}
+        </div>
+        <div class="mu-course-footer">
+            <a href="{{viewurl}}" class="btn btn-primary mu-course-cta">
+                <span class="mu-cta mu-cta-continue">{{#str}} continue_action, theme_modernui {{/str}}</span>
+                <span class="mu-cta mu-cta-start">{{#str}} cta_start, theme_modernui {{/str}}</span>
+                <span class="mu-cta mu-cta-review">{{#str}} cta_review, theme_modernui {{/str}}</span>
+                <span class="mu-cta mu-cta-open">{{#str}} cta_open, theme_modernui {{/str}}</span>
+                <span class="visually-hidden">{{fullname}}</span>
+            </a>
+            <div class="menu">
+                {{> block_myoverview/course-action-menu }}
+            </div>
+        </div>
+    </div>
+{{/courses}}
+</div>

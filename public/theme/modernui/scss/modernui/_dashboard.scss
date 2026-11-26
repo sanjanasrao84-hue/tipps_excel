@@ -1,0 +1,978 @@
+// Modern UI: Dashboard and My courses. var(--mu-*) only.
+//
+// Pieces: the welcome hero (templates/dashboard_hero.mustache), course cards (block_myoverview/view-cards),
+// progress bar (block_myoverview/progress-bar), empty states (theme_modernui/empty_illustration), and the
+// blocks that usually sit on these pages (timeline, calendar, recently accessed items / courses).
+//
+// Motion: entrance and hover use --mu-dur / --mu-ease, which Reduce motion sets to 0 (post.scss), and the
+// global reduce rules switch every animation off. Nothing here carries information through motion alone.
+
+// ---------------------------------------------------------------------------------------------------------
+// Shared bits
+// ---------------------------------------------------------------------------------------------------------
+@keyframes mu-rise {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes mu-shimmer {
+    from {
+        background-position: 100% 0;
+    }
+    to {
+        background-position: -100% 0;
+    }
+}
+
+@keyframes mu-ring-fill {
+    from {
+        stroke-dasharray: 0 100;
+    }
+}
+
+@keyframes mu-burst {
+    0% {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+    30% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1.6);
+    }
+}
+
+.mu-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 1.875rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+
+    .icon {
+        margin: 0;
+        width: auto;
+        height: auto;
+        font-size: 0.875em;
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Page header on the Dashboard: the hero is the visual heading, so the h1 becomes a quiet label.
+// ---------------------------------------------------------------------------------------------------------
+.pagelayout-mydashboard #page-header {
+    margin-bottom: calc(var(--mu-pad) * 0.5);
+
+    h1,
+    .h2 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--mu-muted);
+        margin: 0;
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Hero
+// ---------------------------------------------------------------------------------------------------------
+.mu-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: calc(var(--mu-pad) * 1.5);
+    margin: 0 0 calc(var(--mu-pad) * 2);
+    padding: calc(var(--mu-pad) * 1.5);
+    border-radius: calc(var(--mu-radius-lg) * 1.25);
+    background: var(--mu-glow-accent), var(--mu-grad-brand);
+    color: var(--mu-on-primary);
+    box-shadow: var(--mu-shadow);
+    overflow: hidden;
+    isolation: isolate;
+    animation: mu-rise var(--mu-dur) var(--mu-ease) both;
+
+    // Soft decorative rings in the corner.
+    &::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        inset: auto -6rem -8rem auto;
+        width: 20rem;
+        height: 20rem;
+        border-radius: 50%;
+        border: 2.5rem solid rgba(var(--mu-primary-rgb), 0.35);
+        box-shadow: 0 0 0 2.5rem rgba(var(--mu-accent-rgb), 0.12);
+        pointer-events: none;
+    }
+
+    @include media-breakpoint-up(md) {
+        padding: calc(var(--mu-pad) * 2.25);
+    }
+
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+        align-items: center;
+    }
+}
+
+.mu-hero-date {
+    margin: 0 0 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.mu-hero-title {
+    margin: 0 0 0.5rem;
+    color: inherit;
+    // unquote(): scssphp would otherwise try to add rem and vw itself.
+    font-size: unquote("clamp(1.75rem, 1.2rem + 2.2vw, 2.625rem)");
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.mu-hero-message {
+    margin: 0 0 var(--mu-pad);
+    max-width: 38rem;
+    font-size: 1.0625rem;
+    line-height: 1.5;
+}
+
+.mu-hero-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    .mu-chip {
+        background-color: rgba(var(--mu-primary-rgb), 0.55);
+        color: var(--mu-on-primary);
+        box-shadow: inset 0 0 0 1px currentColor;
+    }
+}
+
+// One-time completion celebration.
+.mu-celebrate {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: var(--mu-pad);
+    padding: 0.75rem var(--mu-pad);
+    border-radius: var(--mu-radius);
+    background-color: rgba(var(--mu-primary-rgb), 0.6);
+    box-shadow: inset 0 0 0 1px currentColor;
+    font-weight: 600;
+
+    .mu-celebrate-text {
+        color: inherit;
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+    }
+
+    .mu-celebrate-icon {
+        margin: 0;
+        font-size: 1.25rem;
+    }
+}
+
+.mu-celebrate-burst {
+    position: absolute;
+    left: 0.6rem;
+    top: 50%;
+    width: 3rem;
+    height: 3rem;
+    margin-top: -1.5rem;
+    pointer-events: none;
+    background:
+        radial-gradient(circle, var(--mu-on-primary) 0 2px, transparent 3px) 0 0 / 12px 12px,
+        radial-gradient(circle, rgba(var(--mu-accent-rgb), 1) 0 2px, transparent 3px) 6px 6px / 12px 12px;
+    border-radius: 50%;
+    opacity: 0;
+    animation: mu-burst 1.2s var(--mu-ease) 0.3s 2;
+}
+
+// "Continue where you left off".
+.mu-continue {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    border-radius: var(--mu-radius-lg);
+    background-color: var(--mu-surface);
+    color: var(--mu-text);
+    box-shadow: var(--mu-shadow-hover);
+    overflow: hidden;
+    transition: transform var(--mu-dur) var(--mu-ease), box-shadow var(--mu-dur) var(--mu-ease);
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+
+    &:focus-within {
+        outline: 3px solid var(--mu-on-primary);
+        outline-offset: 3px;
+    }
+
+    @include media-breakpoint-up(sm) {
+        grid-template-columns: 9rem minmax(0, 1fr);
+    }
+}
+
+.mu-continue-cover {
+    aspect-ratio: 16 / 7;
+    background-color: var(--mu-surface-2);
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    @include media-breakpoint-up(sm) {
+        aspect-ratio: auto;
+    }
+}
+
+.mu-continue-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: calc(var(--mu-pad) * 1.25);
+}
+
+.mu-continue-label {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--mu-brand);
+}
+
+.mu-continue-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.3;
+
+    span {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+}
+
+.mu-continue-modicon {
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin: 0;
+}
+
+.mu-continue-course {
+    margin: 0;
+    color: var(--mu-muted);
+    font-size: 0.875rem;
+}
+
+.mu-continue-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--mu-pad);
+    margin-top: calc(var(--mu-pad) * 0.75);
+}
+
+.mu-continue-btn {
+    min-height: 2.75rem;
+    padding-inline: 1.25rem;
+    font-weight: 600;
+
+    // stretched-link makes the whole card the target; the ring and text stay above it visually only.
+    &::after {
+        border-radius: var(--mu-radius-lg);
+    }
+}
+
+// Empty variant (no courses / nothing to continue).
+.mu-continue-empty {
+    justify-items: center;
+    gap: 0.75rem;
+    padding: calc(var(--mu-pad) * 1.5);
+    text-align: center;
+
+    @include media-breakpoint-up(sm) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .mu-empty-illustration {
+        width: 9rem;
+        height: auto;
+    }
+
+    .mu-continue-title {
+        justify-content: center;
+    }
+}
+
+// Progress ring.
+.mu-ring {
+    position: relative;
+    flex: none;
+    width: 3.25rem;
+    height: 3.25rem;
+
+    svg {
+        width: 100%;
+        height: 100%;
+        transform: rotate(-90deg);
+    }
+
+    circle {
+        fill: none;
+        stroke-width: 3.5;
+    }
+
+    .mu-ring-track {
+        stroke: var(--mu-tint-strong);
+    }
+
+    .mu-ring-value {
+        stroke: var(--mu-brand);
+        stroke-linecap: round;
+        stroke-dasharray: var(--mu-ring-value) 100;
+        animation: mu-ring-fill calc(var(--mu-dur) * 4) var(--mu-ease) both;
+    }
+}
+
+.mu-ring-text {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--mu-text);
+}
+
+// High contrast: flat colours, solid outlines, no translucent layers.
+html[data-mu-contrast="high"] {
+    .mu-hero {
+        background: var(--mu-surface);
+        color: var(--mu-text);
+        border: 2px solid var(--mu-text);
+
+        &::before {
+            display: none;
+        }
+    }
+
+    .mu-hero-chips .mu-chip,
+    .mu-celebrate {
+        background-color: var(--mu-surface);
+        color: var(--mu-text);
+    }
+
+    .mu-continue {
+        border: 2px solid var(--mu-text);
+
+        &:focus-within {
+            outline-color: var(--mu-text);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Course cards (Card view of the course overview and any block using it)
+// ---------------------------------------------------------------------------------------------------------
+.mu-course-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 16.5rem), 1fr));
+    gap: calc(var(--mu-pad) * 1.25);
+    margin: 0;
+}
+
+.mu-course-card.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin: 0;
+    border: 1px solid var(--mu-border);
+    border-radius: var(--mu-radius-lg);
+    background-color: var(--mu-surface);
+    box-shadow: var(--mu-shadow);
+    overflow: hidden;
+    animation: mu-rise var(--mu-dur) var(--mu-ease) both;
+    transition: transform var(--mu-dur) var(--mu-ease), box-shadow var(--mu-dur) var(--mu-ease);
+
+    &:hover,
+    &:focus-within {
+        transform: translateY(-3px);
+        box-shadow: var(--mu-shadow-hover);
+    }
+
+    // Stagger the first cards' entrance a little.
+    @for $i from 2 through 6 {
+        &:nth-child(#{$i}) {
+            animation-delay: calc(var(--mu-dur-fast) * #{($i - 1) * 0.3});
+        }
+    }
+}
+
+.mu-course-cover {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background-color: var(--mu-surface-2);
+
+    img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform calc(var(--mu-dur) * 2) var(--mu-ease);
+    }
+
+    // Gradient at the foot of the image so the chips stay legible on any photo.
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 40% 0 0;
+        background: linear-gradient(transparent, rgba(var(--mu-scrim-rgb), 0.35));
+        pointer-events: none;
+    }
+
+    .mu-chip {
+        position: absolute;
+        z-index: 1;
+        max-width: calc(100% - 1.5rem);
+    }
+
+    .mu-course-category {
+        left: 0.75rem;
+        bottom: 0.75rem;
+        background-color: var(--mu-surface);
+        color: var(--mu-text);
+    }
+
+    .mu-course-done {
+        display: none;
+        right: 0.75rem;
+        top: 0.75rem;
+        background-color: var(--mu-brand);
+        color: var(--mu-on-brand);
+    }
+}
+
+.mu-course-card:hover .mu-course-cover img {
+    transform: scale(1.03);
+}
+
+.mu-course-card[data-progress="100"] .mu-course-done {
+    display: inline-flex;
+}
+
+.mu-course-card .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: var(--mu-pad) calc(var(--mu-pad) * 1.125) calc(var(--mu-pad) * 0.5);
+}
+
+.mu-course-shortname {
+    margin: 0;
+    color: var(--mu-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.mu-course-title {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.35;
+
+    .coursename {
+        color: var(--mu-text);
+        text-decoration: none;
+
+        &:hover,
+        &:focus {
+            color: var(--mu-brand);
+            text-decoration: underline;
+        }
+    }
+
+    .multiline {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    [data-region="favourite-icon"] .icon {
+        color: var(--mu-accent);
+    }
+}
+
+.mu-badge-muted {
+    align-self: flex-start;
+    background-color: var(--mu-surface-2);
+    color: var(--mu-text);
+    border: 1px solid var(--mu-border);
+}
+
+.mu-course-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding: calc(var(--mu-pad) * 0.5) calc(var(--mu-pad) * 1.125) calc(var(--mu-pad) * 1.125);
+
+    .mu-course-cta {
+        flex: 1;
+        min-height: 2.75rem;
+        font-weight: 600;
+    }
+
+    .menu .coursemenubtn {
+        width: 2.75rem;
+        height: 2.75rem;
+        border-radius: var(--mu-radius);
+        color: var(--mu-muted);
+
+        &:hover,
+        &:focus {
+            background-color: var(--mu-surface-2);
+            color: var(--mu-text);
+        }
+    }
+}
+
+// CTA label by progress (see the view-cards template).
+.mu-cta {
+    display: none;
+}
+
+.mu-course-card .mu-cta-continue {
+    display: inline;
+}
+
+.mu-course-card[data-progress="0"],
+.mu-course-card[data-progress="100"],
+.mu-course-card[data-progress=""] {
+    .mu-cta-continue {
+        display: none;
+    }
+}
+
+.mu-course-card[data-progress="0"] .mu-cta-start,
+.mu-course-card[data-progress="100"] .mu-cta-review,
+.mu-course-card[data-progress=""] .mu-cta-open {
+    display: inline;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Progress bar (Card, List and Summary views)
+// ---------------------------------------------------------------------------------------------------------
+.mu-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+    width: 100%;
+}
+
+.mu-progress-track {
+    height: 0.5rem;
+    border-radius: 999px;
+    background-color: var(--mu-tint-strong);
+    overflow: hidden;
+}
+
+.mu-progress-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--mu-brand), var(--mu-brand-hover));
+    transition: width calc(var(--mu-dur) * 3) var(--mu-ease);
+}
+
+.mu-progress-text {
+    color: var(--mu-muted);
+    font-size: 0.8125rem;
+}
+
+html[data-mu-contrast="high"] .mu-progress-track {
+    background-color: var(--mu-surface);
+    border: 1px solid var(--mu-text);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// List and Summary views: same surfaces and spacing, markup unchanged.
+// ---------------------------------------------------------------------------------------------------------
+.block_myoverview .course-listitem.list-group-item {
+    margin-bottom: 0.75rem;
+    padding: var(--mu-pad) !important;
+    border: 1px solid var(--mu-border) !important;
+    border-radius: var(--mu-radius-lg) !important;
+    background-color: var(--mu-surface);
+    color: var(--mu-text);
+    box-shadow: var(--mu-shadow);
+    transition: box-shadow var(--mu-dur) var(--mu-ease), transform var(--mu-dur) var(--mu-ease);
+
+    &:hover,
+    &:focus-within {
+        box-shadow: var(--mu-shadow-hover);
+        transform: translateY(-2px);
+    }
+
+    .coursename {
+        font-weight: 600;
+    }
+
+    .summaryimage,
+    .list-image {
+        border-radius: var(--mu-radius);
+    }
+}
+
+// Filter / sort / view controls above the courses.
+.block_myoverview [data-region="filter"] {
+    gap: 0.5rem;
+
+    .btn.dropdown-toggle,
+    .btn.btn-outline-secondary {
+        min-height: 2.75rem;
+        border-radius: 999px;
+        border-color: var(--mu-border);
+        background-color: var(--mu-surface);
+        color: var(--mu-text);
+
+        &:hover,
+        &:focus {
+            background-color: var(--mu-surface-2);
+        }
+    }
+
+    input[type="search"],
+    .form-control {
+        min-height: 2.75rem;
+        border-radius: 999px;
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Empty states
+// ---------------------------------------------------------------------------------------------------------
+.mu-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin: var(--mu-pad) auto;
+    padding: calc(var(--mu-pad) * 2) var(--mu-pad);
+    max-width: 32rem;
+    text-align: center;
+    animation: mu-rise var(--mu-dur) var(--mu-ease) both;
+
+    .mu-empty-illustration {
+        width: 12rem;
+        height: auto;
+    }
+
+    .mu-empty-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .mu-empty-text {
+        margin: 0;
+        color: var(--mu-muted);
+    }
+
+    .mu-empty-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+
+        .btn {
+            min-height: 2.75rem;
+        }
+    }
+}
+
+.mu-empty-compact {
+    padding: var(--mu-pad);
+
+    .mu-empty-illustration {
+        width: 8rem;
+    }
+}
+
+// Illustration colours.
+.mu-empty-illustration {
+    overflow: visible;
+
+    .mu-ill-shadow {
+        fill: rgba(var(--mu-scrim-rgb), 0.08);
+    }
+
+    .mu-ill-glow {
+        fill: var(--mu-tint);
+    }
+
+    .mu-ill-page {
+        fill: var(--mu-surface);
+        stroke: var(--mu-brand);
+        stroke-width: 2.5;
+        stroke-linejoin: round;
+    }
+
+    .mu-ill-page-alt {
+        fill: var(--mu-surface-2);
+    }
+
+    .mu-ill-line {
+        fill: none;
+        stroke: var(--mu-muted);
+        stroke-width: 3;
+        stroke-linecap: round;
+        opacity: 0.6;
+    }
+
+    .mu-ill-line-accent {
+        stroke: var(--mu-accent);
+        opacity: 1;
+    }
+
+    .mu-ill-spark,
+    .mu-ill-dot-accent {
+        fill: var(--mu-accent);
+    }
+
+    .mu-ill-dot {
+        fill: var(--mu-brand);
+    }
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Skeleton placeholders: soft shimmer instead of grey pulsing bars.
+// ---------------------------------------------------------------------------------------------------------
+.bg-pulse-grey {
+    background-color: var(--mu-surface-2);
+    background-image: linear-gradient(90deg, var(--mu-surface-2) 0%, var(--mu-surface) 50%, var(--mu-surface-2) 100%);
+    background-size: 200% 100%;
+    border-radius: var(--mu-radius-sm);
+    animation: mu-shimmer 1.4s linear infinite;
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// Blocks on the Dashboard and My courses
+// ---------------------------------------------------------------------------------------------------------
+.pagelayout-mydashboard,
+.pagelayout-mycourses {
+    .block.card {
+        margin-bottom: calc(var(--mu-pad) * 1.5);
+        border: 1px solid var(--mu-border);
+        border-radius: var(--mu-radius-lg);
+        background-color: var(--mu-surface);
+        box-shadow: var(--mu-shadow);
+        animation: mu-rise var(--mu-dur) var(--mu-ease) both;
+
+        > .card-body {
+            padding: calc(var(--mu-pad) * 1.25);
+
+            @include media-breakpoint-up(md) {
+                padding: calc(var(--mu-pad) * 1.5);
+            }
+        }
+
+        .card-title {
+            margin-bottom: var(--mu-pad);
+            font-size: 1.125rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: var(--mu-text);
+        }
+    }
+}
+
+// My courses: the course overview fills the page, so it does not need a framed card.
+.pagelayout-mycourses .block_myoverview.block.card {
+    border: 0;
+    background-color: transparent;
+    box-shadow: none;
+
+    > .card-body {
+        padding: 0;
+    }
+}
+
+// Dashboard content region: two columns on wide screens (timeline beside calendar), full-width course lists.
+// Off while editing, so block moving keeps its plain single column.
+@include media-breakpoint-up(xl) {
+    body.pagelayout-mydashboard:not(.editing) #block-region-content {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: calc(var(--mu-pad) * 1.5);
+        align-items: start;
+
+        > .block_myoverview,
+        > .block_recentlyaccessedcourses,
+        > .block_recentlyaccesseditems,
+        > .block_html,
+        > .block:only-child {
+            grid-column: 1 / -1;
+        }
+    }
+}
+
+// Timeline.
+.block_timeline {
+    .list-group-item {
+        background-color: transparent;
+        border-color: var(--mu-border);
+        color: var(--mu-text);
+        transition: background-color var(--mu-dur-fast) var(--mu-ease);
+
+        &:hover {
+            background-color: var(--mu-tint);
+        }
+    }
+
+    h5,
+    .h5 {
+        color: var(--mu-muted);
+        font-size: 0.8125rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .event-name a,
+    .event-name-container a {
+        color: var(--mu-text);
+        font-weight: 600;
+    }
+
+    .btn,
+    .form-select,
+    .form-control {
+        min-height: 2.75rem;
+        border-radius: 999px;
+    }
+}
+
+// Calendar (month block and mini calendar).
+.block_calendar_month,
+.block_calendar_upcoming {
+    .calendartable,
+    .calendarmonth {
+        th {
+            color: var(--mu-muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        td {
+            border-color: var(--mu-border);
+        }
+    }
+
+    .day-number-circle {
+        display: inline-grid;
+        place-items: center;
+        min-width: 2rem;
+        height: 2rem;
+        border-radius: 999px;
+        transition: background-color var(--mu-dur-fast) var(--mu-ease);
+    }
+
+    td:hover .day-number-circle {
+        background-color: var(--mu-tint);
+    }
+
+    td.today .day-number-circle {
+        background-color: var(--mu-brand);
+        color: var(--mu-on-brand);
+        font-weight: 700;
+    }
+
+    .calendar-controls a {
+        color: var(--mu-brand);
+    }
+}
+
+// Recently accessed items and courses.
+.block_recentlyaccesseditems,
+.block_recentlyaccessedcourses {
+    .card {
+        border: 1px solid var(--mu-border);
+        border-radius: var(--mu-radius-lg);
+        background-color: var(--mu-surface);
+        overflow: hidden;
+        transition: transform var(--mu-dur) var(--mu-ease), box-shadow var(--mu-dur) var(--mu-ease);
+
+        &:hover,
+        &:focus-within {
+            transform: translateY(-2px);
+            box-shadow: var(--mu-shadow-hover);
+        }
+    }
+
+    .card-img-top,
+    .card-img {
+        border-radius: 0;
+    }
+}
+
+// Activity icons in lists get a soft tinted backing to read as one family.
+.block_timeline,
+.block_recentlyaccesseditems {
+    .activityiconcontainer.smaller {
+        border-radius: var(--mu-radius);
+    }
+}
+
+// Small screens: tighter hero and stacked controls.
+@include media-breakpoint-down(sm) {
+    .mu-hero {
+        padding: calc(var(--mu-pad) * 1.25);
+        border-radius: var(--mu-radius-lg);
+    }
+
+    .mu-continue-actions {
+        flex-wrap: wrap;
+    }
+
+    .mu-continue-btn {
+        flex: 1;
+    }
+}

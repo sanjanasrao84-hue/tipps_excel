@@ -1,0 +1,252 @@
+// Modern UI: every colour, size and radius comes from a --mu-* CSS variable.
+// The variables are set by (1) admin settings, (2) the user's Appearance panel, (3) the dark palette below.
+
+// ---- Neutral token defaults (light) ----
+:root {
+  --mu-surface: #ffffff;
+  --mu-surface-2: #f1f5f9;
+  --mu-text: #0f172a;
+  --mu-text-rgb: 15, 23, 42;
+  --mu-muted: #475569;
+  --mu-border: #e2e8f0;
+  --mu-radius-sm: calc(var(--mu-radius) * 0.6);
+  --mu-radius-lg: calc(var(--mu-radius) * 1.5);
+  --mu-fs-scale: 1;
+  --mu-pad: 1rem;
+  --mu-content-max: 1200px;
+  --mu-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.2);
+  --mu-rainbow: conic-gradient(red, yellow, lime, aqua, blue, magenta, red); // custom-colour swatch only
+  --mu-brand: var(--mu-primary);
+  --mu-brand-rgb: var(--mu-primary-rgb);
+  --mu-brand-hover: var(--mu-primary-hover);
+  --mu-on-brand: var(--mu-on-primary);
+  // Tinted surfaces and gradients, all derived from the brand / accent colours.
+  --mu-tint: rgba(var(--mu-brand-rgb), 0.08);
+  --mu-tint-strong: rgba(var(--mu-brand-rgb), 0.16);
+  --mu-grad-brand: linear-gradient(135deg, var(--mu-primary) 0%, var(--mu-primary-hover) 100%);
+  --mu-glow-accent: radial-gradient(circle at 85% 15%, rgba(var(--mu-accent-rgb), 0.22), transparent 55%);
+  --mu-scrim-rgb: 15, 23, 42; // shadows and image scrims: always dark, in both modes
+  --mu-shadow-hover: 0 12px 28px rgba(var(--mu-scrim-rgb), 0.12), 0 2px 6px rgba(var(--mu-scrim-rgb), 0.08);
+  // Motion. Zeroed by Reduce motion (below and in the user-preferences section).
+  --mu-dur-fast: 150ms;
+  --mu-dur: 220ms;
+  --mu-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+// ---- Dark palette (used with data-bs-theme="dark") ----
+html[data-bs-theme="dark"] {
+  --mu-bg: #0f172a;
+  --mu-bg-rgb: 15, 23, 42;
+  --mu-surface: #1e293b;
+  --mu-surface-2: #273449;
+  --mu-text: #e2e8f0;
+  --mu-text-rgb: 226, 232, 240;
+  --mu-muted: #a7b4c7;
+  --mu-border: #334155;
+  --mu-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --mu-scrim-rgb: 0, 0, 0;
+  --mu-shadow-hover: 0 12px 28px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
+  --mu-brand: var(--mu-lift);
+  --mu-brand-rgb: var(--mu-lift-rgb);
+  --mu-brand-hover: var(--mu-lift-hover);
+  --mu-on-brand: var(--mu-on-lift);
+  color-scheme: dark;
+}
+
+// ---- User preferences (data attributes set on <html>) ----
+html[data-mu-fontsize="small"] { --mu-fs-scale: 0.9; }
+html[data-mu-fontsize="large"] { --mu-fs-scale: 1.15; }
+html[data-mu-density="compact"] { --mu-pad: 0.5rem; }
+html[data-mu-contrast="high"] {
+  --mu-border: currentColor;
+  --mu-muted: var(--mu-text);
+}
+html[data-mu-motion="reduce"] {
+  --mu-dur-fast: 0ms;
+  --mu-dur: 0ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mu-dur-fast: 0ms;
+    --mu-dur: 0ms;
+  }
+}
+html[data-mu-motion="reduce"] *,
+html[data-mu-motion="reduce"] *::before,
+html[data-mu-motion="reduce"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html *, html *::before, html *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// ---- Bridge to Bootstrap 5.3 variables (so core and plugin UI follow the theme) ----
+:root,
+[data-bs-theme] {
+  --bs-primary: var(--mu-brand);
+  --bs-primary-rgb: var(--mu-brand-rgb);
+  --bs-link-color: var(--mu-brand);
+  --bs-link-color-rgb: var(--mu-brand-rgb);
+  --bs-link-hover-color: var(--mu-brand-hover);
+  --bs-body-bg: var(--mu-bg);
+  --bs-body-bg-rgb: var(--mu-bg-rgb);
+  --bs-body-color: var(--mu-text);
+  --bs-body-color-rgb: var(--mu-text-rgb);
+  --bs-body-font-family: var(--mu-font);
+  --bs-secondary-color: var(--mu-muted);
+  --bs-border-color: var(--mu-border);
+  --bs-border-radius: var(--mu-radius);
+  --bs-border-radius-sm: var(--mu-radius-sm);
+  --bs-border-radius-lg: var(--mu-radius-lg);
+  --bs-focus-ring-color: rgba(var(--mu-brand-rgb), 0.35);
+}
+
+html { font-size: calc(var(--mu-base-size) * var(--mu-fs-scale)); }
+body, #page { background-color: var(--mu-bg); color: var(--mu-text); font-family: var(--mu-font); }
+h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.01em; }
+a:focus-visible, button:focus-visible, .btn:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid rgba(var(--mu-brand-rgb), 0.6);
+  outline-offset: 2px;
+}
+
+// ---- Content width ----
+html[data-mu-width="boxed"] #page.drawers .main-inner { max-width: var(--mu-content-max); }
+html[data-mu-width="full"] #page.drawers .main-inner { max-width: none; }
+
+// ---- Buttons ----
+.btn { border-radius: var(--mu-radius); font-weight: 500; --bs-btn-padding-y: calc(var(--mu-pad) * 0.4); }
+.btn-primary {
+  --bs-btn-color: var(--mu-on-brand);
+  --bs-btn-bg: var(--mu-brand);
+  --bs-btn-border-color: var(--mu-brand);
+  --bs-btn-hover-color: var(--mu-on-brand);
+  --bs-btn-hover-bg: var(--mu-brand-hover);
+  --bs-btn-hover-border-color: var(--mu-brand-hover);
+  --bs-btn-active-color: var(--mu-on-brand);
+  --bs-btn-active-bg: var(--mu-brand-hover);
+  --bs-btn-active-border-color: var(--mu-brand-hover);
+  --bs-btn-disabled-color: var(--mu-on-brand);
+  --bs-btn-disabled-bg: var(--mu-brand);
+  --bs-btn-disabled-border-color: var(--mu-brand);
+  --bs-btn-focus-shadow-rgb: var(--mu-brand-rgb);
+}
+.btn-outline-primary {
+  --bs-btn-color: var(--mu-brand);
+  --bs-btn-border-color: var(--mu-brand);
+  --bs-btn-hover-color: var(--mu-on-brand);
+  --bs-btn-hover-bg: var(--mu-brand);
+  --bs-btn-hover-border-color: var(--mu-brand);
+  --bs-btn-active-color: var(--mu-on-brand);
+  --bs-btn-active-bg: var(--mu-brand-hover);
+  --bs-btn-active-border-color: var(--mu-brand-hover);
+  --bs-btn-focus-shadow-rgb: var(--mu-brand-rgb);
+}
+.btn-secondary {
+  --bs-btn-color: var(--mu-text);
+  --bs-btn-bg: var(--mu-surface-2);
+  --bs-btn-border-color: var(--mu-border);
+  --bs-btn-hover-color: var(--mu-text);
+  --bs-btn-hover-bg: var(--mu-border);
+  --bs-btn-hover-border-color: var(--mu-border);
+  --bs-btn-active-color: var(--mu-text);
+  --bs-btn-active-bg: var(--mu-border);
+}
+
+// ---- Cards, surfaces, dropdowns, modals ----
+.card {
+  --bs-card-bg: var(--mu-surface);
+  --bs-card-border-color: var(--mu-border);
+  --bs-card-border-radius: var(--mu-radius-lg);
+  --bs-card-cap-bg: var(--mu-surface-2);
+  --bs-card-spacer-y: var(--mu-pad);
+  --bs-card-spacer-x: var(--mu-pad);
+  box-shadow: var(--mu-shadow);
+  color: var(--mu-text);
+}
+.dropdown-menu, .popover, .modal-content, .list-group-item, .offcanvas {
+  --bs-dropdown-bg: var(--mu-surface);
+  --bs-dropdown-color: var(--mu-text);
+  --bs-dropdown-border-color: var(--mu-border);
+  --bs-dropdown-link-color: var(--mu-text);
+  --bs-dropdown-link-hover-bg: var(--mu-surface-2);
+  --bs-dropdown-link-hover-color: var(--mu-text);
+  --bs-list-group-bg: var(--mu-surface);
+  --bs-list-group-color: var(--mu-text);
+  --bs-list-group-border-color: var(--mu-border);
+  --bs-modal-bg: var(--mu-surface);
+  --bs-modal-color: var(--mu-text);
+  --bs-modal-border-radius: var(--mu-radius-lg);
+  --bs-modal-border-color: var(--mu-border);
+  --bs-modal-header-border-color: var(--mu-border);
+  --bs-modal-footer-border-color: var(--mu-border);
+  border-radius: var(--mu-radius);
+}
+.modal-content { box-shadow: var(--mu-shadow); }
+
+// ---- Navbar, drawers, footer ----
+.navbar.fixed-top, nav.navbar {
+  background-color: var(--mu-surface) !important;
+  border-bottom: 1px solid var(--mu-border);
+  box-shadow: var(--mu-shadow);
+}
+.navbar .nav-link, .navbar .navbar-brand { color: var(--mu-text); }
+.drawer, .drawer-left, .drawer-right, #theme_boost-drawers-courseindex, #theme_boost-drawers-blocks {
+  background-color: var(--mu-surface);
+  color: var(--mu-text);
+  border-color: var(--mu-border);
+}
+#page-footer { background: var(--mu-surface); color: var(--mu-muted); border-top: 1px solid var(--mu-border); }
+.breadcrumb { --bs-breadcrumb-divider-color: var(--mu-muted); --bs-breadcrumb-item-active-color: var(--mu-muted); }
+
+// ---- Forms ----
+.form-control, .form-select, .custom-select {
+  background-color: var(--mu-surface);
+  color: var(--mu-text);
+  border-color: var(--mu-border);
+  border-radius: var(--mu-radius);
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--mu-brand);
+  box-shadow: 0 0 0 0.2rem rgba(var(--mu-brand-rgb), 0.25);
+  background-color: var(--mu-surface);
+  color: var(--mu-text);
+}
+.form-check-input:checked { background-color: var(--mu-brand); border-color: var(--mu-brand); }
+
+// ---- Tables, tabs, pagination, badges, alerts ----
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--mu-text);
+  --bs-table-border-color: var(--mu-border);
+  --bs-table-striped-bg: var(--mu-surface-2);
+  --bs-table-hover-bg: var(--mu-surface-2);
+  --bs-table-cell-padding-y: calc(var(--mu-pad) * 0.5);
+  --bs-table-cell-padding-x: var(--mu-pad);
+}
+.nav-tabs { --bs-nav-tabs-border-color: var(--mu-border); --bs-nav-tabs-link-active-bg: var(--mu-surface); --bs-nav-tabs-link-active-color: var(--mu-text); --bs-nav-tabs-link-active-border-color: var(--mu-border); }
+.nav-pills { --bs-nav-pills-link-active-bg: var(--mu-brand); --bs-nav-pills-link-active-color: var(--mu-on-brand); }
+.page-link { --bs-pagination-bg: var(--mu-surface); --bs-pagination-color: var(--mu-brand); --bs-pagination-border-color: var(--mu-border); }
+.page-item.active .page-link { background-color: var(--mu-brand); border-color: var(--mu-brand); color: var(--mu-on-brand); }
+.badge.bg-primary { background-color: var(--mu-brand) !important; color: var(--mu-on-brand) !important; }
+.badge, .alert { border-radius: var(--mu-radius-sm); }
+.alert { border-radius: var(--mu-radius); }
+.progress { border-radius: 999px; background-color: var(--mu-surface-2); }
+.progress-bar { background-color: var(--mu-brand); }
+
+// ---- Dark mode: Moodle uses these helper classes in many places ----
+html[data-bs-theme="dark"] .bg-white,
+html[data-bs-theme="dark"] .bg-light,
+html[data-bs-theme="dark"] .bg-body { background-color: var(--mu-surface) !important; color: var(--mu-text); }
+html[data-bs-theme="dark"] .text-dark, html[data-bs-theme="dark"] .text-body { color: var(--mu-text) !important; }
+html[data-bs-theme="dark"] .text-muted { color: var(--mu-muted) !important; }
+html[data-bs-theme="dark"] .border, html[data-bs-theme="dark"] .border-bottom, html[data-bs-theme="dark"] .border-top { border-color: var(--mu-border) !important; }
+
+// ---- Pages and components (one partial each; var(--mu-*) only) ----
+@import "modernui/login";
+@import "modernui/appearance";
+@import "modernui/dashboard";

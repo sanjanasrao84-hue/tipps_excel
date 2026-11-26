@@ -1,0 +1,55 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template core/login_panel
+
+    Modern UI override of the brand panel beside the login form.
+
+    Shows the compact logo (or the site name), the welcome heading and the welcome text from the theme's
+    Login page settings. Core's global "users / sites / countries" figures are left out: they describe
+    moodle.org, not this site. Without the theme's context (another login-flow page) it falls back to core's copy.
+
+    Example context (json):
+    {
+        "mu_welcometitle": "Welcome to Example Academy",
+        "mu_welcometext": "<p>Learn at your own pace.</p>",
+        "mu_compactlogo": null,
+        "sitename": "Example",
+        "leftinstructions": null
+    }
+}}
+<div class="login-layout-left-content mu-login-panel">
+    <div class="mu-login-brand">
+        {{#mu_compactlogo}}
+            <img class="mu-login-logo" src="{{mu_compactlogo}}" alt="" aria-hidden="true">
+        {{/mu_compactlogo}}
+        {{#sitename}}<span class="mu-login-sitename">{{sitename}}</span>{{/sitename}}
+    </div>
+    {{#mu_welcometitle}}
+        <h2 class="mu-login-title">{{mu_welcometitle}}</h2>
+        <div class="mu-login-text">{{{mu_welcometext}}}</div>
+    {{/mu_welcometitle}}
+    {{^mu_welcometitle}}
+        {{#leftinstructions}}
+            <div class="mu-login-text">{{{leftinstructions}}}</div>
+        {{/leftinstructions}}
+        {{^leftinstructions}}
+            <h2 class="mu-login-title">{{#str}}loginwelcometitle{{/str}}</h2>
+            <div class="mu-login-text"><p>{{#str}}loginwelcomedescription{{/str}}</p></div>
+        {{/leftinstructions}}
+    {{/mu_welcometitle}}
+</div>

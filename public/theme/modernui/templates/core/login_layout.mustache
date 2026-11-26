@@ -1,0 +1,65 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template core/login_layout
+
+    Modern UI override of the login-flow layout (login, MFA...).
+
+    Split (default): brand panel on the left from the lg breakpoint, form on the right. Below lg the panel is
+    hidden and a short welcome is shown above the form instead.
+    Centered (mu_centered): no side panel; the form card sits centred over the brand background, with the welcome
+    above it at every width.
+
+    Context variables (from theme_modernui's layout/login.php; all optional, so other login-flow pages that render
+    this partial without them still get the split layout with core's default copy):
+    * output - The core renderer (main_content).
+    * mu_centered - True for the centred layout.
+    * mu_welcometitle - Welcome heading (plain text, already formatted).
+    * mu_welcometext - Welcome text (HTML, already formatted).
+    * mu_compactlogo - Compact logo URL, if the site has one.
+    * sitename - Site short name.
+
+    Example context (json):
+    {
+        "output": {"main_content": "<h1>Login form goes here</h1>"},
+        "mu_centered": false,
+        "mu_welcometitle": "Welcome to Example Academy",
+        "mu_welcometext": "<p>Learn at your own pace.</p>",
+        "mu_compactlogo": null,
+        "sitename": "Example"
+    }
+}}
+<div id="page-content" class="mu-login min-vh-100 row g-0">
+    {{^mu_centered}}
+    <aside class="login-layout-left col-lg-6 d-none d-lg-flex">
+        {{> core/login_panel }}
+    </aside>
+    {{/mu_centered}}
+    <div id="region-main" class="login-layout-right col-12{{^mu_centered}} col-lg-6{{/mu_centered}}">
+        <div id="region-main-box" class="login-layout-right-content">
+            {{#mu_welcometext}}
+            <div class="mu-login-intro{{^mu_centered}} d-lg-none{{/mu_centered}}">
+                {{#mu_welcometitle}}<p class="mu-login-intro-title">{{mu_welcometitle}}</p>{{/mu_welcometitle}}
+                <div class="mu-login-intro-text">{{{mu_welcometext}}}</div>
+            </div>
+            {{/mu_welcometext}}
+            <div class="login-container">
+                {{{ output.main_content }}}
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,114 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template theme_modernui/appearance
+
+    The per-user Appearance drawer (Bootstrap offcanvas), opened from the "Appearance" item that
+    theme_modernui/appearance adds to the user menu (from the <template> below). Rendered at the top of <body>
+    for logged-in users by hook_callbacks::before_top_of_body, with the user's current choices already checked.
+
+    Example context (json):
+    {
+        "darkenabled": true,
+        "modes": [{"value": "light", "label": "Light", "checked": true}, {"value": "dark", "label": "Dark", "checked": false}],
+        "fontsizes": [{"value": "medium", "label": "Medium", "checked": true}],
+        "densities": [{"value": "comfortable", "label": "Comfortable", "checked": true}],
+        "motion": false,
+        "contrast": false,
+        "customcolor": "#4f46e5",
+        "swatches": [{"hex": "#4F46E5", "name": "Indigo", "pressed": false}]
+    }
+}}
+<template id="mu-appearance-menuitem">
+    <a href="#" class="dropdown-item mu-appearance-menuitem" role="menuitem" tabindex="-1"
+       aria-controls="mu-appearance-panel" aria-haspopup="dialog">
+        <i class="icon fa fa-palette fa-fw" aria-hidden="true"></i>{{#str}} appearance, theme_modernui {{/str}}
+    </a>
+</template>
+
+<div class="offcanvas offcanvas-end mu-appearance" tabindex="-1" id="mu-appearance-panel"
+     aria-labelledby="mu-appearance-title">
+    <div class="offcanvas-header">
+        <h2 class="offcanvas-title h5" id="mu-appearance-title">{{#str}} appearance, theme_modernui {{/str}}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"
+                aria-label="{{#str}} appearance_close, theme_modernui {{/str}}"></button>
+    </div>
+    <div class="offcanvas-body">
+        <p class="mu-appearance-intro">{{#str}} appearance_intro, theme_modernui {{/str}}</p>
+
+        <fieldset class="mu-appearance-group">
+            <legend>{{#str}} appearance_mode, theme_modernui {{/str}}</legend>
+            <div class="btn-group mu-segmented" role="group">
+                {{#modes}}
+                <input type="radio" class="btn-check" name="mu-mode" id="mu-mode-{{value}}" value="{{value}}" autocomplete="off"{{#checked}} checked{{/checked}}>
+                <label class="btn btn-outline-primary" for="mu-mode-{{value}}">{{label}}</label>
+                {{/modes}}
+            </div>
+            {{^darkenabled}}<p class="mu-appearance-note">{{#str}} appearance_darkdisabled, theme_modernui {{/str}}</p>{{/darkenabled}}
+        </fieldset>
+
+        <fieldset class="mu-appearance-group">
+            <legend>{{#str}} appearance_accent, theme_modernui {{/str}}</legend>
+            <div class="mu-swatches">
+                {{#swatches}}
+                <button type="button" class="mu-swatch" data-color="{{hex}}" style="--mu-swatch: {{hex}}"
+                        aria-pressed="{{#pressed}}true{{/pressed}}{{^pressed}}false{{/pressed}}"
+                        title="{{name}}"><span class="visually-hidden">{{name}}</span></button>
+                {{/swatches}}
+                <label class="mu-swatch mu-swatch-custom" title="{{#str}} appearance_custom, theme_modernui {{/str}}">
+                    <span class="visually-hidden">{{#str}} appearance_custom, theme_modernui {{/str}}</span>
+                    <input type="color" id="mu-custom-color" value="{{customcolor}}">
+                </label>
+            </div>
+        </fieldset>
+
+        <fieldset class="mu-appearance-group">
+            <legend>{{#str}} appearance_fontsize, theme_modernui {{/str}}</legend>
+            <div class="btn-group mu-segmented" role="group">
+                {{#fontsizes}}
+                <input type="radio" class="btn-check" name="mu-fontsize" id="mu-fontsize-{{value}}" value="{{value}}" autocomplete="off"{{#checked}} checked{{/checked}}>
+                <label class="btn btn-outline-primary" for="mu-fontsize-{{value}}">{{label}}</label>
+                {{/fontsizes}}
+            </div>
+        </fieldset>
+
+        <fieldset class="mu-appearance-group">
+            <legend>{{#str}} appearance_density, theme_modernui {{/str}}</legend>
+            <div class="btn-group mu-segmented" role="group">
+                {{#densities}}
+                <input type="radio" class="btn-check" name="mu-density" id="mu-density-{{value}}" value="{{value}}" autocomplete="off"{{#checked}} checked{{/checked}}>
+                <label class="btn btn-outline-primary" for="mu-density-{{value}}">{{label}}</label>
+                {{/densities}}
+            </div>
+        </fieldset>
+
+        <fieldset class="mu-appearance-group">
+            <legend class="visually-hidden">{{#str}} appearance_accessibility, theme_modernui {{/str}}</legend>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="mu-motion"{{#motion}} checked{{/motion}}>
+                <label class="form-check-label" for="mu-motion">{{#str}} appearance_motion, theme_modernui {{/str}}</label>
+            </div>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="mu-contrast"{{#contrast}} checked{{/contrast}}>
+                <label class="form-check-label" for="mu-contrast">{{#str}} appearance_contrast, theme_modernui {{/str}}</label>
+            </div>
+        </fieldset>
+
+        <button type="button" class="btn btn-secondary w-100" id="mu-reset">{{#str}} appearance_reset, theme_modernui {{/str}}</button>
+        <p class="visually-hidden" id="mu-appearance-status" role="status" aria-live="polite"></p>
+    </div>
+</div>

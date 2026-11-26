@@ -1,0 +1,37 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template theme_modernui/empty_illustration
+
+    Decorative inline SVG for empty states: an open book with a sparkle. It has no fills of its own; the
+    mu-ill-* classes colour it from the --mu-* variables (scss/modernui/_dashboard.scss), so it follows the
+    preset, the user's accent colour and dark mode.
+
+    Example context (json):
+    {}
+}}
+<svg class="mu-empty-illustration" viewBox="0 0 200 140" width="200" height="140" aria-hidden="true" focusable="false">
+    <ellipse class="mu-ill-shadow" cx="100" cy="124" rx="70" ry="8"/>
+    <circle class="mu-ill-glow" cx="100" cy="64" r="56"/>
+    <path class="mu-ill-page" d="M100 38c-14-9-34-11-52-8v70c18-3 38-1 52 8z"/>
+    <path class="mu-ill-page mu-ill-page-alt" d="M100 38c14-9 34-11 52-8v70c-18-3-38-1-52 8z"/>
+    <path class="mu-ill-line" d="M58 46c10-1.5 21-.5 31 3M58 58c10-1.5 21-.5 31 3M58 70c10-1.5 21-.5 31 3"/>
+    <path class="mu-ill-line mu-ill-line-accent" d="M111 49c10-3.5 21-4.5 31-3M111 61c10-3.5 21-4.5 31-3"/>
+    <path class="mu-ill-spark" d="M156 16l3.5 9 9 3.5-9 3.5-3.5 9-3.5-9-9-3.5 9-3.5z"/>
+    <circle class="mu-ill-dot" cx="38" cy="24" r="4"/>
+    <circle class="mu-ill-dot mu-ill-dot-accent" cx="172" cy="74" r="3"/>
+</svg>
