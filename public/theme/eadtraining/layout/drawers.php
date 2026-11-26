@@ -141,6 +141,11 @@ if (optional_param("embed-frame-top", 0, PARAM_INT)) {
 
     $templatecontext["editing"] = $PAGE->user_is_editing();
 
+    if ($PAGE->pagelayout === "mydashboard" && isloggedin() && !isguestuser()) {
+        $templatecontext["glassdashboard"] = (new \theme_eadtraining\output\glass_dashboard($USER))
+            ->export_for_template($OUTPUT);
+    }
+
     if (str_contains($_SERVER['REQUEST_URI'], 'mod/scorm/view.php')) {
         $templatecontext["mod_scorm_view"] = true;
     } else if (str_contains($_SERVER['REQUEST_URI'], 'mod/scorm/player.php')) {

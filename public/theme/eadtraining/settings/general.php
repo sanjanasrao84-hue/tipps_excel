@@ -32,6 +32,13 @@ $page = new admin_settingpage(
     get_string("generalsettings", "theme_eadtraining")
 );
 
+$url = "{$CFG->wwwroot}/theme/eadtraining/colortheme.php";
+$setting = new admin_setting_heading(
+    "theme_eadtraining_colortheme_link", "",
+    get_string("colortheme_settings_link", "theme_eadtraining", $url)
+);
+$page->add($setting);
+
 $url = "{$CFG->wwwroot}/theme/eadtraining/quickstart/#brandcolor";
 $setting = new admin_setting_heading(
     "theme_eadtraining_quickstart_brandcolor", "",

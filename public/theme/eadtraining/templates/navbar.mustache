@@ -169,6 +169,52 @@
 
 {{> theme_eadtraining/primary-drawer-mobile }}
 
+<aside class="glass-sidebar d-print-none" aria-label="{{#str}}sitemenubar, admin{{/str}}">
+    <a href="{{{ config.homeurl }}}" class="glass-sidebar__brand aabtn">
+        {{# output.should_display_navbar_logo }}
+            <img src="{{{output.get_compact_logo_url}}}" class="logo" alt="{{{sitename}}}">
+        {{/ output.should_display_navbar_logo }}
+        {{^ output.should_display_navbar_logo }}
+            <span class="glass-sidebar__mark" aria-hidden="true"><i class="fa fa-graduation-cap"></i></span>
+            <span class="glass-sidebar__sitename">{{{sitename}}}</span>
+        {{/ output.should_display_navbar_logo }}
+    </a>
+    <nav class="glass-sidebar__nav">
+        {{#mobileprimarynav}}
+            {{#haschildren}}
+                <details class="glass-sidebar__group" {{#isopen}}open{{/isopen}}>
+                    <summary class="glass-sidebar__link" data-key="{{key}}">
+                        <span class="glass-sidebar__text">{{{text}}}</span>
+                        <i class="fa fa-chevron-down glass-sidebar__chevron" aria-hidden="true"></i>
+                    </summary>
+                    <div class="glass-sidebar__sub">
+                        {{#children}}
+                            {{^divider}}
+                                <a href="{{{url}}}" class="glass-sidebar__sublink {{#isactive}}active{{/isactive}}"
+                                   {{#isactive}}aria-current="page"{{/isactive}}>{{{text}}}</a>
+                            {{/divider}}
+                        {{/children}}
+                    </div>
+                </details>
+            {{/haschildren}}
+            {{^haschildren}}
+                <a href="{{{url}}}" class="glass-sidebar__link {{#isactive}}active{{/isactive}}" data-key="{{key}}"
+                   {{#isactive}}aria-current="page"{{/isactive}}>
+                    <span class="glass-sidebar__text">{{{text}}}</span>
+                </a>
+            {{/haschildren}}
+        {{/mobileprimarynav}}
+    </nav>
+    {{#usermenu}}
+        {{^unauthenticateduser}}
+            <a class="glass-sidebar__user" href="{{#profilepopup}}{{profileurl}}{{/profilepopup}}{{^profilepopup}}{{config.wwwroot}}/user/profile.php{{/profilepopup}}">
+                {{#avatardata}}<span class="glass-sidebar__avatar {{classes}}">{{{content}}}</span>{{/avatardata}}
+                <span class="glass-sidebar__username">{{userfullname}}</span>
+            </a>
+        {{/unauthenticateduser}}
+    {{/usermenu}}
+</aside>
+
 <script>
 (function () {
     let lastHeight = -1;

@@ -2,12 +2,12 @@
  Site administration (pages under /admin/).
  Scoped to body.path-admin: course settings pages also use the "admin" layout and are not changed.
  */
-$siteadmin-radius: 14px;
-$siteadmin-border: rgba($primary, .14);
+$siteadmin-radius: 18px;
+$siteadmin-border: rgba(255, 255, 255, .78);
 $siteadmin-tint: rgba($primary, .07);
 $siteadmin-heading: darken($primary, 30%);
 $siteadmin-link: darken($primary, 8%);
-$siteadmin-muted: #5b6476;
+$siteadmin-muted: #5c6d75;
 
 .path-admin {
 
@@ -65,8 +65,9 @@ $siteadmin-muted: #5b6476;
             padding: 1.125rem 1.25rem 1rem;
             border: 1px solid $siteadmin-border;
             border-radius: $siteadmin-radius;
-            background: #fff;
-            box-shadow: 0 2px 10px rgba(16, 24, 40, .04);
+            background: var(--g-glass-strong);
+            backdrop-filter: var(--g-blur);
+            box-shadow: var(--g-shadow-sm);
 
             > [class*="col"] {
                 width: 100%;

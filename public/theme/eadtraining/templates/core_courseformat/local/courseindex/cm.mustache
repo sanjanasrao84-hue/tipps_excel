@@ -54,7 +54,7 @@
                     tabindex="-1">
                 {{#module}}
                     <div class="activity-icon">
-                        <img src="/theme/image.php?theme=eadtraining&component={{{module}}}&image=monologo&filtericon=1"
+                        <img src="{{#globals.config}}{{{wwwroot}}}{{/globals.config}}{{^globals.config}}{{{config.wwwroot}}}{{/globals.config}}/theme/image.php?theme=eadtraining&component={{{module}}}&image=monologo&filtericon=1"
                              alt="{{{modname}}} ícone" title="{{{modname}}}">
                     </div>
                 {{/module}}
@@ -67,7 +67,7 @@
                data-for="cm_name" tabindex="-1" data-anchor="true">
                 {{#module}}
                     <div class="activity-icon">
-                        <img src="/theme/image.php?theme=eadtraining&component={{{module}}}&image=monologo&filtericon=1"
+                        <img src="{{#globals.config}}{{{wwwroot}}}{{/globals.config}}{{^globals.config}}{{{config.wwwroot}}}{{/globals.config}}/theme/image.php?theme=eadtraining&component={{{module}}}&image=monologo&filtericon=1"
                              alt="{{{modname}}} ícone" title="{{{modname}}}">
                     </div>
                 {{/module}}

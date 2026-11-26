@@ -1,0 +1,2718 @@
+// Soft Modern Glass design system. Loaded last, so it restyles everything above it.
+// Presentation only: no markup, ids, names or data attributes are relied on beyond Moodle's own.
+
+@font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url([[font:theme|Manrope-normal-500.woff2]]) format('woff2');
+}
+@font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url([[font:theme|Manrope-normal-600.woff2]]) format('woff2');
+}
+@font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url([[font:theme|Manrope-normal-700.woff2]]) format('woff2');
+}
+@font-face {
+    font-family: 'Manrope';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url([[font:theme|Manrope-normal-800.woff2]]) format('woff2');
+}
+
+// ---------------------------------------------------------------------------
+// Tokens
+// ---------------------------------------------------------------------------
+$g-teal: $primary;
+$g-teal-deep: mix($primary, #062a2e, 72%);
+$g-sidebar-w: 256px;
+
+// Colour themes. lib.php prepends $g-palettes (every theme) and $g-palette-key (the one selected);
+// these defaults only apply if the theme is compiled without them.
+$g-palettes: () !default;
+$g-palette-key: "clinical" !default;
+
+@function g-rgb($c) {
+    @return #{red($c)}, #{green($c)}, #{blue($c)};
+}
+
+// Every colour token a theme can change. The names keep their original "teal" wording so the
+// rest of the stylesheet is unchanged; in other themes "teal" simply means "primary".
+@mixin g-palette($p) {
+    $primary-c: map-get($p, primary);
+    --g-teal: #{$primary-c};
+    --g-teal-rgb: #{g-rgb($primary-c)};
+    --g-teal-deep: #{map-get($p, deep)};
+    --g-teal-bright: #{map-get($p, bright)};
+    --g-aqua: #{map-get($p, aqua)};
+    --g-teal-tint: #{rgba($primary-c, .08)};
+    --g-teal-tint-2: #{rgba($primary-c, .14)};
+    --g-blue: #{map-get($p, accent2)};
+    --g-blue-rgb: #{g-rgb(map-get($p, accent2))};
+    --g-blue-tint: #{rgba(map-get($p, accent2), .1)};
+    --g-highlight: #{map-get($p, highlight)};
+    --g-highlight-rgb: #{g-rgb(map-get($p, highlight))};
+    --g-chart-1: #{map-get($p, chart1)};
+    --g-chart-2: #{map-get($p, chart2)};
+    --g-chart-warm: #{map-get($p, warm)};
+    --g-glow1-rgb: #{g-rgb(map-get($p, glow1))};
+    --g-glow2-rgb: #{g-rgb(map-get($p, glow2))};
+    --g-glow3-rgb: #{g-rgb(map-get($p, glow3))};
+    --g-bg-top: #{map-get($p, bgtop)};
+    --g-bg-bottom: #{map-get($p, bgbottom)};
+    --bs-primary: #{$primary-c};
+    --bs-primary-rgb: #{g-rgb($primary-c)};
+    --bs-link-color: #{map-get($p, deep)};
+    --bs-link-color-rgb: #{g-rgb(map-get($p, deep))};
+    --bs-link-hover-color: #{$primary-c};
+
+    // The glass design is the same in every colour theme; only the faint inner tint of the rim follows
+    // the theme colour. Glossy glass, in layers (top first): a bright diagonal reflection from the
+    // top-left corner, a soft glow in that corner, then see-through white so colour shows through.
+    --g-glow-a: 1;
+    --g-gloss: linear-gradient(128deg, rgba(255, 255, 255, .62) 0%, rgba(255, 255, 255, .22) 26%, rgba(255, 255, 255, .04) 44%, rgba(255, 255, 255, 0) 52%);
+    --g-sheen: radial-gradient(90% 60% at 0% 0%, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 60%);
+    --g-glass: var(--g-gloss), var(--g-sheen), linear-gradient(180deg, rgba(255, 255, 255, .52) 0%, rgba(255, 255, 255, .24) 100%);
+    --g-glass-strong: var(--g-gloss), var(--g-sheen), linear-gradient(180deg, rgba(255, 255, 255, .8) 0%, rgba(255, 255, 255, .56) 100%);
+    --g-glass-border: rgba(255, 255, 255, .6);
+    --g-blur: saturate(190%) blur(24px);
+    // Lit glass edges: bright top-left rim, softer bottom-right rim, faint inner tint for thickness.
+    --g-rim: inset 1.5px 1.5px 0 rgba(255, 255, 255, .95), inset -1px -1px 0 rgba(255, 255, 255, .4), inset 0 0 0 1px rgba(255, 255, 255, .2), inset 0 -24px 36px -30px rgba(#{g-rgb($primary-c)}, .18);
+}
+
+// Built from $primary when no palette map is supplied (e.g. a child theme compiling this file).
+$g-fallback-palette: (
+    primary: $primary, deep: $g-teal-deep, bright: #14b8a6, aqua: #2dd4bf, accent2: #4f8cf7, highlight: #5f4fb0,
+    chart1: #0d9488, chart2: #4f8cf7, warm: #e8892b, glow1: #2dd4bf, glow2: #4f8cf7, glow3: #a78bfa,
+    bgtop: #eaf4f4, bgbottom: #ebeef6
+);
+$g-active-palette: map-get($g-palettes, $g-palette-key);
+@if not $g-active-palette {
+    $g-active-palette: $g-fallback-palette;
+}
+
+:root {
+    @include g-palette($g-active-palette);
+    --g-navy: #10284a;
+    --g-lavender: #ece8fb;
+    --g-champagne: #f7ecd6;
+    --g-amber: #f59e0b;
+    --g-pearl: #f3f7f7;
+    --g-ink: #0f2a33;
+    --g-ink-2: #2f4650;
+    --g-muted: #5c6d75;
+    --g-line: rgba(15, 42, 51, .09);
+    --g-line-strong: rgba(15, 42, 51, .16);
+    --g-r-xl: 22px;
+    --g-r-lg: 18px;
+    --g-r: 12px;
+    --g-r-sm: 9px;
+    --g-shadow-sm: var(--g-rim), 0 1px 2px rgba(16, 40, 74, .06), 0 6px 16px -6px rgba(16, 40, 74, .14);
+    --g-shadow: var(--g-rim), 0 1px 2px rgba(16, 40, 74, .05), 0 18px 40px -16px rgba(16, 40, 74, .26);
+    --g-shadow-lg: var(--g-rim), 0 2px 6px rgba(16, 40, 74, .06), 0 34px 70px -24px rgba(16, 40, 74, .36);
+    --g-glow: inset 0 1px 0 rgba(255, 255, 255, .45), inset 0 -2px 0 rgba(0, 0, 0, .1), 0 10px 24px -8px rgba(var(--g-teal-rgb), .65);
+    // Glossy teal: a polished highlight over the top half of every teal pill and button.
+    --g-grad-primary: linear-gradient(180deg, rgba(255, 255, 255, .26) 0%, rgba(255, 255, 255, .08) 48%, rgba(255, 255, 255, 0) 52%), linear-gradient(135deg, var(--g-teal-deep) 0%, var(--g-teal) 100%);
+    --g-grad-data: linear-gradient(90deg, var(--g-teal) 0%, var(--g-aqua) 100%);
+    --g-ease: cubic-bezier(.2, .7, .2, 1);
+    --g-head: 'Manrope', 'Inter', system-ui, sans-serif;
+    --g-sidebar-w: #{$g-sidebar-w};
+
+    --bs-font-sans-serif: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --bs-body-color: var(--g-ink-2);
+    --bs-body-bg: var(--g-pearl);
+    --bs-emphasis-color: var(--g-ink);
+    --bs-heading-color: var(--g-ink);
+    --bs-secondary-color: var(--g-muted);
+    --bs-border-color: var(--g-line);
+    --bs-border-color-translucent: var(--g-line);
+    --bs-border-radius: var(--g-r);
+    --bs-border-radius-sm: var(--g-r-sm);
+    --bs-border-radius-lg: var(--g-r-lg);
+    --bs-focus-ring-color: rgba(var(--g-teal-rgb), .28);
+}
+
+// ---------------------------------------------------------------------------
+// Base
+// ---------------------------------------------------------------------------
+html {
+    background: var(--g-pearl);
+}
+
+body {
+    color: var(--g-ink-2);
+    background: transparent;
+    font-family: var(--bs-font-sans-serif);
+    text-rendering: optimizeLegibility;
+
+    // Soft pearl canvas with teal and light-blue glows, fixed behind every page.
+    &::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        // A coloured, airy backdrop so the frosted panels have something to blur:
+        // aqua and teal light from the top-left, blue from the right, lavender below, and a soft
+        // diagonal light streak like daylight through tall windows.
+        // Plus a few defined colour shapes: the glass blurs them, so colour visibly glows through it.
+        // All colours come from the selected colour theme.
+        background:
+            linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, calc(.55 * var(--g-glow-a))) 42%, transparent 54%),
+            radial-gradient(circle at 80% 24%, rgba(var(--g-glow1-rgb), calc(.55 * var(--g-glow-a))) 0, rgba(var(--g-glow1-rgb), calc(.4 * var(--g-glow-a))) 6rem, rgba(var(--g-glow1-rgb), 0) 13rem),
+            radial-gradient(circle at 36% 72%, rgba(var(--g-glow2-rgb), calc(.42 * var(--g-glow-a))) 0, rgba(var(--g-glow2-rgb), calc(.28 * var(--g-glow-a))) 5rem, rgba(var(--g-glow2-rgb), 0) 12rem),
+            radial-gradient(circle at 64% 96%, rgba(var(--g-glow3-rgb), calc(.38 * var(--g-glow-a))) 0, rgba(var(--g-glow3-rgb), calc(.22 * var(--g-glow-a))) 5rem, rgba(var(--g-glow3-rgb), 0) 11rem),
+            radial-gradient(circle at 18% 34%, rgba(var(--g-teal-rgb), calc(.22 * var(--g-glow-a))) 0, rgba(var(--g-teal-rgb), calc(.12 * var(--g-glow-a))) 4rem, rgba(var(--g-teal-rgb), 0) 9rem),
+            radial-gradient(44rem 36rem at 2% -6%, rgba(var(--g-glow1-rgb), calc(.42 * var(--g-glow-a))), transparent 68%),
+            radial-gradient(34rem 30rem at 34% 30%, rgba(var(--g-teal-rgb), calc(.14 * var(--g-glow-a))), transparent 70%),
+            radial-gradient(42rem 34rem at 104% 4%, rgba(var(--g-glow2-rgb), calc(.32 * var(--g-glow-a))), transparent 68%),
+            radial-gradient(36rem 30rem at 88% 62%, rgba(var(--g-glow1-rgb), calc(.18 * var(--g-glow-a))), transparent 70%),
+            radial-gradient(46rem 34rem at 40% 112%, rgba(var(--g-glow3-rgb), calc(.5 * var(--g-glow-a))), transparent 70%),
+            linear-gradient(180deg, var(--g-bg-top) 0%, var(--g-bg-bottom) 100%);
+    }
+}
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    font-family: var(--g-head);
+    color: var(--g-ink);
+    font-weight: 700;
+    letter-spacing: -.015em;
+}
+
+h1, .h1 {
+    letter-spacing: -.025em;
+    font-weight: 800;
+}
+
+a {
+    color: var(--g-teal-deep);
+    text-underline-offset: .18em;
+    transition: color .15s ease;
+
+    &:hover {
+        color: var(--g-teal);
+    }
+}
+
+::selection {
+    background: rgba(var(--g-teal-rgb), .18);
+}
+
+.text-muted,
+.dimmed_text {
+    color: var(--g-muted) !important;
+}
+
+table,
+.badge,
+.progress,
+.tabular,
+[data-region="course-progress"] {
+    font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+    outline: 2px solid rgba(var(--g-teal-rgb), .55);
+    outline-offset: 2px;
+}
+
+// ---------------------------------------------------------------------------
+// Glass surface mixin
+// ---------------------------------------------------------------------------
+@mixin glass($strong: false) {
+    @if $strong {
+        background: var(--g-glass-strong);
+    } @else {
+        background: var(--g-glass);
+    }
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    border: 1px solid var(--g-glass-border);
+    box-shadow: var(--g-shadow);
+}
+
+// ---------------------------------------------------------------------------
+// Shell: left sidebar (desktop), top bar, drawers, footer
+// ---------------------------------------------------------------------------
+.glass-sidebar {
+    display: none;
+}
+
+@include media-breakpoint-up(lg) {
+    .glass-sidebar {
+        position: fixed;
+        z-index: 1035;
+        top: 14px;
+        bottom: 14px;
+        left: 14px;
+        width: calc(var(--g-sidebar-w) - 28px);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 18px 12px 12px;
+        border-radius: var(--g-r-xl);
+        @include glass;
+        box-shadow: var(--g-shadow-lg);
+        overflow: hidden;
+    }
+
+    body:has(.glass-sidebar) {
+        #page-wrapper {
+            padding-left: var(--g-sidebar-w);
+        }
+
+        .navbar.fixed-top {
+            left: var(--g-sidebar-w);
+
+            .navbar-brand,
+            .primary-navigation,
+            .navbar-toggler {
+                display: none !important;
+            }
+        }
+
+        .drawer.drawer-left.show:not(.drawer-primary-mobile) {
+            left: var(--g-sidebar-w);
+        }
+
+        // The theme slides drawers up to the top on scroll: keep them above the glass top bar.
+        .drawer:not(.drawer-primary-mobile) {
+            z-index: 1031;
+        }
+
+        .stickyfooter {
+            left: var(--g-sidebar-w);
+        }
+    }
+}
+
+.glass-sidebar__brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 10px 18px;
+    color: var(--g-ink);
+    text-decoration: none;
+    font-family: var(--g-head);
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: -.02em;
+
+    &:hover {
+        color: var(--g-ink);
+    }
+
+    .logo {
+        max-height: 40px;
+        max-width: 100%;
+    }
+}
+
+.glass-sidebar__mark {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    color: #fff;
+    background: var(--g-grad-primary);
+    box-shadow: var(--g-glow);
+}
+
+.glass-sidebar__sitename {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.glass-sidebar__nav {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow-y: auto;
+    padding: 2px;
+}
+
+.glass-sidebar__link,
+.glass-sidebar__sublink {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: var(--g-r);
+    color: var(--g-ink-2);
+    font-weight: 600;
+    font-size: .92rem;
+    text-decoration: none;
+    cursor: pointer;
+    list-style: none;
+    transition: background .18s var(--g-ease), color .18s var(--g-ease), box-shadow .18s var(--g-ease), transform .18s var(--g-ease);
+
+    &::-webkit-details-marker {
+        display: none;
+    }
+
+    &:hover {
+        color: var(--g-ink);
+        background: var(--g-teal-tint);
+    }
+
+    &.active {
+        color: #fff;
+        background: var(--g-grad-primary);
+        box-shadow: var(--g-glow);
+    }
+}
+
+// One icon per primary navigation node, picked from its Moodle key.
+.glass-sidebar__link::before {
+    content: "\f138";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: .95rem;
+    width: 20px;
+    text-align: center;
+    opacity: .8;
+}
+.glass-sidebar__link[data-key="home"]::before { content: "\f015"; }
+.glass-sidebar__link[data-key="myhome"]::before { content: "\f625"; }
+.glass-sidebar__link[data-key="mycourses"]::before { content: "\f19d"; }
+.glass-sidebar__link[data-key="courses"]::before { content: "\f02d"; }
+.glass-sidebar__link[data-key="siteadminnode"]::before { content: "\f013"; }
+.glass-sidebar__link[data-key="calendar"]::before { content: "\f133"; }
+.glass-sidebar__link[href*="/local/lmssub/"]::before { content: "\f521"; }
+.glass-sidebar__link[href*="/local/gcal/"]::before { content: "\f133"; }
+.glass-sidebar__link[href*="/report/"]::before { content: "\f201"; }
+
+.glass-sidebar__text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.glass-sidebar__chevron {
+    font-size: .7rem;
+    opacity: .6;
+    transition: transform .2s var(--g-ease);
+
+    .glass-sidebar__group[open] & {
+        transform: rotate(180deg);
+    }
+}
+
+.glass-sidebar__sub {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 2px 0 6px 22px;
+    padding-left: 10px;
+    border-left: 1px solid var(--g-line);
+}
+
+.glass-sidebar__sublink {
+    padding: 7px 10px;
+    font-weight: 500;
+    font-size: .86rem;
+}
+
+.glass-sidebar__user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    padding: 10px;
+    border-radius: var(--g-r);
+    color: var(--g-ink);
+    font-weight: 600;
+    font-size: .9rem;
+    text-decoration: none;
+    background: rgba(255, 255, 255, .55);
+    border: 1px solid var(--g-line);
+    transition: background .18s ease;
+
+    &:hover {
+        color: var(--g-ink);
+        background: #fff;
+    }
+
+    .realuser {
+        display: none;
+    }
+
+    img,
+    .userinitials {
+        width: 34px;
+        height: 34px;
+        margin: 0;
+        border-radius: 50%;
+    }
+}
+
+.glass-sidebar__username {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// Top bar: transparent over the canvas; the theme's scroll script fades the glass layer in.
+.navbar.fixed-top {
+    background: transparent !important;
+    border-bottom: 0;
+    box-shadow: none;
+
+    .navbar-content-background {
+        position: absolute;
+        inset: 0;
+        background: var(--g-glass);
+        -webkit-backdrop-filter: var(--g-blur);
+        backdrop-filter: var(--g-blur);
+        border-bottom: 1px solid var(--g-glass-border);
+        box-shadow: 0 10px 30px -18px rgba(16, 40, 74, .28);
+    }
+
+    > .container-fluid {
+        position: relative;
+    }
+
+    .navbar-brand {
+        font-family: var(--g-head);
+        font-weight: 800;
+        color: var(--g-ink);
+    }
+
+    .nav-link,
+    .btn-open,
+    .popover-region-toggle {
+        color: var(--g-ink-2);
+    }
+
+    .primary-navigation .navigation .nav-link {
+        font-weight: 600;
+        border-radius: var(--g-r-sm);
+
+        &.active {
+            color: var(--g-teal-deep);
+            border-bottom-color: var(--g-teal);
+        }
+    }
+
+    .divider {
+        border-color: var(--g-line) !important;
+    }
+
+    .usermenu .userbutton .avatar img,
+    .usermenu .userinitials {
+        box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(var(--g-teal-rgb), .25);
+    }
+
+    .search-input-wrapper {
+        > .btn-open {
+            border-radius: 999px;
+        }
+
+        &.expanded .form-control {
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .85);
+        }
+    }
+
+    .editmode-switch-form .form-check-input:checked {
+        background-color: var(--g-teal);
+        border-color: var(--g-teal);
+    }
+}
+
+// Drawers (course index, blocks, mobile menu).
+.drawer {
+    background: var(--g-glass-strong) !important;
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    border-color: var(--g-glass-border) !important;
+    box-shadow: var(--g-shadow-lg) !important;
+
+    .drawerheader {
+        border-bottom: 1px solid var(--g-line);
+    }
+
+    .list-group-item {
+        border: 0;
+        border-radius: var(--g-r);
+        margin: 2px 8px;
+        background: transparent;
+        font-weight: 600;
+        color: var(--g-ink-2);
+
+        &.active {
+            color: #fff;
+            background: var(--g-grad-primary);
+        }
+    }
+}
+
+.drawer-toggler .btn,
+.drawer-toggles .btn {
+    border-radius: 999px !important;
+    @include glass(true);
+    color: var(--g-teal-deep);
+}
+
+// Course index.
+.courseindex {
+    .courseindex-section-title,
+    .courseindex-item {
+        border-radius: var(--g-r-sm);
+    }
+
+    .courseindex-item:hover,
+    .courseindex-section-title:hover {
+        background: var(--g-teal-tint);
+    }
+
+    .courseindex-item.pageitem,
+    .courseindex-section .courseindex-item.pageitem {
+        color: #fff;
+        background: var(--g-grad-primary);
+
+        a {
+            color: #fff;
+        }
+    }
+}
+
+// Footer: light glass instead of the dark band.
+#page-footer {
+    color: var(--g-muted) !important;
+    background: rgba(255, 255, 255, .5) !important;
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    border-top: 1px solid var(--g-glass-border);
+
+    a {
+        color: var(--g-teal-deep);
+    }
+
+    .footer-title {
+        color: var(--g-ink);
+        font-family: var(--g-head);
+    }
+
+    .footer-copywriter,
+    .text-white {
+        color: var(--g-muted) !important;
+    }
+
+    .footer-foot {
+        background: transparent !important;
+        border-top: 1px solid var(--g-line);
+    }
+
+    &:not(:has(.footer-container, .footer-foot)) {
+        background: transparent !important;
+        border-top: 0;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Page header and navigation tabs
+// ---------------------------------------------------------------------------
+#page-header {
+    .page-header-headings h1,
+    h1.h2 {
+        font-family: var(--g-head);
+        font-weight: 800;
+        letter-spacing: -.025em;
+        color: var(--g-ink);
+    }
+}
+
+.breadcrumb {
+    background: transparent;
+    font-size: .85rem;
+
+    .breadcrumb-item a {
+        color: var(--g-muted);
+
+        &:hover {
+            color: var(--g-teal-deep);
+        }
+    }
+}
+
+.secondary-navigation .navigation .nav-tabs,
+.nav-tabs {
+    border-bottom: 1px solid var(--g-line);
+}
+
+// Secondary navigation (course / activity tabs): a full-width glass bar.
+// core/moremenu moves tabs into "More" while the tab list is taller than its <nav>, so the glass
+// padding and border sit on the outer wrapper, and the nav, list and tabs share one height.
+.secondary-navigation {
+    // Its blur makes a stacking layer: lift it so the "More" menu opens above the page content.
+    position: relative;
+    z-index: 20;
+    margin-bottom: 1rem;
+    padding: 4px;
+    border: 1px solid var(--g-glass-border);
+    border-radius: var(--g-r-lg);
+    background: var(--g-glass);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    box-shadow: var(--g-shadow-sm);
+
+    .navigation {
+        margin: 0;
+        padding: 0;
+    }
+
+    .moremenu,
+    .moremenu .nav-link {
+        height: 40px;
+    }
+}
+
+.secondary-navigation .navigation .nav-tabs {
+    gap: 4px;
+    align-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+
+    .nav-link {
+        padding: 0 1rem;
+        border: 0;
+        border-radius: var(--g-r);
+        color: var(--g-ink-2);
+        font-weight: 600;
+        font-size: .9rem;
+        white-space: nowrap;
+        transition: background .18s ease, color .18s ease, box-shadow .18s ease;
+
+        &:hover {
+            color: var(--g-ink);
+            background: rgba(255, 255, 255, .6);
+            border: 0;
+        }
+
+        // Active tab: a raised white segment with teal text (segmented-control style).
+        &.active,
+        &.active:hover {
+            color: var(--g-teal-deep);
+            background: #fff;
+            box-shadow: var(--g-rim), 0 2px 8px -2px rgba(15, 42, 51, .18);
+            border: 0;
+        }
+    }
+
+    // "More" looks like any other tab, with its arrow.
+    .dropdownmoremenu > .dropdown-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+}
+
+.tertiary-navigation {
+    .navitem .btn,
+    .urlselect .form-select {
+        border-radius: 999px;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Surfaces: main region, cards, blocks
+// ---------------------------------------------------------------------------
+// The homepage, Dashboard and My courses lay out their own panels, so their wrapper stays bare.
+body:not(.homemode-editor):not(.pagelayout-mydashboard):not(.pagelayout-mycourses) #page.drawers div[role="main"] {
+    background: var(--g-glass);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    border: 1px solid var(--g-glass-border);
+    border-radius: var(--g-r-xl);
+    box-shadow: var(--g-shadow);
+}
+
+.card,
+.block.card,
+.dashboard-card,
+.coursebox,
+.list-group:not(.drawer .list-group) {
+    border-radius: var(--g-r-lg);
+}
+
+.card {
+    background: var(--g-glass-strong);
+    border: 1px solid var(--g-glass-border);
+    box-shadow: var(--g-shadow-sm);
+
+    .card-header,
+    .card-footer {
+        background: transparent;
+        border-color: var(--g-line);
+    }
+
+    .card-title {
+        font-family: var(--g-head);
+        color: var(--g-ink);
+        font-weight: 700;
+    }
+}
+
+.block.card {
+    @include glass(true);
+
+    .card-title,
+    h5 {
+        font-size: 1rem;
+    }
+}
+
+// Lift on hover only for things that are clickable as a whole.
+.dashboard-card,
+.course-card,
+.coursebox,
+a.card {
+    transition: transform .25s var(--g-ease), box-shadow .25s var(--g-ease);
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--g-shadow-lg);
+    }
+}
+
+.list-group-item {
+    border-color: var(--g-line);
+}
+
+hr {
+    border-color: var(--g-line);
+    opacity: 1;
+}
+
+// ---------------------------------------------------------------------------
+// Buttons
+// ---------------------------------------------------------------------------
+.btn {
+    --bs-btn-border-radius: var(--g-r);
+    --bs-btn-font-weight: 600;
+    border-radius: var(--g-r);
+    font-weight: 600;
+    letter-spacing: .005em;
+    transition: transform .16s var(--g-ease), box-shadow .2s var(--g-ease), background .2s ease, color .2s ease, border-color .2s ease;
+
+    &:active {
+        transform: translateY(1px);
+    }
+}
+
+.btn-lg {
+    border-radius: var(--g-r-lg);
+}
+
+.btn-primary,
+.btn-primary:disabled,
+.btn-primary.disabled {
+    --bs-btn-color: #fff;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-active-color: #fff;
+    color: #fff;
+    border: 0;
+    background: var(--g-grad-primary);
+    box-shadow: var(--g-glow);
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+    color: #fff;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .3) 0%, rgba(255, 255, 255, .1) 48%, rgba(255, 255, 255, 0) 52%), linear-gradient(135deg, var(--g-teal-deep) -20%, var(--g-teal-bright) 120%);
+    box-shadow: 0 12px 26px -10px rgba(var(--g-teal-rgb), .65);
+    transform: translateY(-1px);
+}
+
+.btn-secondary,
+.btn-outline-secondary,
+.btn-light {
+    --bs-btn-color: var(--g-ink);
+    --bs-btn-hover-color: var(--g-ink);
+    --bs-btn-active-color: var(--g-ink);
+    color: var(--g-ink);
+    background: rgba(255, 255, 255, .78);
+    border: 1px solid var(--g-line-strong);
+    box-shadow: var(--g-shadow-sm);
+
+    &:hover,
+    &:focus-visible {
+        color: var(--g-ink);
+        background: #fff;
+        border-color: rgba(var(--g-teal-rgb), .35);
+        box-shadow: var(--g-shadow);
+    }
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--g-teal-deep);
+    --bs-btn-border-color: rgba(var(--g-teal-rgb), .45);
+    --bs-btn-hover-bg: var(--g-teal-tint-2);
+    --bs-btn-hover-color: var(--g-teal-deep);
+    --bs-btn-hover-border-color: var(--g-teal);
+    --bs-btn-active-bg: var(--g-teal-tint-2);
+    --bs-btn-active-color: var(--g-teal-deep);
+    background: rgba(255, 255, 255, .6);
+}
+
+.btn-link {
+    color: var(--g-teal-deep);
+    font-weight: 600;
+}
+
+.btn-icon {
+    border-radius: 999px;
+}
+
+// ---------------------------------------------------------------------------
+// Forms
+// ---------------------------------------------------------------------------
+.form-control,
+.form-select,
+.custom-select,
+select.form-control,
+input[type="text"].form-control,
+textarea.form-control {
+    color: var(--g-ink);
+    background-color: rgba(255, 255, 255, .86);
+    border: 1px solid var(--g-line-strong);
+    border-radius: var(--g-r);
+    box-shadow: inset 0 1px 2px rgba(16, 40, 74, .04);
+    transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+
+    &:hover {
+        border-color: rgba(var(--g-teal-rgb), .35);
+    }
+
+    &:focus {
+        color: var(--g-ink);
+        background-color: #fff;
+        border-color: var(--g-teal);
+        box-shadow: 0 0 0 4px rgba(var(--g-teal-rgb), .14);
+    }
+
+    &::placeholder {
+        color: #8a99a0;
+    }
+}
+
+.input-group-text {
+    background: rgba(255, 255, 255, .7);
+    border-color: var(--g-line-strong);
+    color: var(--g-muted);
+}
+
+input[type="checkbox"],
+input[type="radio"],
+input[type="range"],
+progress {
+    accent-color: var(--g-teal);
+}
+
+.form-check-input {
+    border-color: var(--g-line-strong);
+
+    &:checked {
+        background-color: var(--g-teal);
+        border-color: var(--g-teal);
+    }
+
+    &:focus {
+        border-color: var(--g-teal);
+        box-shadow: 0 0 0 4px rgba(var(--g-teal-rgb), .14);
+    }
+}
+
+.col-form-label,
+.form-label,
+label {
+    color: var(--g-ink-2);
+    font-weight: 500;
+}
+
+.mform {
+    fieldset.collapsible legend a.fheader,
+    legend {
+        font-family: var(--g-head);
+        font-weight: 700;
+        color: var(--g-ink);
+    }
+
+    fieldset.collapsible {
+        border-bottom: 1px solid var(--g-line);
+    }
+
+    .form-control-feedback.invalid-feedback {
+        font-weight: 500;
+    }
+}
+
+.fp-content,
+.filemanager-container,
+.fitem_ffilemanager .filemanager,
+.dndupload-target {
+    border-radius: var(--g-r);
+}
+
+// ---------------------------------------------------------------------------
+// Tables
+// ---------------------------------------------------------------------------
+.generaltable,
+.table,
+.flexible {
+    --bs-table-bg: transparent;
+    --bs-table-striped-bg: rgba(var(--g-teal-rgb), .03);
+    --bs-table-hover-bg: rgba(var(--g-teal-rgb), .06);
+    --bs-table-border-color: var(--g-line);
+    color: var(--g-ink-2);
+
+    > thead > tr > th,
+    > tr > th,
+    thead th {
+        color: var(--g-muted);
+        font-size: .76rem;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        background: rgba(255, 255, 255, .55);
+        border-bottom: 1px solid var(--g-line-strong);
+        white-space: nowrap;
+
+        a {
+            color: inherit;
+        }
+    }
+
+    td {
+        border-color: var(--g-line);
+        vertical-align: middle;
+    }
+
+    tbody tr {
+        transition: background-color .15s ease;
+    }
+}
+
+.generaltable,
+.table-dynamic .table,
+.reportbuilder-table {
+    border-radius: var(--g-r-lg);
+    overflow: hidden;
+}
+
+.table-responsive,
+.no-overflow {
+    border-radius: var(--g-r-lg);
+}
+
+// ---------------------------------------------------------------------------
+// Feedback: alerts, badges, progress, toasts
+// ---------------------------------------------------------------------------
+.alert {
+    border: 1px solid transparent;
+    border-radius: var(--g-r-lg);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    box-shadow: var(--g-shadow-sm);
+}
+
+.alert-info,
+.alert-primary {
+    color: #0d4a55;
+    background: rgba(214, 240, 243, .78);
+    border-color: rgba(var(--g-teal-rgb), .2);
+}
+
+.alert-success {
+    color: #155b3c;
+    background: rgba(220, 246, 233, .8);
+    border-color: rgba(34, 139, 90, .2);
+}
+
+.alert-warning {
+    color: #7a4b05;
+    background: rgba(252, 241, 214, .85);
+    border-color: rgba(245, 158, 11, .25);
+}
+
+.alert-danger {
+    color: #8a1f1f;
+    background: rgba(253, 228, 228, .85);
+    border-color: rgba(202, 49, 32, .2);
+}
+
+.badge {
+    font-weight: 600;
+    letter-spacing: .01em;
+    border-radius: 999px;
+    padding: .38em .72em;
+}
+
+.badge.bg-primary,
+.badge-primary {
+    color: var(--g-teal-deep) !important;
+    background: var(--g-teal-tint-2) !important;
+}
+
+.badge.bg-secondary,
+.badge-secondary,
+.badge.bg-light {
+    color: var(--g-ink-2) !important;
+    background: rgba(15, 42, 51, .07) !important;
+}
+
+.badge.bg-success {
+    color: #155b3c !important;
+    background: rgba(34, 139, 90, .14) !important;
+}
+
+.badge.bg-warning {
+    color: #7a4b05 !important;
+    background: rgba(245, 158, 11, .18) !important;
+}
+
+.badge.bg-danger {
+    color: #8a1f1f !important;
+    background: rgba(202, 49, 32, .13) !important;
+}
+
+.badge.bg-info {
+    color: #1c4f9c !important;
+    background: var(--g-blue-tint) !important;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(15, 42, 51, .08);
+    overflow: hidden;
+
+    .progress-bar {
+        border-radius: 999px;
+        background: var(--g-grad-data) !important;
+    }
+}
+
+.toast {
+    @include glass(true);
+    border-radius: var(--g-r-lg);
+    box-shadow: var(--g-shadow-lg);
+}
+
+// ---------------------------------------------------------------------------
+// Overlays: dropdowns, modals, popovers
+// ---------------------------------------------------------------------------
+.dropdown-menu {
+    --bs-dropdown-link-hover-bg: var(--g-teal-tint);
+    --bs-dropdown-link-hover-color: var(--g-ink);
+    --bs-dropdown-link-active-bg: var(--g-teal-tint-2);
+    --bs-dropdown-link-active-color: var(--g-ink);
+    // Menus stay almost opaque: their text must never mix with the page behind. (A blur cannot
+    // work inside an already-blurred parent such as the tab bar, so glass would show through.)
+    padding: 6px;
+    border: 1px solid rgba(255, 255, 255, .9);
+    border-radius: var(--g-r-lg);
+    background: linear-gradient(180deg, #ffffff 0%, #f8fcfc 100%);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    box-shadow: var(--g-shadow-lg);
+    animation: g-pop .16s var(--g-ease);
+
+    .dropdown-item {
+        border-radius: var(--g-r-sm);
+        padding: .5rem .75rem;
+        color: var(--g-ink-2);
+        font-weight: 500;
+
+        &:hover,
+        &:focus {
+            color: var(--g-ink);
+            background: var(--g-teal-tint);
+        }
+
+        &.active,
+        &:active {
+            color: var(--g-teal-deep);
+            background: var(--g-teal-tint-2);
+        }
+    }
+
+    .dropdown-divider {
+        border-color: var(--g-line);
+    }
+}
+
+.modal-content {
+    border: 1px solid var(--g-glass-border);
+    border-radius: var(--g-r-xl);
+    background: rgba(255, 255, 255, .92);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    box-shadow: var(--g-shadow-lg);
+
+    .modal-header,
+    .modal-footer {
+        border-color: var(--g-line);
+    }
+
+    .modal-title {
+        font-family: var(--g-head);
+        font-weight: 700;
+        color: var(--g-ink);
+    }
+}
+
+.modal-backdrop.show {
+    opacity: 1;
+    background: rgba(15, 42, 51, .28);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+.popover {
+    border: 1px solid var(--g-glass-border);
+    border-radius: var(--g-r);
+    box-shadow: var(--g-shadow-lg);
+}
+
+.popover-region-container {
+    border-radius: var(--g-r-lg) !important;
+    border-color: var(--g-glass-border) !important;
+    box-shadow: var(--g-shadow-lg) !important;
+    overflow: hidden;
+}
+
+.pagination {
+    gap: 4px;
+
+    .page-link {
+        border-radius: var(--g-r-sm) !important;
+        border-color: var(--g-line);
+        color: var(--g-ink-2);
+        background: rgba(255, 255, 255, .7);
+    }
+
+    .page-item.active .page-link {
+        color: #fff;
+        border-color: transparent;
+        background: var(--g-grad-primary);
+    }
+}
+
+@keyframes g-pop {
+    from {
+        opacity: 0;
+        transform: translateY(-4px) scale(.98);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Login and other auth pages: light glass whichever login preset is selected.
+// The class is repeated to outrank the preset rules (.page-wrapper-login.<preset>).
+// ---------------------------------------------------------------------------
+.page-wrapper-login.page-wrapper-login.page-wrapper-login {
+    color: var(--g-ink-2);
+    background:
+        radial-gradient(38rem 30rem at 12% 10%, rgba(var(--g-glow1-rgb), .28), transparent 70%),
+        radial-gradient(36rem 30rem at 92% 18%, rgba(var(--g-glow2-rgb), .22), transparent 70%),
+        radial-gradient(40rem 32rem at 70% 100%, rgba(214, 205, 250, .6), transparent 70%),
+        linear-gradient(180deg, #f1f7f7 0%, #eaf2f3 100%);
+    overflow: auto;
+
+    &::before,
+    &::after {
+        display: none;
+    }
+
+    .login-container {
+        position: relative;
+        max-width: 460px;
+        padding: 40px 40px 34px;
+        border: 1px solid var(--g-glass-border);
+        border-radius: 26px;
+        background: rgba(255, 255, 255, .7);
+        -webkit-backdrop-filter: var(--g-blur);
+        backdrop-filter: var(--g-blur);
+        box-shadow: var(--g-shadow-lg);
+        color: var(--g-ink-2);
+
+        &::before {
+            content: "\f19d";
+            display: grid;
+            place-items: center;
+            width: 46px;
+            height: 46px;
+            margin-bottom: 22px;
+            border-radius: 14px;
+            color: #fff;
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 1.15rem;
+            background: var(--g-grad-primary);
+            box-shadow: var(--g-glow);
+        }
+
+        &:has(.login-logo img)::before {
+            display: none;
+        }
+
+        .login-heading {
+            margin-bottom: 22px;
+            color: var(--g-ink);
+            font-family: var(--g-head);
+            font-size: 1.65rem;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
+    }
+
+    .login-logo img {
+        max-height: 70px;
+    }
+
+    form {
+        .form-control,
+        .custom-select {
+            min-height: 48px;
+            color: var(--g-ink);
+            background: rgba(255, 255, 255, .88);
+            border: 1px solid var(--g-line-strong);
+            border-radius: var(--g-r);
+            box-shadow: inset 0 1px 2px rgba(16, 40, 74, .04);
+
+            &::placeholder {
+                color: #8a99a0;
+            }
+
+            &:focus {
+                background: #fff;
+                border-color: var(--g-teal);
+                box-shadow: 0 0 0 4px rgba(var(--g-teal-rgb), .14);
+            }
+        }
+
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus,
+        .password-wrapper input:-webkit-autofill,
+        .password-wrapper input:-webkit-autofill:hover,
+        .password-wrapper input:-webkit-autofill:focus {
+            -webkit-text-fill-color: var(--g-ink);
+            caret-color: var(--g-ink);
+            -webkit-box-shadow: 0 0 0 1000px #f4fbfb inset;
+            box-shadow: 0 0 0 1000px #f4fbfb inset;
+        }
+
+        label {
+            color: var(--g-ink-2);
+        }
+
+        .btn-primary {
+            min-height: 48px;
+            color: #fff;
+            border: 0;
+            background: var(--g-grad-primary);
+            background-image: var(--g-grad-primary);
+            box-shadow: var(--g-glow);
+            font-weight: 700;
+
+            &:hover {
+                filter: none;
+                background-image: linear-gradient(180deg, rgba(255, 255, 255, .3) 0%, rgba(255, 255, 255, .1) 48%, rgba(255, 255, 255, 0) 52%), linear-gradient(135deg, var(--g-teal-deep) -20%, var(--g-teal-bright) 120%);
+            }
+        }
+
+        .btn.btn-secondary {
+            color: var(--g-ink);
+            background: rgba(255, 255, 255, .8);
+            border: 1px solid var(--g-line-strong);
+
+            &:hover {
+                background: #fff;
+                border-color: rgba(var(--g-teal-rgb), .35);
+            }
+        }
+
+        .password-wrapper .toggle-password,
+        .toggle-sensitive-btn {
+            color: var(--g-muted);
+            background: transparent;
+
+            &:hover,
+            &.active {
+                color: var(--g-teal-deep);
+                text-shadow: none;
+            }
+        }
+    }
+
+    .login-form-forgotpassword,
+    .login-form-remember {
+        a {
+            color: var(--g-teal-deep);
+            font-weight: 600;
+
+            &:hover {
+                color: var(--g-teal);
+            }
+        }
+    }
+
+    .login-divider,
+    hr {
+        border-color: var(--g-line);
+    }
+
+    .login-signup,
+    .login-instructions,
+    .login-identityproviders {
+        color: var(--g-muted);
+
+        h2, .login-heading {
+            font-size: 1.05rem;
+        }
+    }
+
+    .alert.alert-danger {
+        color: #8a1f1f;
+        background: rgba(253, 228, 228, .9);
+        border: 1px solid rgba(202, 49, 32, .2);
+    }
+
+    .loginfooter {
+        background: rgba(255, 255, 255, .55);
+        border-top: 1px solid var(--g-glass-border);
+        -webkit-backdrop-filter: var(--g-blur);
+        backdrop-filter: var(--g-blur);
+        box-shadow: none;
+
+        p, a, button {
+            color: var(--g-ink-2);
+
+            &:hover {
+                color: var(--g-teal-deep);
+            }
+        }
+
+        .arrow {
+            border-color: var(--g-ink-2);
+        }
+
+        .language-menu__list {
+            background: var(--g-glass-strong);
+            border-color: var(--g-glass-border);
+        }
+    }
+
+    .modal-content {
+        color: var(--g-ink-2);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .page-wrapper-login.page-wrapper-login.page-wrapper-login {
+        .login-container {
+            max-width: calc(100% - 24px);
+            padding: 30px 22px 26px;
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Course page: glass sections, glossy section headers, activity rows.
+// ---------------------------------------------------------------------------
+#region-main .course-content {
+    .section-item {
+        border: 1px solid var(--g-glass-border);
+        background: var(--g-glass-strong);
+        -webkit-backdrop-filter: var(--g-blur);
+        backdrop-filter: var(--g-blur);
+        box-shadow: var(--g-shadow-sm);
+    }
+
+    .course-section-header {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--g-glass-border);
+        background: var(--g-sheen), linear-gradient(120deg, rgba(var(--g-teal-rgb), .12), rgba(var(--g-blue-rgb), .08) 70%, rgba(255, 255, 255, .5));
+        box-shadow: var(--g-rim);
+
+        &::before {
+            content: "";
+            position: absolute;
+            top: 12px;
+            bottom: 12px;
+            left: 0;
+            width: 4px;
+            border-radius: 0 4px 4px 0;
+            background: var(--g-grad-primary);
+        }
+    }
+
+    .sectionname,
+    .sectionname a {
+        color: var(--g-ink);
+        font-family: var(--g-head);
+        font-weight: 700;
+        letter-spacing: -.01em;
+    }
+
+    .activity-item {
+        transition: background .18s ease;
+
+        &:hover {
+            background: rgba(var(--g-teal-rgb), .04);
+        }
+    }
+
+    .activityname a,
+    .instancename {
+        color: var(--g-ink);
+        font-weight: 600;
+    }
+}
+
+// Activity completion buttons: done = teal pill, to do = glass pill.
+.btn-subtle-success,
+.btn-subtle-body,
+[data-region="completionrequirements"] .btn {
+    border-radius: 999px !important;
+    font-weight: 600;
+}
+
+.btn.btn-subtle-success {
+    color: var(--g-teal-deep);
+    background: rgba(var(--g-teal-rgb), .14);
+    border-color: rgba(var(--g-teal-rgb), .2);
+
+    &:hover {
+        color: var(--g-teal-deep);
+        background: rgba(var(--g-teal-rgb), .2);
+    }
+}
+
+.btn.btn-subtle-body {
+    color: var(--g-ink-2);
+    background: rgba(255, 255, 255, .75);
+    border-color: var(--g-line-strong);
+
+    &:hover {
+        color: var(--g-ink);
+        background: #fff;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Course overview, List and Summary layouts. The theme paints .categoryname white for the
+// Card layout (where it sits on the course image); on these light rows that text vanished.
+// ---------------------------------------------------------------------------
+.block_myoverview .list-group {
+    gap: 12px;
+}
+
+.block_myoverview .course-listitem.list-group-item span.categoryname {
+    align-self: flex-start;
+    width: auto;
+}
+
+.block_myoverview .course-listitem.list-group-item {
+    padding: 14px 16px !important;
+    border: 1px solid var(--g-glass-border) !important;
+    border-radius: var(--g-r-lg) !important;
+    color: var(--g-ink-2);
+    background: var(--g-glass-strong);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    box-shadow: var(--g-shadow-sm);
+    transition: box-shadow .25s var(--g-ease), transform .25s var(--g-ease);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--g-shadow);
+    }
+
+    .list-image,
+    .summary-image {
+        border-radius: var(--g-r) !important;
+        box-shadow: 0 6px 16px -8px rgba(15, 42, 51, .35);
+    }
+
+    .coursename {
+        color: var(--g-ink);
+        font-family: var(--g-head);
+        font-size: 1.05rem;
+        font-weight: 700;
+        text-decoration: none;
+
+        &:hover,
+        &:focus {
+            color: var(--g-teal-deep);
+            text-decoration: underline;
+        }
+    }
+
+    span.categoryname {
+        display: inline-block;
+        margin: 6px 0 4px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        color: var(--g-highlight);
+        background: rgba(var(--g-highlight-rgb), .12);
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+    }
+
+    .summary,
+    .summary * {
+        color: var(--g-ink-2) !important;
+    }
+
+    .summary {
+        margin: 6px 0 10px;
+        font-size: .92rem;
+        line-height: 1.6;
+    }
+
+    .text-muted,
+    .muted,
+    .progress-text,
+    small {
+        color: var(--g-muted) !important;
+    }
+
+    .progress {
+        height: 8px;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Custom plugin pages: same glass surfaces, plugin CSS files left untouched.
+// ---------------------------------------------------------------------------
+
+// Subscriptions (local_lmssub): plans, bundles, My subscriptions.
+.lmssub-plans {
+    .lmssub-plan,
+    .lmssub-panel,
+    .lmssub-active,
+    .lmssub-empty,
+    .lmssub-trust li {
+        border-color: var(--g-glass-border);
+        background: var(--g-glass-strong);
+        -webkit-backdrop-filter: var(--g-blur);
+        backdrop-filter: var(--g-blur);
+        box-shadow: var(--g-shadow);
+    }
+
+    .lmssub-hero {
+        border-color: var(--g-glass-border);
+        background: var(--g-sheen), linear-gradient(135deg, rgba(var(--g-glow1-rgb), .3), rgba(var(--g-glow2-rgb), .22) 60%, rgba(var(--g-glow3-rgb), .3));
+        box-shadow: var(--g-shadow);
+    }
+
+    .lmssub-plan {
+        border-radius: var(--g-r-xl);
+
+        &:hover {
+            box-shadow: var(--g-shadow-lg);
+        }
+    }
+
+    .lmssub-duration-label,
+    .lmssub-filter {
+        border-color: var(--g-line-strong);
+        background: rgba(255, 255, 255, .7);
+    }
+
+    .lmssub-filter.active {
+        border-color: transparent;
+        background: var(--g-grad-primary);
+        box-shadow: var(--g-glow);
+    }
+
+    .lmssub-price-amount,
+    .lmssub-plan-name,
+    .lmssub-hero-title {
+        font-family: var(--g-head);
+        letter-spacing: -.02em;
+    }
+}
+
+// Organisation reports (report_orgreports): re-point its design tokens.
+.orgr {
+    --orgr-surface: var(--g-glass-strong);
+    --orgr-subtle: rgba(255, 255, 255, .5);
+    --orgr-border: var(--g-glass-border);
+    --orgr-border-strong: var(--g-line-strong);
+    --orgr-text: var(--g-ink);
+    --orgr-text-2: var(--g-ink-2);
+    --orgr-muted: var(--g-muted);
+    --orgr-sky: var(--g-chart-1);
+    --orgr-sky-600: var(--g-teal);
+    --orgr-sky-700: var(--g-teal-deep);
+    --orgr-sky-50: rgba(var(--g-teal-rgb), .06);
+    --orgr-sky-100: rgba(var(--g-teal-rgb), .12);
+    --orgr-sky-200: rgba(var(--g-teal-rgb), .22);
+    --orgr-blue: var(--g-chart-2);
+    --orgr-shadow: var(--g-shadow);
+    --orgr-radius: var(--g-r-lg);
+    --orgr-radius-sm: var(--g-r-sm);
+}
+
+// Google Calendar (local_gcal / block_gcal_calendar).
+.lgc-main,
+.lgc-sidebar,
+.lgc-status {
+    border-color: var(--g-glass-border) !important;
+    background: var(--g-glass-strong) !important;
+    box-shadow: var(--g-shadow-sm);
+}
+
+.lgc-main {
+    border-radius: var(--g-r-xl) !important;
+}
+
+// Filters panel: tidy section labels and soft rows for the event types.
+.lgc-sidebar {
+    border-radius: var(--g-r-xl) !important;
+
+    .lgc-label {
+        color: var(--g-muted);
+        font-size: .7rem;
+        letter-spacing: .1em;
+    }
+
+    .lgc-category {
+        margin: 0 -8px;
+        padding: 5px 8px;
+        border-radius: var(--g-r-sm);
+        color: var(--g-ink-2);
+        transition: background .15s ease;
+
+        &:hover {
+            background: var(--g-teal-tint);
+        }
+    }
+}
+
+// The calendar itself (FullCalendar). Only its look changes; its behaviour stays in local_gcal.
+.lgc-calendar {
+    --fc-border-color: rgba(15, 42, 51, .07);
+    --fc-page-bg-color: transparent;
+    --fc-neutral-bg-color: rgba(255, 255, 255, .4);
+    --fc-today-bg-color: rgba(var(--g-teal-rgb), .07);
+    --fc-button-bg-color: rgba(255, 255, 255, .7);
+    --fc-button-border-color: var(--g-line-strong);
+    --fc-button-text-color: var(--g-ink-2);
+    --fc-button-hover-bg-color: #fff;
+    --fc-button-hover-border-color: rgba(var(--g-teal-rgb), .35);
+    --fc-button-active-bg-color: var(--g-teal);
+    --fc-button-active-border-color: transparent;
+    --fc-event-border-color: transparent;
+    --fc-list-event-hover-bg-color: var(--g-teal-tint);
+    --fc-highlight-color: rgba(var(--g-teal-rgb), .1);
+
+    // Toolbar: round arrows, a strong title, and the views as one segmented pill.
+    .fc-header-toolbar.fc-toolbar {
+        gap: 12px;
+        margin-bottom: 18px !important;
+    }
+
+    .fc-toolbar-title {
+        color: var(--g-ink);
+        font-family: var(--g-head);
+        font-size: 1.35rem !important;
+        font-weight: 800;
+        letter-spacing: -.02em;
+    }
+
+    .fc-button {
+        border-radius: 999px !important;
+        font-weight: 600;
+        font-size: .86rem;
+        box-shadow: var(--g-shadow-sm) !important;
+        text-transform: none;
+        transition: background .15s ease, color .15s ease, box-shadow .15s ease;
+
+        &:focus-visible {
+            box-shadow: 0 0 0 3px rgba(var(--g-teal-rgb), .25) !important;
+        }
+    }
+
+    .fc-prev-button,
+    .fc-next-button {
+        display: inline-grid;
+        place-items: center;
+        width: 38px;
+        height: 38px;
+        padding: 0 !important;
+    }
+
+    .fc-button-group {
+        gap: 8px;
+    }
+
+    // Month / Week / Day / Agenda: one glass track with a glossy active segment.
+    .fc-toolbar-chunk:last-child .fc-button-group {
+        gap: 2px;
+        padding: 4px;
+        border: 1px solid var(--g-glass-border);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .55);
+        box-shadow: var(--g-rim);
+
+        .fc-button {
+            border: 0;
+            border-radius: 999px !important;
+            background: transparent;
+            box-shadow: none !important;
+
+            &:hover {
+                background: var(--g-teal-tint);
+            }
+
+            &.fc-button-active {
+                color: #fff;
+                background: var(--g-grad-primary);
+                box-shadow: var(--g-glow) !important;
+            }
+        }
+    }
+
+    // Grid: hairlines, rounded frame, quiet weekday labels.
+    .fc-scrollgrid {
+        overflow: hidden;
+        border: 1px solid var(--g-glass-border) !important;
+        border-radius: var(--g-r-lg);
+        background: rgba(255, 255, 255, .55);
+        box-shadow: var(--g-rim);
+    }
+
+    .fc-col-header-cell {
+        border-color: transparent;
+        background: rgba(255, 255, 255, .5);
+    }
+
+    .fc-col-header-cell-cushion {
+        padding: 10px 4px !important;
+        color: var(--g-muted);
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        text-decoration: none;
+    }
+
+    .fc-daygrid-day {
+        transition: background .15s ease;
+
+        &:hover {
+            background: rgba(var(--g-teal-rgb), .04);
+        }
+    }
+
+    .fc-daygrid-day-top {
+        flex-direction: row;
+        padding: 6px 6px 0;
+    }
+
+    .fc-daygrid-day-number {
+        display: inline-grid;
+        place-items: center;
+        min-width: 28px;
+        height: 28px;
+        padding: 0 6px !important;
+        border-radius: 999px;
+        color: var(--g-ink-2);
+        font-size: .85rem;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        text-decoration: none;
+    }
+
+    .fc-day-other .fc-daygrid-day-number {
+        color: rgba(15, 42, 51, .3);
+    }
+
+    .fc-day-today {
+        .fc-daygrid-day-number {
+            color: #fff;
+            background: var(--g-grad-primary);
+            box-shadow: var(--g-glow);
+        }
+    }
+
+    .fc-day-sat,
+    .fc-day-sun {
+        background: rgba(15, 42, 51, .015);
+    }
+
+    // Events: rounded chips.
+    .fc-event {
+        margin: 1px 4px !important;
+        padding: 2px 6px;
+        border-radius: 8px !important;
+        font-size: .78rem;
+        font-weight: 600;
+        box-shadow: 0 2px 6px -3px rgba(15, 42, 51, .35);
+        transition: transform .12s ease, box-shadow .12s ease;
+
+        &:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px -6px rgba(15, 42, 51, .45);
+        }
+    }
+
+    .fc-daygrid-dot-event {
+        background: rgba(255, 255, 255, .8);
+
+        .fc-event-title,
+        .fc-event-time {
+            color: var(--g-ink);
+        }
+    }
+
+    .fc-daygrid-more-link {
+        color: var(--g-teal-deep);
+        font-weight: 700;
+    }
+
+    // Week and day views.
+    .fc-timegrid-slot-label-cushion,
+    .fc-timegrid-axis-cushion {
+        color: var(--g-muted);
+        font-size: .75rem;
+    }
+
+    // Agenda (list) view.
+    .fc-list {
+        overflow: hidden;
+        border: 1px solid var(--g-glass-border) !important;
+        border-radius: var(--g-r-lg);
+    }
+
+    .fc-list-day-cushion {
+        background: rgba(255, 255, 255, .6) !important;
+        color: var(--g-ink);
+        font-weight: 700;
+    }
+
+    .fc-list-empty {
+        background: transparent;
+        color: var(--g-muted);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lgc-calendar .fc-event:hover {
+        transform: none;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Colour theme picker (colortheme.php): one row per theme with its 4 colours.
+// ---------------------------------------------------------------------------
+.ct {
+    display: grid;
+    gap: 18px;
+    max-width: 760px;
+}
+
+.ct-list {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+}
+
+.ct-intro {
+    margin: 0;
+    color: var(--g-muted);
+}
+
+.ct-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0;
+    padding: 10px 14px;
+    border: 1px solid transparent;
+    border-radius: var(--g-r);
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease;
+
+    &:hover {
+        background: rgba(255, 255, 255, .6);
+    }
+
+    &:has(input:checked) {
+        border-color: rgba(var(--g-teal-rgb), .35);
+        background: rgba(255, 255, 255, .75);
+    }
+
+    // Keyboard users still reach the (visually hidden) radio: show where focus is.
+    &:has(input:focus-visible) {
+        outline: 2px solid rgba(var(--g-teal-rgb), .55);
+        outline-offset: 2px;
+    }
+}
+
+// The real radio stays in the form and the tab order; only its look is replaced by .ct-check.
+.ct-row__input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+// Selection mark: an empty ring, filled with a check when chosen.
+.ct-check {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border: 2px solid var(--g-line-strong);
+    border-radius: 50%;
+    color: transparent;
+    font-size: .75rem;
+    background: #fff;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+
+    .ct-row__input:checked + & {
+        border-color: transparent;
+        color: #fff;
+        background: var(--g-grad-primary);
+        box-shadow: var(--g-glow);
+    }
+}
+
+.ct-row__name {
+    min-width: 140px;
+    color: var(--g-ink);
+    font-weight: 600;
+}
+
+// The theme's 4-colour palette set, as overlapping circles (like a palette card).
+.ct-swatches {
+    display: flex;
+    flex: none;
+    margin-left: auto;
+    padding-left: 8px;
+
+    span {
+        width: 40px;
+        height: 40px;
+        margin-left: -8px;
+        border: 3px solid #fff;
+        border-radius: 50%;
+        box-shadow: 0 2px 6px -2px rgba(15, 42, 51, .3);
+    }
+}
+
+@include media-breakpoint-down(sm) {
+    .ct-row {
+        flex-wrap: wrap;
+    }
+
+    .ct-row__name {
+        min-width: 0;
+    }
+
+    .ct-swatches {
+        width: 100%;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Dashboard learning overview (templates/glass_dashboard*.mustache).
+// Data colours: teal #0d9488 and blue #4f8cf7 (validated for colour-blind separation);
+// "not started" is the neutral track. Text never takes a series colour.
+// ---------------------------------------------------------------------------
+.gd {
+    --gd-teal: var(--g-chart-1);
+    --gd-blue: var(--g-chart-2);
+    --gd-track: rgba(15, 42, 51, .08);
+    display: grid;
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.gd-num {
+    font-variant-numeric: tabular-nums;
+}
+
+.gd-card {
+    position: relative;
+    min-width: 0;
+    padding: 22px 24px;
+    border: 1px solid var(--g-glass-border);
+    border-radius: var(--g-r-lg);
+    background: var(--g-glass);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    box-shadow: var(--g-shadow);
+}
+
+.gd-card__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    h3 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+}
+
+.gd-card__meta {
+    color: var(--g-muted);
+    font-size: .82rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.gd-card__desc {
+    margin: -8px 0 16px;
+    color: var(--g-muted);
+    font-size: .85rem;
+}
+
+.gd-grid {
+    display: grid;
+    gap: 20px;
+
+    &--2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.gd-empty {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    padding: 18px;
+    border: 1px dashed var(--g-line-strong);
+    border-radius: var(--g-r);
+    color: var(--g-muted);
+    font-size: .9rem;
+
+    .fa {
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        background: var(--g-teal-tint);
+        color: var(--g-teal-deep);
+    }
+}
+
+// Welcome card with headline chips, as in the reference design.
+.gd-hero {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px 32px;
+    padding: 22px 26px;
+    background: var(--g-glass-strong);
+}
+
+.gd-hero__intro {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.gd-hero__mark {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    color: #fff;
+    font-size: 1.35rem;
+    background: var(--g-grad-primary);
+    box-shadow: var(--g-glow);
+}
+
+.gd-hero__title {
+    margin: 0;
+    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+    font-weight: 800;
+    letter-spacing: -.03em;
+}
+
+.gd-hero__subtitle {
+    margin: 2px 0 0;
+    color: var(--g-muted);
+}
+
+.gd-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.gd-chip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px 10px 10px;
+    border: 1px solid var(--g-glass-border);
+    border-radius: var(--g-r-lg);
+    background: rgba(255, 255, 255, .6);
+    box-shadow: var(--g-shadow-sm);
+
+    strong,
+    small {
+        display: block;
+    }
+
+    strong {
+        color: var(--g-ink);
+        font-family: var(--g-head);
+        font-size: 1.3rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    small {
+        color: var(--g-muted);
+        font-size: .78rem;
+        font-weight: 600;
+    }
+}
+
+.gd-chip__icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+
+    &--teal {
+        color: var(--gd-teal);
+        background: rgba(var(--g-teal-rgb), .12);
+    }
+
+    &--amber {
+        color: #b45309;
+        background: rgba(245, 158, 11, .16);
+    }
+
+    &--blue {
+        color: var(--g-blue);
+        background: rgba(var(--g-blue-rgb), .14);
+    }
+}
+
+// Overall progress donut (as in the reference): complete in teal, remaining in orange,
+// always shown with its legend and centre label (the orange needs visible labels).
+.gd-donut-row {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 20px;
+}
+
+.gd-donut {
+    --gd-orange: var(--g-chart-warm);
+    position: relative;
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 128px;
+    height: 128px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .55), rgba(255, 255, 255, 0) 45%),
+        conic-gradient(var(--gd-teal) 0 calc(var(--gd-p) * 1%), var(--gd-orange) 0 100%);
+    box-shadow: inset 0 2px 4px rgba(255, 255, 255, .5), 0 14px 28px -14px rgba(15, 42, 51, .45);
+
+    &--empty {
+        background: conic-gradient(var(--gd-track) 0 100%);
+        box-shadow: inset 0 0 0 1px var(--g-line);
+    }
+}
+
+.gd-donut__hole {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    text-align: center;
+    background: var(--g-glass-strong);
+    -webkit-backdrop-filter: var(--g-blur);
+    backdrop-filter: var(--g-blur);
+    box-shadow: var(--g-rim), 0 2px 8px rgba(15, 42, 51, .12);
+
+    strong {
+        color: var(--g-ink);
+        font-family: var(--g-head);
+        font-size: 1.35rem;
+        font-weight: 800;
+        line-height: 1;
+    }
+
+    small {
+        margin-top: 3px;
+        color: var(--g-muted);
+        font-size: .7rem;
+        font-weight: 600;
+    }
+}
+
+.gd-legend--stack {
+    flex-direction: column;
+    margin: 0;
+
+    strong {
+        margin-left: 4px;
+    }
+}
+
+.gd-swatch--remaining {
+    background: var(--g-chart-warm);
+}
+
+// Empty charts keep their frame, with a note laid over the baseline.
+.gd-columns {
+    position: relative;
+}
+
+.gd-columns__note {
+    position: absolute;
+    inset: 0 0 22px 40px;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    color: var(--g-muted);
+    font-size: .86rem;
+    font-weight: 600;
+}
+
+.gd-columns--empty .gd-columns__plot {
+    opacity: .7;
+}
+
+.gd-segbar--empty {
+    align-items: center;
+    justify-content: center;
+}
+
+.gd-segbar__note {
+    color: var(--g-muted);
+    font-size: .84rem;
+    font-weight: 600;
+}
+
+// Meter list: a name, a figure and a bar per row.
+.gd-meters {
+    display: grid;
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.gd-meter {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+    align-items: baseline;
+}
+
+.gd a {
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.gd-meter__name {
+    overflow: hidden;
+    color: var(--g-ink);
+    font-weight: 600;
+    font-size: .92rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gd-meter__value {
+    color: var(--g-ink-2);
+    font-weight: 700;
+    font-size: .88rem;
+}
+
+.gd-meter__track {
+    grid-column: 1 / -1;
+    display: block;
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--gd-track);
+}
+
+.gd-meter__fill {
+    display: block;
+    height: 100%;
+    min-width: 4px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--gd-teal), var(--g-aqua));
+    transition: width .6s var(--g-ease);
+}
+
+// Column chart: one teal series, thin columns, rounded data ends, recessive axis.
+.gd-columns {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px;
+    height: 200px;
+}
+
+.gd-columns__axis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 22px;
+    color: var(--g-muted);
+    font-size: .72rem;
+    text-align: right;
+}
+
+.gd-columns__plot {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--g-line-strong);
+    background:
+        linear-gradient(var(--g-line), var(--g-line)) 0 0 / 100% 1px no-repeat,
+        linear-gradient(var(--g-line), var(--g-line)) 0 50% / 100% 1px no-repeat;
+    background-origin: content-box;
+    background-clip: content-box;
+}
+
+.gd-col {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    min-width: 0;
+    cursor: default;
+}
+
+.gd-col__bar {
+    display: block;
+    width: min(100%, 22px);
+    min-height: 0;
+    border-radius: 4px 4px 0 0;
+    background: var(--gd-teal);
+    transition: filter .15s ease, height .6s var(--g-ease);
+}
+
+.gd-col:hover .gd-col__bar {
+    filter: brightness(1.12);
+}
+
+// A day with no activity is a quiet baseline tick, not a coloured mark.
+.gd-col--zero .gd-col__bar {
+    height: 2px !important;
+    border-radius: 2px;
+    background: var(--g-line-strong);
+}
+
+// Keep tooltips of the right-most columns inside the card.
+.gd-col:nth-last-child(-n+3) .gd-col__tip {
+    right: 0;
+}
+
+.gd-col__label {
+    position: absolute;
+    bottom: -20px;
+    color: var(--g-muted);
+    font-size: .68rem;
+    white-space: nowrap;
+}
+
+.gd-col__tip {
+    position: absolute;
+    z-index: 2;
+    bottom: calc(100% + 6px);
+    padding: 5px 9px;
+    border-radius: 8px;
+    color: #fff;
+    font-size: .74rem;
+    white-space: nowrap;
+    background: var(--g-ink);
+    box-shadow: var(--g-shadow-sm);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(4px);
+    transition: opacity .15s ease, transform .15s ease;
+}
+
+.gd-col:hover .gd-col__tip {
+    opacity: 1;
+    transform: none;
+}
+
+// Segmented bar: one whole split into its parts, 2px surface gaps.
+.gd-segbar {
+    display: flex;
+    gap: 2px;
+    height: 44px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: var(--gd-track);
+}
+
+.gd-segbar__part {
+    display: grid;
+    place-items: center;
+    min-width: 28px;
+    color: #fff;
+    font-weight: 700;
+    font-size: .85rem;
+
+    &--completed {
+        background: var(--gd-teal);
+    }
+
+    &--inprogress {
+        background: var(--gd-blue);
+    }
+
+    &--notstarted {
+        color: var(--g-ink-2);
+        background: rgba(15, 42, 51, .1);
+    }
+}
+
+.gd-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin: 14px 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--g-ink-2);
+    font-size: .86rem;
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+}
+
+.gd-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+
+    &--completed {
+        background: var(--gd-teal);
+    }
+
+    &--inprogress {
+        background: var(--gd-blue);
+    }
+
+    &--notstarted {
+        background: rgba(15, 42, 51, .2);
+    }
+}
+
+// Recent activity as a connected timeline.
+.gd-timeline {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.gd-timeline__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+
+    & + &::before {
+        content: "";
+        position: absolute;
+        top: -10px;
+        left: 17px;
+        height: 20px;
+        border-left: 2px solid var(--g-line);
+    }
+}
+
+.gd-timeline__icon {
+    width: 36px;
+    height: 36px;
+    padding: 8px;
+    border-radius: 11px;
+    background: rgba(255, 255, 255, .8);
+    box-shadow: var(--g-shadow-sm);
+}
+
+.gd-timeline__body {
+    min-width: 0;
+
+    a,
+    strong {
+        display: block;
+        overflow: hidden;
+        color: var(--g-ink);
+        font-weight: 600;
+        font-size: .9rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    small {
+        color: var(--g-muted);
+        font-size: .78rem;
+    }
+}
+
+.gd-timeline__done {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: .7rem;
+    background: var(--gd-teal);
+}
+
+// Admin site overview.
+.gd-section-title h2 {
+    margin: 8px 0 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.gd-kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+}
+
+.gd-kpi {
+    padding: 18px 20px;
+
+    small {
+        display: block;
+        color: var(--g-muted);
+        font-size: .8rem;
+        font-weight: 600;
+    }
+
+    strong {
+        display: block;
+        margin-top: 6px;
+        color: var(--g-ink);
+        font-family: var(--g-head);
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -.02em;
+    }
+}
+
+@include media-breakpoint-down(lg) {
+    .gd-grid--2 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    // Google Calendar block: a long organisation name must not widen the page on phones.
+    .lgc-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.lgc-sidebar .form-select {
+    max-width: 100%;
+}
+
+@include media-breakpoint-down(sm) {
+    .gd-card {
+        padding: 18px;
+    }
+
+    .gd-chips,
+    .gd-chip {
+        width: 100%;
+    }
+
+    // Fourteen day labels do not fit on a phone: keep every other one.
+    .gd-col:nth-child(even) .gd-col__label {
+        visibility: hidden;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Accessibility: honour reduced-motion preferences everywhere.
+// ---------------------------------------------------------------------------
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .dashboard-card:hover,
+    .course-card:hover,
+    .coursebox:hover,
+    a.card:hover,
+    .btn-primary:hover {
+        transform: none;
+    }
+}

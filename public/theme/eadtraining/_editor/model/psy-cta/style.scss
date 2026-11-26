@@ -1,8 +1,12 @@
-.block_themeeditor.psy-cta { padding-top: 0; }
-.psy-cta__panel { position: relative; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 28px 40px; overflow: hidden; padding: clamp(32px, 5vw, 56px); border-radius: 28px; background: linear-gradient(120deg, var(--psy-teal-50) 0%, var(--psy-sky-50) 55%, var(--psy-lavender-50) 100%); }
+/* Continue learning: a glass banner over a soft gradient. */
+.block_themeeditor.psy-cta { padding-top: clamp(24px, 3vw, 40px); }
+.psy-cta__panel { position: relative; isolation: isolate; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 28px 40px; overflow: hidden; padding: clamp(32px, 5vw, 60px); border: 1px solid rgba(255, 255, 255, .85); border-radius: 30px; background: linear-gradient(120deg, rgba(var(--g-glow1-rgb), .3) 0%, rgba(var(--g-glow2-rgb), .25) 55%, rgba(var(--g-glow3-rgb), .35) 100%); box-shadow: 0 2px 6px rgba(16, 40, 74, .05), 0 34px 70px -34px rgba(16, 40, 74, .38); }
+.psy-cta__panel::before, .psy-cta__panel::after { content: ""; position: absolute; z-index: -1; border-radius: 50%; filter: blur(30px); pointer-events: none; }
+.psy-cta__panel::before { top: -90px; left: -60px; width: 300px; height: 300px; background: rgba(var(--g-glow1-rgb), .35); }
+.psy-cta__panel::after { right: -80px; bottom: -120px; width: 340px; height: 340px; background: rgba(var(--g-blue-rgb), .28); }
 .psy-cta__text { max-width: 620px; }
-.psy-cta__text h2 { margin: 0 0 10px; font-size: clamp(1.5rem, 2.6vw, 2.1rem); font-weight: 700; line-height: 1.25; letter-spacing: -.02em; }
-.psy-cta__text p { margin: 0; font-size: 1.05rem; line-height: 1.65; }
-.psy-cta__actions { display: flex; flex-wrap: wrap; gap: 12px; }
-.psy-cta__disclaimer { max-width: 760px; margin: 24px auto 0; color: var(--psy-muted); font-size: .85rem; line-height: 1.6; text-align: center; }
+.psy-cta__text h2 { margin: 0 0 10px; color: var(--g-ink, #0f2a33); font-family: var(--g-head, "Manrope", sans-serif); font-size: clamp(1.6rem, 2.8vw, 2.4rem); font-weight: 800; line-height: 1.2; letter-spacing: -.03em; }
+.psy-cta__text p { margin: 0; color: var(--g-ink-2, #2f4650); font-size: 1.05rem; line-height: 1.65; }
+.psy-cta__actions { display: flex; flex-wrap: wrap; gap: 12px; padding: 8px; border: 1px solid rgba(255, 255, 255, .85); border-radius: 18px; background: rgba(255, 255, 255, .45); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.psy-cta__disclaimer { max-width: 760px; margin: 24px auto 0; color: var(--g-muted, #5c6d75); font-size: .85rem; line-height: 1.6; text-align: center; }
 @media (max-width: 575.98px) { .psy-cta__actions, .psy-cta__actions .psy-btn { width: 100%; } }
